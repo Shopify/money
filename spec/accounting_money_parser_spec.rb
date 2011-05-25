@@ -1,9 +1,17 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe MoneyParser do
+describe AccountingMoneyParser do
   describe "parsing of amounts with period decimal separator" do
     before(:each) do
-      @parser = MoneyParser.new
+      @parser = AccountingMoneyParser.new
+    end
+    
+    it "should parse parenthesis as a negative amount eg (99.00)" do
+      @parser.parse("(99.00)").should == Money.new(-99.00)
+    end
+  
+    it "should parse parenthesis as a negative amount regardless of currency sign" do
+      @parser.parse("($99.00)").should == Money.new(-99.00)
     end
   
     it "should parse an empty string to $0" do

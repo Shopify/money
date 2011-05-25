@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + '/spec_helper'
+require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe "an object supporting to_money", :shared => true do
+shared_examples_for "an object supporting to_money" do
   it "should support to_money" do
     @value.to_money.should == @money
   end

@@ -11,6 +11,7 @@ class Money
     
     @value = value_to_decimal(value).round(2)
     @cents = (@value * 100).to_i
+    @@parser = nil
   end
   
   def <=>(other)
@@ -50,7 +51,16 @@ class Money
   end
   
   def self.parse(input)
-    MoneyParser.parse(input)
+    parser.parse(input)
+  end
+  
+  # allow parser to be set via dependency injection.
+  def self.parser
+    @@parser ||= MoneyParser
+  end
+  
+  def self.parser=(new_parser_class)
+    @@parser = new_parser_class
   end
   
   def self.empty
