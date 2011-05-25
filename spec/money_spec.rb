@@ -313,8 +313,16 @@ describe "Money" do
       Money.parser = AccountingMoneyParser
     end
     
-    it "should support parenthesis" do
+    it "should keep AccountingMoneyParser class on new money objects" do
       Money.new.class.parser.should == AccountingMoneyParser
+    end
+
+    it "should support parenthesis from AccountingMoneyParser" do
+      Money.parse("($5.00)").should == Money.new(-5)
+    end
+    
+    it "should support parenthesis from AccountingMoneyParser for .to_money" do
+      "($5.00)".to_money.should == Money.new(-5)
     end
     
     after(:each) do

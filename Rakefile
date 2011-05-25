@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "money"
   gem.homepage = "http://github.com/ssoroka/money"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Shopify's money gem}
+  gem.description = %Q{Manage money in shopify with a class that wont lose pennies during division!}
   gem.email = "ssoroka78@gmail.com"
   gem.authors = ["Steven Soroka"]
   # dependencies defined in Gemfile

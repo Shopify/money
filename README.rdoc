@@ -1,6 +1,6 @@
 = money
 
-Description goes here.
+Manage money in shopify with a class that wont lose pennies during division!
 
 == Contributing to money
  
@@ -14,6 +14,6 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 Steven Soroka. See LICENSE.txt for
+Copyright (c) 2011 Shopify. See LICENSE.txt for
 further details.
 
