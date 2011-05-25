@@ -307,4 +307,18 @@ describe "Money" do
       @money.value.should == BigDecimal.new("1.13")
     end
   end
+  
+  describe "parser dependency injection" do
+    before(:each) do
+      Money.parser = AccountingMoneyParser
+    end
+    
+    it "should support parenthesis" do
+      Money.new.class.parser.should == AccountingMoneyParser
+    end
+    
+    after(:each) do
+      Money.parser = nil # reset
+    end
+  end
 end

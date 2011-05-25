@@ -11,7 +11,6 @@ class Money
     
     @value = value_to_decimal(value).round(2)
     @cents = (@value * 100).to_i
-    @@parser = nil
   end
   
   def <=>(other)

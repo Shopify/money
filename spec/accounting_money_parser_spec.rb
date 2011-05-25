@@ -101,7 +101,7 @@ describe AccountingMoneyParser do
 
   describe "parsing of amounts with comma decimal separator" do
     before(:each) do
-      @parser = MoneyParser.new
+      @parser = AccountingMoneyParser.new
     end
     
     it "should parse dollar amount $1,00 with leading $" do
@@ -151,7 +151,7 @@ describe AccountingMoneyParser do
   
   describe "parsing of decimal cents amounts from 0 to 10" do
     before(:each) do
-      @parser = MoneyParser.new
+      @parser = AccountingMoneyParser.new
     end
     
     it "should parse 50.0" do
