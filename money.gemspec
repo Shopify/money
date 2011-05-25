@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
     "lib/money_column.rb",
     "lib/money_column/active_record_hooks.rb",
     "lib/money_column/railtie.rb",
+    "money.gemspec",
     "spec/accounting_money_parser_spec.rb",
     "spec/core_extensions_spec.rb",
     "spec/money_parser_spec.rb",

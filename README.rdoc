@@ -2,6 +2,8 @@
 
 Manage money in shopify with a class that wont lose pennies during division!
 
+money_column expects a decimal 8,2 database field.
+
 == Contributing to money
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
