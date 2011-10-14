@@ -107,6 +107,10 @@ class Money
     Money.new(value.abs)
   end
 
+  def floor
+    Money.new(value.floor)
+  end
+
   def fraction(rate)
     raise ArgumentError, "rate should be positive" if rate < 0
 

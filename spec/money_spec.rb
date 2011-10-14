@@ -141,6 +141,12 @@ describe "Money" do
   it "should be comparable with non-money objects" do
     @money.should_not == nil
   end
+
+  it "should support floor" do
+    Money.new(15.52).floor.should == Money.new(15.00)
+    Money.new(18.99).floor.should == Money.new(18.00)
+    Money.new(21).floor.should == Money.new(21)
+  end
   
   describe "frozen with amount of $1" do
     before(:each) do
