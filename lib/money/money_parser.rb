@@ -21,8 +21,8 @@ class MoneyParser
     # Convert 0.123 or 0,123 into what will be parsed as a decimal amount 0.12 or 0.13
     amount.gsub!(/^(-)?(0[,.]\d\d)\d+$/, '\1\2')
             
-    segments = amount.scan(/^(.*?)(?:[\.\,](\d{1,2}))?$/).first
         
+    segments = amount.scan(/^(.*?)(?:[\.\,](\d{1,}))?$/).first
     return ZERO_MONEY if segments.empty?    
     
     amount   = segments[0].gsub(/[^-\d]/, '')
