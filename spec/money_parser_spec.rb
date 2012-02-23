@@ -82,6 +82,10 @@ describe MoneyParser do
       @parser.parse("-0.123").should == Money.new(-0.12)
     end
     
+    it "should parse thousands amount" do
+      @parser.parse("1.000").should == Money.new(1.00)
+    end
+
     it "should parse negative amount with multiple leading - signs" do
       @parser.parse("--0.123").should == Money.new(-0.12)
     end
@@ -110,10 +114,6 @@ describe MoneyParser do
 
     it "should parse the amount from an amount surrounded by garbage" do
       @parser.parse("Rubbish$1,00Rubbish").should == Money.new(1.00)
-    end
-    
-    it "should parse thousands amount" do
-      @parser.parse("1.000").should == Money.new(1000.00)
     end
     
     it "should parse negative hundreds amount" do
