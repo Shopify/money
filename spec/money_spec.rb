@@ -68,34 +68,42 @@ describe "Money" do
   
   it "should be addable with integer" do
     (Money.new(1.33) + 1).should == Money.new(2.33)
+    (1 + Money.new(1.33)).should == Money.new(2.33)
   end
   
   it "should be addable with float" do
     (Money.new(1.33) + 1.50).should == Money.new(2.83)
+    (1.50 + Money.new(1.33)).should == Money.new(2.83)
   end
   
   it "should be multipliable with an integer" do
     (Money.new(1.00) * 55).should == Money.new(55.00)
+    (55 * Money.new(1.00)).should == Money.new(55.00)
   end
   
   it "should be multiplable with a float" do
     (Money.new(1.00) * 1.50).should == Money.new(1.50)
+    (1.50 * Money.new(1.00)).should == Money.new(1.50)
   end
   
   it "should be multipliable by a cents amount" do
     (Money.new(1.00) * 0.50).should == Money.new(0.50)
+    (0.50 * Money.new(1.00)).should == Money.new(0.50)
   end
   
   it "should be multipliable by a repeatable floating point number" do
     (Money.new(24.00) * (1 / 30.0)).should == Money.new(0.80)
+    ((1 / 30.0) * Money.new(24.00)).should == Money.new(0.80)
   end
   
   it "should round multiplication result with fractional penny of 5 or higher up" do
     (Money.new(0.03) * 0.5).should == Money.new(0.02)
+    (0.5 * Money.new(0.03)).should == Money.new(0.02)
   end
   
   it "should round multiplication result with fractional penny of 4 or lower down" do
     (Money.new(0.10) * 0.33).should == Money.new(0.03)
+    (0.33 * Money.new(0.10)).should == Money.new(0.03)
   end
   
   it "should raise if divided" do
