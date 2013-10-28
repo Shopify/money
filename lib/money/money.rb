@@ -44,7 +44,12 @@ class Money
   def eql?(other)
     self.class == other.class && value == other.value
   end
-  
+
+  def coerce(other)
+    raise TypeError, "Money can't be coerced into #{other.class}" unless other.is_a?(Numeric)
+    [self, other]
+  end
+
   def hash
     value.hash
   end
