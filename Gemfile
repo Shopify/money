@@ -11,4 +11,6 @@ group :development do
   gem "bundler", "~> 1.3.0"
   gem "jeweler", "~> 1.6.0"
   gem "simplecov", ">= 0"
+  gem "rails"
+  gem "sqlite3"
 end
