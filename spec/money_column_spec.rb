@@ -6,31 +6,31 @@ end
 
 describe "MoneyColumn" do
 
-  it "should typecast string to money" do
+  it "typecasts string to money" do
     m = MoneyRecord.new(:price => "100")
 
     m.price.should == Money.new(100)
   end
 
-  it "should typecast numeric to money" do
+  it "typecasts numeric to money" do
     m = MoneyRecord.new(:price => 100)
 
     m.price.should == Money.new(100)
   end
 
-  it "should typecast blank to nil" do
+  it "typecasts blank to nil" do
     m = MoneyRecord.new(:price => "")
 
     m.price.should == nil
   end
 
-  it "should typecast invalid string to empty money" do
+  it "ypecasts invalid string to empty money" do
     m = MoneyRecord.new(:price => "magic")
 
     m.price.should == Money.new(0)
   end
 
-  it "should typecast value that does not respond to to_money as nil" do
+  it "typecasts value that does not respond to to_money as nil" do
     m = MoneyRecord.new(:price => true)
 
     m.price.should == nil
