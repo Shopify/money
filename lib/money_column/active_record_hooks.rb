@@ -17,7 +17,7 @@ module MoneyColumn
           end
 
           define_method("#{name}=") do |value|
-            if value.blank?
+            if value.blank? || !value.respond_to?(:to_money)
               write_attribute(name, nil)
               nil
             else
@@ -25,7 +25,7 @@ module MoneyColumn
               write_attribute(name, money.value)
               money
             end
-          end        
+          end
         end
       end
     end

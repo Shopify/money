@@ -29,4 +29,10 @@ describe "MoneyColumn" do
 
     m.price.should == Money.new(0)
   end
+
+  it "should typecast value that does not respond to to_money as nil" do
+    m = MoneyRecord.new(:price => true)
+
+    m.price.should == nil
+  end
 end
