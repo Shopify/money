@@ -152,7 +152,7 @@ class Money
     return amounts.collect { |cents| Money.from_cents(cents) }
   end
 
-  # Split money amongst parties evenly without loosing pennies.
+  # Split money amongst parties evenly without losing pennies.
   #
   # @param [2] number of parties.
   #
