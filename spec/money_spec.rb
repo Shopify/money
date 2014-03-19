@@ -115,7 +115,7 @@ describe "Money" do
   end
   
   it "should return cents in to_json" do
-    Money.new(1.00).to_liquid.should == 100
+    Money.new(1.00).to_json.should == "1.00"
   end
   
   it "should support absolute value" do
