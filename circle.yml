@@ -2,6 +2,10 @@ machine:
   ruby:
     version: ruby-2.1.1
 
+database:
+  override:
+    - echo "Skipping database setup"
+
 test:
   override:
     - bundle exec rake
