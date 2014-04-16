@@ -76,6 +76,16 @@ describe "Money" do
     (1.50 + Money.new(1.33)).should == Money.new(2.83)
   end
 
+  it "should be subtractable with integer" do
+    (Money.new(1.66) - 1).should == Money.new(0.66)
+    (2 - Money.new(1.66)).should == Money.new(0.34)
+  end
+
+  it "should be subtractable with float" do
+    (Money.new(1.66) - 1.50).should == Money.new(0.16)
+    (1.50 - Money.new(1.33)).should == Money.new(0.17)
+  end
+
   it "should be multipliable with an integer" do
     (Money.new(1.00) * 55).should == Money.new(55.00)
     (55 * Money.new(1.00)).should == Money.new(55.00)
@@ -185,6 +195,9 @@ describe "Money" do
       (@money <=> 1).should == 0
       (@money <=> 2).should == -1
       (@money <=> 0.5).should == 1
+      (1 <=> @money).should == 0
+      (2 <=> @money).should == 1
+      (0.5 <=> @money).should == -1
     end
 
     it "should have the same hash value as $1" do
