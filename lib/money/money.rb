@@ -13,6 +13,10 @@ class Money
     @cents = (@value * 100).to_i
   end
 
+  def -@
+    Money.new(-value)
+  end
+
   def <=>(other)
     cents <=> other.to_money.cents
   end
@@ -45,9 +49,31 @@ class Money
     self.class == other.class && value == other.value
   end
 
+  class ReverseOperationProxy
+    def initialize(value)
+      @value = value
+    end
+
+    def <=>(other)
+      -(other <=> @value)
+    end
+
+    def +(other)
+      other + @value
+    end
+
+    def -(other)
+      -(other - @value)
+    end
+
+    def *(other)
+      other * @value
+    end
+  end
+
   def coerce(other)
     raise TypeError, "Money can't be coerced into #{other.class}" unless other.is_a?(Numeric)
-    [self, other]
+    [ReverseOperationProxy.new(other), self]
   end
 
   def hash
