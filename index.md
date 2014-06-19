@@ -1,3 +1,7 @@
+---
+layout: index
+---
+
 # money
 
 [![Build Status](https://circleci.com/gh/Shopify/money.png?circle-token=88060f61185838446bb65723d96658bdd74ebb3c)](https://circleci.com/gh/Shopify/money)
