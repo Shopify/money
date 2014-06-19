@@ -1,4 +1,0 @@
-markdown: kramdown
-gems:
-  - jekyll-sitemap
-  - markdown
