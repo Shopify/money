@@ -18,4 +18,4 @@ money_column expects a decimal 8,2 database field.
 
 ## License
 
-Copyright (c) 2011 Shopify | Released under the [MIT-LICENSE](http://opensource.org/licenses/MIT)
+Copyright (c) 2011 Shopify. Released under the [MIT-LICENSE](http://opensource.org/licenses/MIT).
