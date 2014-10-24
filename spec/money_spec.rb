@@ -166,16 +166,6 @@ describe "Money" do
     Money.new(2100).floor.should == Money.new(2100)
   end
 
-=begin
-  it "should support round with number of fractional digits and mode similar to BigDecimal" do
-    Money.new(1525).round(2).should == Money.new(1500)
-    Money.new(1550).round(2).should == Money.new(1600)
-    Money.new(1555).round(2).should == Money.new(1600)
-    Money.new(1650).round(2).should == Money.new(1600)
-    Money.new(1651).round(2).should == Money.new(1700)
-    Money.new(1651).round(1).should == Money.new(1650)
-  end
-=end
   describe "frozen with amount of $1" do
     before(:each) do
       @money = Money.new(100).freeze

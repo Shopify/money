@@ -2,7 +2,6 @@ require "bigdecimal"
 require "bigdecimal/util"
 require "set"
 require "i18n"
-require "pry-byebug"
 require "money/currency"
 require "money/money"
 require File.dirname(__FILE__) + '/shopify_money/money'
