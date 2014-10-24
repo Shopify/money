@@ -3,6 +3,8 @@ source "https://rubygems.org"
 # Example:
 #   gem "activesupport", ">= 2.3.5"
 
+gem "money", "~> 6.3.0"
+
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
@@ -13,4 +15,5 @@ group :development do
   gem "simplecov", ">= 0"
   gem "rails"
   gem "sqlite3"
+  gem "pry-byebug"
 end

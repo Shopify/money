@@ -1,9 +1,8 @@
-require 'bigdecimal'
-require 'bigdecimal/util'
+require 'money/money'
 
 class Money
-  include Comparable
 
+=begin
   attr_reader :value, :cents
 
   def initialize(value = 0)
@@ -32,11 +31,13 @@ class Money
   def *(numeric)
     Money.new(value * numeric)
   end
+=end
 
   def /(numeric)
     raise "[Money] Dividing money objects can lose pennies. Use #split instead"
   end
 
+=begin
   def inspect
     "#<#{self.class} value:#{self.to_s}>"
   end
@@ -48,7 +49,7 @@ class Money
   def eql?(other)
     self.class == other.class && value == other.value
   end
-
+=end
   class ReverseOperationProxy
     def initialize(value)
       @value = value
@@ -70,16 +71,15 @@ class Money
       other * @value
     end
   end
-
   def coerce(other)
     raise TypeError, "Money can't be coerced into #{other.class}" unless other.is_a?(Numeric)
     [ReverseOperationProxy.new(other), self]
   end
-
+=begin
   def hash
     value.hash
   end
-
+=end
   def self.parse(input)
     parser.parse(input)
   end
@@ -92,15 +92,15 @@ class Money
   def self.parser=(new_parser_class)
     @@parser = new_parser_class
   end
-
+=begin
   def self.empty
     Money.new
   end
-
+=end
   def self.from_cents(cents)
-    Money.new(cents.round.to_f / 100)
+    Money.new(cents.round)
   end
-
+=begin
   def to_money
     self
   end
@@ -117,13 +117,12 @@ class Money
   def to_f
     value.to_f
   end
-
   def to_s
     sprintf("%.2f", value.to_f)
   end
-
+=end
   def to_liquid
-    cents
+    fractional
   end
 
   def to_json(options = {})
@@ -133,26 +132,26 @@ class Money
   def as_json(*args)
     to_s
   end
-
+=begin
   def abs
     Money.new(value.abs)
   end
-
+=end
   def floor
-    Money.new(value.floor)
+    to_i
   end
-
+=begin
   def round(*args)
-    Money.new(value.round(*args))
+    Money.new(to_d.round(*args))
   end
-
+=end
   def fraction(rate)
     raise ArgumentError, "rate should be positive" if rate < 0
 
-    result = value / (1 + rate)
+    result = fractional / (1 + rate)
     Money.new(result)
   end
-
+=begin
   # Allocates money between different parties without losing pennies.
   # After the mathmatically split has been performed, left over pennies will
   # be distributed round-robin amongst the parties. This means that parties
@@ -204,7 +203,6 @@ class Money
 
     return result
   end
-
   private
   # poached from Rails
   def value_to_decimal(value)
@@ -219,4 +217,5 @@ class Money
       value.to_s.to_d
     end
   end
+=end
 end
