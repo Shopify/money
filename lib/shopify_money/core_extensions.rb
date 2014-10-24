@@ -1,9 +1,13 @@
 # Allows Writing of 100.to_money for +Numeric+ types
-#   100.to_money => #<Money @cents=10000>
-#   100.37.to_money => #<Money @cents=10037>
+#   100.to_money => #<Money @fractional=100>
+#   100.37.to_money => #<Money @fractional=10037>
 class Numeric
   def to_money
-    Money.new(self)
+    Money.new(self * 100)
+  end
+
+  def exchange_to(arg)
+    to_money
   end
 end
 
