@@ -142,6 +142,10 @@ class Money
     Money.new(value.floor)
   end
 
+  def round(ndigits=0)
+    Money.new(value.round(ndigits))
+  end
+
   def fraction(rate)
     raise ArgumentError, "rate should be positive" if rate < 0
 

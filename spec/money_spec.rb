@@ -362,4 +362,27 @@ describe "Money" do
       Money.parser = nil # reset
     end
   end
+  
+  describe "round" do
+    
+    it "should round to 0 decimal places by default" do
+      Money.new(54.1).round.should == Money.new(54)
+      Money.new(54.5).round.should == Money.new(55)
+    end
+    
+    # Overview of standard vs. banker's rounding for next 4 specs:
+    # http://www.xbeat.net/vbspeed/i_BankersRounding.htm
+    it "should implement standard rounding for 2 digits" do
+      Money.new(54.1754).round(2).should == Money.new(54.18)
+      Money.new(343.2050).round(2).should == Money.new(343.21)
+      Money.new(106.2038).round(2).should == Money.new(106.20)
+    end
+
+    it "should implement standard rounding for 1 digit" do
+      Money.new(27.25).round(1).should == Money.new(27.3)
+      Money.new(27.45).round(1).should == Money.new(27.5)
+      Money.new(27.55).round(1).should == Money.new(27.6)
+    end
+
+  end
 end
