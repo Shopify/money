@@ -166,15 +166,6 @@ describe "Money" do
     Money.new(21).floor.should == Money.new(21)
   end
 
-  it "should support round with number of fractional digits and mode similar to BigDecimal" do
-    Money.new(15.25).round(0, :banker).should == Money.new(15)
-    Money.new(15.5).round(0, :banker).should == Money.new(16)
-    Money.new(15.55).round(0, :banker).should == Money.new(16)
-    Money.new(16.5).round(0, :banker).should == Money.new(16)
-    Money.new(16.51).round(0, :banker).should == Money.new(17)
-    Money.new(16.51).round(1).should == Money.new(16.5)
-  end
-
   describe "frozen with amount of $1" do
     before(:each) do
       @money = Money.new(1.00).freeze
@@ -340,15 +331,13 @@ describe "Money" do
     end
   end
 
-  describe "created with 3 decimal places" do
-    it "should round 3rd decimal place to nearest even neighbour" do
-      Money.new(1.124).value.should == BigDecimal.new("1.12")
-      Money.new(1.125).value.should == BigDecimal.new("1.12")
-      Money.new(1.126).value.should == BigDecimal.new("1.13")
+  describe "with amount of $1 with created with 3 decimal places" do
+    before(:each) do
+      @money = Money.new(1.125)
+    end
 
-      Money.new(1.134).value.should == BigDecimal.new("1.13")
-      Money.new(1.135).value.should == BigDecimal.new("1.14")
-      Money.new(1.136).value.should == BigDecimal.new("1.14")
+    it "should round 3rd decimal place" do
+      @money.value.should == BigDecimal.new("1.13")
     end
   end
 
