@@ -175,6 +175,11 @@ describe "Money" do
     Money.new(16.51).round(1).should == Money.new(16.5)
   end
 
+  it "can be converted from an amount of cents that cannot be represented as an IEEE 754 double precision float" do
+    amount = 2**53 + 1
+    expect(Money.from_cents(amount).cents).to eq(amount)
+  end
+
   describe "frozen with amount of $1" do
     before(:each) do
       @money = Money.new(1.00).freeze

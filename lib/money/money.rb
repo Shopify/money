@@ -98,7 +98,7 @@ class Money
   end
 
   def self.from_cents(cents)
-    Money.new(cents.round.to_f / 100)
+    Money.new(cents.round.to_d / 100)
   end
 
   def to_money
