@@ -9,7 +9,7 @@ class Money
   def initialize(value = 0)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
 
-    @value = value_to_decimal(value).round(2, :banker)
+    @value = value_to_decimal(value).round(2)
     @cents = (@value * 100).to_i
   end
 
@@ -142,8 +142,8 @@ class Money
     Money.new(value.floor)
   end
 
-  def round(*args)
-    Money.new(value.round(*args))
+  def round(ndigits=0)
+    Money.new(value.round(ndigits))
   end
 
   def fraction(rate)
