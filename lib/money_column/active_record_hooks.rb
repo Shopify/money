@@ -2,14 +2,14 @@ module MoneyColumn
   module ActiveRecordHooks
     def self.included(base)
       base.extend(ClassMethods)
-    end                   
+    end
 
     module ClassMethods
       def money_column(*columns)
-        [columns].flatten.each do |name|
+        Array(columns).flatten.each do |name|
           define_method(name) do
             value = read_attribute(name)
-            value.blank? ? nil : Money.new(read_attribute(name))
+            value.blank? ? nil : Money.new(value)
           end
 
           define_method("#{name}_before_type_cast") do
@@ -31,4 +31,3 @@ module MoneyColumn
     end
   end
 end
-
