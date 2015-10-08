@@ -6,161 +6,161 @@ describe "Money" do
     @money = Money.new
   end
 
-  it "should be contructable with empty class method" do
+  it "is contructable with empty class method" do
     expect(Money.empty).to eq(@money)
   end
 
-  it "should return itself with to_money" do
+  it "returns itself with to_money" do
     expect(@money.to_money).to eq(@money)
   end
 
-  it "should default to 0 when constructed with no arguments" do
+  it "defaults to 0 when constructed with no arguments" do
     expect(@money).to eq(Money.new(0.00))
   end
 
-  it "should to_s as a float with 2 decimal places" do
+  it "to_s as a float with 2 decimal places" do
     expect(@money.to_s).to eq("0.00")
   end
 
-  it "should be constructable with a BigDecimal" do
+  it "is constructable with a BigDecimal" do
     expect(Money.new(BigDecimal.new("1.23"))).to eq(Money.new(1.23))
   end
 
-  it "should be constructable with a Fixnum" do
+  it "is constructable with a Fixnum" do
     expect(Money.new(3)).to eq(Money.new(3.00))
   end
 
-  it "should be construcatable with a Float" do
+  it "is construcatable with a Float" do
     expect(Money.new(3.00)).to eq(Money.new(3.00))
   end
 
-  it "should be addable" do
+  it "is addable" do
     expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
   end
 
-  it "should be able to add $0 + $0" do
+  it "is able to add $0 + $0" do
     expect((Money.new + Money.new)).to eq(Money.new)
   end
 
-  it "should be subtractable" do
+  it "is subtractable" do
     expect((Money.new(5.00) - Money.new(3.49))).to eq(Money.new(1.51))
   end
 
-  it "should be subtractable to $0" do
+  it "is subtractable to $0" do
     expect((Money.new(5.00) - Money.new(5.00))).to eq(Money.new)
   end
 
-  it "should be substractable to a negative amount" do
+  it "is substractable to a negative amount" do
     expect((Money.new(0.00) - Money.new(1.00))).to eq(Money.new("-1.00"))
   end
 
-  it "should inspect to a presentable string" do
+  it "inspects to a presentable string" do
     expect(@money.inspect).to eq("#<Money value:0.00>")
   end
 
-  it "should be inspectable within an array" do
+  it "is inspectable within an array" do
     expect([@money].inspect).to eq("[#<Money value:0.00>]")
   end
 
-  it "should correctly support eql? as a value object" do
+  it "correctly support eql? as a value object" do
     expect(@money).to eq(Money.new)
   end
 
-  it "should be addable with integer" do
+  it "is addable with integer" do
     expect((Money.new(1.33) + 1)).to eq(Money.new(2.33))
     expect((1 + Money.new(1.33))).to eq(Money.new(2.33))
   end
 
-  it "should be addable with float" do
+  it "is addable with float" do
     expect((Money.new(1.33) + 1.50)).to eq(Money.new(2.83))
     expect((1.50 + Money.new(1.33))).to eq(Money.new(2.83))
   end
 
-  it "should be subtractable with integer" do
+  it "is subtractable with integer" do
     expect((Money.new(1.66) - 1)).to eq(Money.new(0.66))
     expect((2 - Money.new(1.66))).to eq(Money.new(0.34))
   end
 
-  it "should be subtractable with float" do
+  it "is subtractable with float" do
     expect((Money.new(1.66) - 1.50)).to eq(Money.new(0.16))
     expect((1.50 - Money.new(1.33))).to eq(Money.new(0.17))
   end
 
-  it "should be multipliable with an integer" do
+  it "is multipliable with an integer" do
     expect((Money.new(1.00) * 55)).to eq(Money.new(55.00))
     expect((55 * Money.new(1.00))).to eq(Money.new(55.00))
   end
 
-  it "should be multiplable with a float" do
+  it "is multiplable with a float" do
     expect((Money.new(1.00) * 1.50)).to eq(Money.new(1.50))
     expect((1.50 * Money.new(1.00))).to eq(Money.new(1.50))
   end
 
-  it "should be multipliable by a cents amount" do
+  it "is multipliable by a cents amount" do
     expect((Money.new(1.00) * 0.50)).to eq(Money.new(0.50))
     expect((0.50 * Money.new(1.00))).to eq(Money.new(0.50))
   end
 
-  it "should be multipliable by a repeatable floating point number" do
+  it "is multipliable by a repeatable floating point number" do
     expect((Money.new(24.00) * (1 / 30.0))).to eq(Money.new(0.80))
     expect(((1 / 30.0) * Money.new(24.00))).to eq(Money.new(0.80))
   end
 
-  it "should round multiplication result with fractional penny of 5 or higher up" do
+  it "rounds multiplication result with fractional penny of 5 or higher up" do
     expect((Money.new(0.03) * 0.5)).to eq(Money.new(0.02))
     expect((0.5 * Money.new(0.03))).to eq(Money.new(0.02))
   end
 
-  it "should round multiplication result with fractional penny of 4 or lower down" do
+  it "rounds multiplication result with fractional penny of 4 or lower down" do
     expect((Money.new(0.10) * 0.33)).to eq(Money.new(0.03))
     expect((0.33 * Money.new(0.10))).to eq(Money.new(0.03))
   end
 
-  it "should raise if divided" do
+  it "raises if divided" do
     expect { Money.new(55.00) / 55 }.to raise_error
   end
 
-  it "should return cents in to_liquid" do
+  it "returns cents in to_liquid" do
     expect(Money.new(1.00).to_liquid).to eq(100)
   end
 
-  it "should return cents in to_json" do
+  it "returns cents in to_json" do
     expect(Money.new(1.00).to_json).to eq("1.00")
   end
 
-  it "should support absolute value" do
+  it "supports absolute value" do
     expect(Money.new(-1.00).abs).to eq(Money.new(1.00))
   end
 
-  it "should support to_i" do
+  it "supports to_i" do
     expect(Money.new(1.50).to_i).to eq(1)
   end
 
-  it "should support to_f" do
+  it "supports to_f" do
     expect(Money.new(1.50).to_f.to_s).to eq("1.5")
   end
 
-  it "should be creatable from an integer value in cents" do
+  it "is creatable from an integer value in cents" do
     expect(Money.from_cents(1950)).to eq(Money.new(19.50))
   end
 
-  it "should be creatable from an integer value of 0 in cents" do
+  it "is creatable from an integer value of 0 in cents" do
     expect(Money.from_cents(0)).to eq(Money.new)
   end
 
-  it "should be creatable from a float cents amount" do
+  it "is creatable from a float cents amount" do
     expect(Money.from_cents(1950.5)).to eq(Money.new(19.51))
   end
 
-  it "should raise when constructed with a NaN value" do
+  it "raises when constructed with a NaN value" do
     expect { Money.new( 0.0 / 0) }.to raise_error
   end
 
-  it "should be comparable with non-money objects" do
+  it "is comparable with non-money objects" do
     expect(@money).not_to eq(nil)
   end
 
-  it "should support floor" do
+  it "supports floor" do
     expect(Money.new(15.52).floor).to eq(Money.new(15.00))
     expect(Money.new(18.99).floor).to eq(Money.new(18.00))
     expect(Money.new(21).floor).to eq(Money.new(21))
@@ -171,23 +171,23 @@ describe "Money" do
       @money = Money.new(1.00).freeze
     end
 
-    it "should == $1" do
+    it "is equals to $1" do
       expect(@money).to eq(Money.new(1.00))
     end
 
-    it "should not == $2" do
+    it "is not equals to $2" do
       expect(@money).not_to eq(Money.new(2.00))
     end
 
-    it "<=> $1 should be 0" do
+    it "<=> $1 is 0" do
       expect((@money <=> Money.new(1.00))).to eq(0)
     end
 
-    it "<=> $2 should be -1" do
+    it "<=> $2 is -1" do
       expect((@money <=> Money.new(2.00))).to eq(-1)
     end
 
-    it "<=> $0.50 should equal 1" do
+    it "<=> $0.50 equals 1" do
       expect((@money <=> Money.new(0.50))).to eq(1)
     end
 
@@ -200,11 +200,11 @@ describe "Money" do
       expect((0.5 <=> @money)).to eq(-1)
     end
 
-    it "should have the same hash value as $1" do
+    it "have the same hash value as $1" do
       expect(@money.hash).to eq(Money.new(1.00).hash)
     end
 
-    it "should not have the same hash value as $2" do
+    it "does not have the same hash value as $2" do
       expect(@money.hash).to eq(Money.new(1.00).hash)
     end
 
@@ -215,23 +215,23 @@ describe "Money" do
       @money = Money.new
     end
 
-    it "should be zero" do
+    it "is zero" do
       expect(@money).to be_zero
     end
 
-    it "should be greater than -$1" do
+    it "is greater than -$1" do
       expect(@money).to be > Money.new("-1.00")
     end
 
-    it "should be greater than or equal to $0" do
+    it "is greater than or equal to $0" do
       expect(@money).to be >= Money.new
     end
 
-    it "should be less than or equal to $0" do
+    it "is less than or equal to $0" do
       expect(@money).to be <= Money.new
     end
 
-    it "should be less than $1" do
+    it "is less than $1" do
       expect(@money).to be < Money.new(1.00)
     end
   end
@@ -241,31 +241,31 @@ describe "Money" do
       @money = Money.new(1.00)
     end
 
-    it "should not be zero" do
+    it "is not zero" do
       expect(@money).not_to be_zero
     end
 
-    it "should have a decimal value = 1.00" do
+    it "returns cents as a decimal value = 1.00" do
       expect(@money.value).to eq(BigDecimal.new("1.00"))
     end
 
-    it "should have 100 cents" do
+    it "returns cents as 100 cents" do
       expect(@money.cents).to eq(100)
     end
 
-    it "should return cents as a Fixnum" do
+    it "returns cents as a Fixnum" do
       expect(@money.cents).to be_an_instance_of(Fixnum)
     end
 
-    it "should be greater than $0" do
+    it "is greater than $0" do
       expect(@money).to be > Money.new(0.00)
     end
 
-    it "should be less than $2" do
+    it "is less than $2" do
       expect(@money).to be < Money.new(2.00)
     end
 
-    it "should be equal to $1" do
+    it "is equal to $1" do
       expect(@money).to eq(Money.new(1.00))
     end
   end
@@ -336,7 +336,7 @@ describe "Money" do
       @money = Money.new(1.125)
     end
 
-    it "should round 3rd decimal place" do
+    it "rounds 3rd decimal place" do
       expect(@money.value).to eq(BigDecimal.new("1.13"))
     end
   end
@@ -346,15 +346,15 @@ describe "Money" do
       Money.parser = AccountingMoneyParser
     end
 
-    it "should keep AccountingMoneyParser class on new money objects" do
+    it "keeps AccountingMoneyParser class on new money objects" do
       expect(Money.new.class.parser).to eq(AccountingMoneyParser)
     end
 
-    it "should support parenthesis from AccountingMoneyParser" do
+    it "supports parenthesis from AccountingMoneyParser" do
       expect(Money.parse("($5.00)")).to eq(Money.new(-5))
     end
 
-    it "should support parenthesis from AccountingMoneyParser for .to_money" do
+    it "supports parenthesis from AccountingMoneyParser for .to_money" do
       expect("($5.00)".to_money).to eq(Money.new(-5))
     end
 
@@ -365,20 +365,20 @@ describe "Money" do
   
   describe "round" do
     
-    it "should round to 0 decimal places by default" do
+    it "rounds to 0 decimal places by default" do
       expect(Money.new(54.1).round).to eq(Money.new(54))
       expect(Money.new(54.5).round).to eq(Money.new(55))
     end
     
     # Overview of standard vs. banker's rounding for next 4 specs:
     # http://www.xbeat.net/vbspeed/i_BankersRounding.htm
-    it "should implement standard rounding for 2 digits" do
+    it "implements standard rounding for 2 digits" do
       expect(Money.new(54.1754).round(2)).to eq(Money.new(54.18))
       expect(Money.new(343.2050).round(2)).to eq(Money.new(343.21))
       expect(Money.new(106.2038).round(2)).to eq(Money.new(106.20))
     end
 
-    it "should implement standard rounding for 1 digit" do
+    it "implements standard rounding for 1 digit" do
       expect(Money.new(27.25).round(1)).to eq(Money.new(27.3))
       expect(Money.new(27.45).round(1)).to eq(Money.new(27.5))
       expect(Money.new(27.55).round(1)).to eq(Money.new(27.6))
