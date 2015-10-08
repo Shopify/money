@@ -34,35 +34,35 @@ describe NormalObject do
     expect(object.price).to eq(nil)
   end
 
-  it "generates an attribute weitter that allow setting a money object" do
+  it "generates an attribute writer that allow setting a money object" do
     object = NormalObject.new(0)
     object.price = Money.new(10)
 
     expect(object.price).to eq(Money.new(10))
   end
 
-  it "generates an attribute weitter that allow setting a integer value" do
+  it "generates an attribute writer that allow setting a integer value" do
     object = NormalObject.new(0)
     object.price = 10
 
     expect(object.price).to eq(Money.new(10))
   end
 
-  it "generates an attribute weitter that allow setting a float value" do
+  it "generates an attribute writer that allow setting a float value" do
     object = NormalObject.new(0)
     object.price = 10.12
 
     expect(object.price).to eq(Money.new(10.12))
   end
 
-  it "generates an attribute weitter that allow setting a nil value" do
+  it "generates an attribute writer that allow setting a nil value" do
     object = NormalObject.new(0)
     object.price = nil
 
     expect(object.price).to eq(nil)
   end
 
-  it "generates an attribute weitter that allow setting a blank value" do
+  it "generates an attribute writer that allow setting a blank value" do
     object = NormalObject.new(0)
     object.price = ''
 
