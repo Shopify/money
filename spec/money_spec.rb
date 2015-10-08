@@ -54,6 +54,11 @@ describe "Money" do
     expect((Money.new(0.00) - Money.new(1.00))).to eq(Money.new("-1.00"))
   end
 
+  it "is never negative zero" do
+    expect(Money.new(-0.00).to_s).to eq("0.00")
+    expect((Money.new(0) * -1).to_s).to eq("0.00")
+  end
+
   it "inspects to a presentable string" do
     expect(@money.inspect).to eq("#<Money value:0.00>")
   end
