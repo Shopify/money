@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 shared_examples_for "an object supporting to_money" do
-  it "should support to_money" do
-    @value.to_money.should == @money
+  it "supports to_money" do
+    expect(@value.to_money).to eq(@money)
   end
 end
 
