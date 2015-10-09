@@ -121,6 +121,26 @@ describe "Money" do
     expect((0.33 * Money.new(0.10))).to eq(Money.new(0.03))
   end
 
+  it "is less than a bigger integer" do
+    expect(Money.new(1)).to be < 2
+    expect(2).to be > Money.new(1)
+  end
+
+  it "is less than or equal to a bigger integer" do
+    expect(Money.new(1)).to be <= 2
+    expect(2).to be >= Money.new(1)
+  end
+
+  it "is greater than a lesser integer" do
+    expect(Money.new(2)).to be > 1
+    expect(1).to be < Money.new(2)
+  end
+
+  it "is greater than or equal to a lesser integer" do
+    expect(Money.new(2)).to be >= 1
+    expect(1).to be <= Money.new(2)
+  end
+
   it "raises if divided" do
     expect { Money.new(55.00) / 55 }.to raise_error
   end
@@ -367,14 +387,14 @@ describe "Money" do
       Money.parser = nil # reset
     end
   end
-  
+
   describe "round" do
-    
+
     it "rounds to 0 decimal places by default" do
       expect(Money.new(54.1).round).to eq(Money.new(54))
       expect(Money.new(54.5).round).to eq(Money.new(55))
     end
-    
+
     # Overview of standard vs. banker's rounding for next 4 specs:
     # http://www.xbeat.net/vbspeed/i_BankersRounding.htm
     it "implements standard rounding for 2 digits" do

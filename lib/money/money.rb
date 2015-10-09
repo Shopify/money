@@ -10,7 +10,7 @@ class Money
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
 
     @value = value_to_decimal(value).round(2)
-    @value = 0.to_d if @value.sign == BigDecimal::SIGN_NEGATIVE_ZERO 
+    @value = 0.to_d if @value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
     @cents = (@value * 100).to_i
   end
 
@@ -51,6 +51,8 @@ class Money
   end
 
   class ReverseOperationProxy
+    include Comparable
+
     def initialize(value)
       @value = value
     end
