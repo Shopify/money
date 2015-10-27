@@ -7,17 +7,17 @@ module MoneyAccessor
     def money_accessor(*columns)
       Array(columns).flatten.each do |name|
         define_method(name) do
-          value = _money_get(name)
+          value = _variable_get(name)
           value.blank? ? nil : Money.new(value)
         end
 
         define_method("#{name}=") do |value|
           if value.blank? || !value.respond_to?(:to_money)
-            _money_set(name, nil)
+            _variable_set(name, nil)
             nil
           else
             money = value.to_money
-            _money_set(name, money.value)
+            _variable_set(name, money.value)
             money
           end
         end
@@ -26,17 +26,19 @@ module MoneyAccessor
   end
 
   private
-  
-  def _money_set(ivar, value)
-    if self.is_a?(Struct)
+
+  def _variable_set(ivar, value)
+    case self
+    when Struct
       self[ivar] = value
     else
       instance_variable_set("@#{ivar}", value)
     end
   end
 
-  def _money_get(ivar)
-    if self.is_a?(Struct)
+  def _variable_get(ivar)
+    case self
+    when Struct
       self[ivar]
     else
       instance_variable_get("@#{ivar}")
