@@ -5,19 +5,24 @@ module MoneyAccessor
 
   module ClassMethods
     def money_accessor(*columns)
+      variable_get = self <= Struct ? :[]  : :instance_variable_get
+      variable_set = self <= Struct ? :[]= : :instance_variable_set
+
       Array(columns).flatten.each do |name|
+        variable_name = self <= Struct ? name : "@#{name}"
+
         define_method(name) do
-          value = instance_variable_get("@#{name}")
+          value = public_send(variable_get, variable_name)
           value.blank? ? nil : Money.new(value)
         end
 
         define_method("#{name}=") do |value|
           if value.blank? || !value.respond_to?(:to_money)
-            instance_variable_set("@#{name}", nil)
+            public_send(variable_set, variable_name, nil)
             nil
           else
             money = value.to_money
-            instance_variable_set("@#{name}", money.value)
+            public_send(variable_set, variable_name, money.value)
             money
           end
         end
