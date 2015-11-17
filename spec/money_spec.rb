@@ -313,8 +313,8 @@ describe "Money" do
       expect(moneys[2].cents).to eq(33)
     end
 
-    specify "#allocate requires total to be less then 1" do
-      expect { Money.new(0.05).allocate([0.5,0.6]) }.to raise_error(ArgumentError)
+    specify "#allocate with total > 1" do
+      expect(Money.new(0.12).allocate([0.5, 0.6])).to eq([Money.new(0.06), Money.new(0.06)])
     end
   end
 
