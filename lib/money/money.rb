@@ -169,20 +169,17 @@ class Money
   #   Money.new(5, "USD").allocate([0.3,0.7)) #=> [Money.new(2), Money.new(3)]
   #   Money.new(100, "USD").allocate([0.33,0.33,0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def allocate(splits)
-    allocations = splits.inject(0.0) {|sum, i| sum += i }
-    raise ArgumentError, "splits add to more than 100%" if allocations > 1.0
+    allocations = splits.inject(0) { |sum, n| sum + value_to_decimal(n) }
 
-    left_over = cents
-
-    amounts = splits.collect do |ratio|
-      fraction = (cents * ratio / allocations).floor
-      left_over -= fraction
-      fraction
+    if (allocations - BigDecimal("1")) > Float::EPSILON
+      raise ArgumentError, "splits add to more than 100%"
     end
 
-    left_over.times { |i| amounts[i % amounts.length] += 1 }
+    amounts, left_over = amounts_from_splits(allocations, splits)
 
-    return amounts.collect { |cents| Money.from_cents(cents) }
+    left_over.to_i.times { |i| amounts[i % amounts.length] += 1 }
+
+    amounts.collect { |cents| Money.from_cents(cents) }
   end
 
   # Split money amongst parties evenly without losing pennies.
@@ -209,17 +206,24 @@ class Money
   end
 
   private
-  # poached from Rails
-  def value_to_decimal(value)
-    # Using .class is faster than .is_a? and
-    # subclasses of BigDecimal will be handled
-    # in the else clause
-    if value.class == BigDecimal
-      value
-    elsif value.respond_to?(:to_d)
-      value.to_d
+
+  def value_to_decimal(num)
+    if num.respond_to?(:to_d)
+      num.is_a?(Rational) ? num.to_d(16) : num.to_d
     else
-      value.to_s.to_d
+      BigDecimal.new(num.to_s)
     end
+  end
+
+  def amounts_from_splits(allocations, splits)
+    left_over = cents
+
+    amounts = splits.collect do |ratio|
+      (cents * ratio / allocations).floor.tap do |frac|
+        left_over -= frac
+      end
+    end
+
+    [amounts, left_over]
   end
 end
