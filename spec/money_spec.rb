@@ -316,6 +316,11 @@ describe "Money" do
     specify "#allocate requires total to be less then 1" do
       expect { Money.new(0.05).allocate([0.5,0.6]) }.to raise_error(ArgumentError)
     end
+
+    specify "#allocate will use rationals if provided" do
+      splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
+      expect(Money.new(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])
+    end
   end
 
   describe "split" do
