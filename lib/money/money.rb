@@ -219,7 +219,7 @@ class Money
     left_over = cents
 
     amounts = splits.collect do |ratio|
-      (cents * ratio / allocations).floor.tap do |frac|
+      (value_to_decimal(cents * ratio) / allocations).floor.tap do |frac|
         left_over -= frac
       end
     end
