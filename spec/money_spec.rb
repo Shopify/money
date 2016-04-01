@@ -321,6 +321,13 @@ describe "Money" do
       splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
       expect(Money.new(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])
     end
+
+    specify "#allocate will convert rationals with high precision" do
+      ratios = [Rational(1, 1), Rational(0)]
+      expect(Money.new("858993456.12").allocate(ratios)).to eq([Money.new("858993456.12"), Money.empty])
+      ratios = [Rational(1, 6), Rational(5, 6)]
+      expect(Money.new("3.00").allocate(ratios)).to eq([Money.new("0.50"), Money.new("2.50")])
+    end
   end
 
   describe "split" do
