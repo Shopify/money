@@ -169,7 +169,11 @@ class Money
   #   Money.new(5, "USD").allocate([0.3,0.7)) #=> [Money.new(2), Money.new(3)]
   #   Money.new(100, "USD").allocate([0.33,0.33,0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def allocate(splits)
-    allocations = splits.inject(0) { |sum, n| sum + value_to_decimal(n) }
+    if all_rational?(splits)
+      allocations = splits.inject(0) { |sum, n| sum + n }
+    else
+      allocations = splits.inject(0) { |sum, n| sum + value_to_decimal(n) }
+    end
 
     if (allocations - BigDecimal("1")) > Float::EPSILON
       raise ArgumentError, "splits add to more than 100%"
@@ -206,6 +210,10 @@ class Money
   end
 
   private
+
+  def all_rational?(splits)
+    splits.all? { |split| split.is_a?(Rational) }
+  end
 
   def value_to_decimal(num)
     if num.respond_to?(:to_d)
