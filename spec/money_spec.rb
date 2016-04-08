@@ -313,7 +313,7 @@ describe "Money" do
       expect(moneys[2].cents).to eq(33)
     end
 
-    specify "#allocate requires total to be less then 1" do
+    specify "#allocate requires total to be less than 1" do
       expect { Money.new(0.05).allocate([0.5,0.6]) }.to raise_error(ArgumentError)
     end
 
@@ -327,6 +327,11 @@ describe "Money" do
       expect(Money.new("858993456.12").allocate(ratios)).to eq([Money.new("858993456.12"), Money.empty])
       ratios = [Rational(1, 6), Rational(5, 6)]
       expect(Money.new("3.00").allocate(ratios)).to eq([Money.new("0.50"), Money.new("2.50")])
+    end
+
+    specify "#allocate doesn't raise with weird negative rational ratios" do
+      rate = Rational(-5, 1201)
+      expect { Money.new(1).allocate([rate, 1 - rate]) }.not_to raise_error
     end
   end
 
