@@ -13,6 +13,6 @@ end
 #   '100.37'.to_money => #<Money @cents=10037>
 class String
   def to_money
-    empty? ? Money.empty : Money.parse(self)
+    empty? ? Money.empty : Money.new(self)
   end
 end
