@@ -137,6 +137,14 @@ class Money
     to_s
   end
 
+  def to_xml(options = {})
+    to_s
+  end
+
+  def as_xml(*args)
+    to_s
+  end
+
   def abs
     Money.new(value.abs)
   end
