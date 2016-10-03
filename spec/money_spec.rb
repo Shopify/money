@@ -55,6 +55,14 @@ describe "Money" do
     expect((Money.new(0.00) - Money.new(1.00))).to eq(Money.new("-1.00"))
   end
 
+  it "is nil if other cannot coerce to money" do
+    expect((Money.new(5.00) - nil)).to eq(nil)
+  end
+
+  it "is nil if other cannot coerce to money" do
+    expect((Money.new(5.00) + nil)).to eq(nil)
+  end
+
   it "is never negative zero" do
     expect(Money.new(-0.00).to_s).to eq("0.00")
     expect((Money.new(0) * -1).to_s).to eq("0.00")
@@ -238,6 +246,10 @@ describe "Money" do
       expect((1 <=> @money)).to eq(0)
       expect((2 <=> @money)).to eq(1)
       expect((0.5 <=> @money)).to eq(-1)
+    end
+
+    it "<=> is nil if other cannot coerce to money" do
+      expect((@money <=> nil)).to eq(nil)
     end
 
     it "have the same hash value as $1" do
