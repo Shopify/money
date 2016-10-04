@@ -19,14 +19,17 @@ class Money
   end
 
   def <=>(other)
+    raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
     cents <=> other.to_money.cents
   end
 
   def +(other)
+    raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
     Money.new(value + other.to_money.value)
   end
 
   def -(other)
+    raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
     Money.new(value - other.to_money.value)
   end
 

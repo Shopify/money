@@ -39,12 +39,20 @@ describe "Money" do
     expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
   end
 
+  it "raises error if added other is not compatible" do
+    expect{ Money.new(5.00) + nil }.to raise_error
+  end
+
   it "is able to add $0 + $0" do
     expect((Money.new + Money.new)).to eq(Money.new)
   end
 
   it "is subtractable" do
     expect((Money.new(5.00) - Money.new(3.49))).to eq(Money.new(1.51))
+  end
+
+  it "raises error if subtracted other is not compatible" do
+    expect{ Money.new(5.00) - nil }.to raise_error
   end
 
   it "is subtractable to $0" do
@@ -238,6 +246,10 @@ describe "Money" do
       expect((1 <=> @money)).to eq(0)
       expect((2 <=> @money)).to eq(1)
       expect((0.5 <=> @money)).to eq(-1)
+    end
+
+    it "raises error if compared other is not compatible" do
+      expect{ Money.new(5.00) <=> nil }.to raise_error
     end
 
     it "have the same hash value as $1" do
