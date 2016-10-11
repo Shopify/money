@@ -1,5 +1,4 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
-require 'builder'
 
 describe "Money" do
 
@@ -166,14 +165,8 @@ describe "Money" do
     expect(Money.new(1.00).to_xml).to eq("1.00")
   end
 
-  it "returns xml in to_xml with options present" do
-    options = {
-      root: "price",
-      format: "xml",
-      builder: Builder::XmlMarkup.new,
-      skip_instruct: true
-    }
-    expect(Money.new(1.00).to_xml(options)).to eq("<price type=\"decimal\">1.00</price>")
+  it "returns cents in as_xml" do
+    expect(Money.new(1.00).as_xml).to eq("1.00")
   end
 
   it "supports absolute value" do
