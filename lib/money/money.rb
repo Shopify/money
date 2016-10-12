@@ -141,11 +141,11 @@ class Money
   end
 
   def to_xml(options = {})
-    if options.key?(:builder) && options.key?(:root)
-      options[:builder].tag!(options[:root], to_s, type: "decimal")
-    else
-      to_s
-    end
+    to_s
+  end
+
+  def as_xml(*args)
+    to_s
   end
 
   def abs
