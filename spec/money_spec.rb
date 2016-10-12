@@ -161,14 +161,6 @@ describe "Money" do
     expect(Money.new(1.00).to_json).to eq("1.00")
   end
 
-  it "returns cents in to_xml" do
-    expect(Money.new(1.00).to_xml).to eq("1.00")
-  end
-
-  it "returns cents in as_xml" do
-    expect(Money.new(1.00).as_xml).to eq("1.00")
-  end
-
   it "supports absolute value" do
     expect(Money.new(-1.00).abs).to eq(Money.new(1.00))
   end
