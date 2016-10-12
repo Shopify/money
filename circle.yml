@@ -1,6 +1,6 @@
 machine:
   ruby:
-    version: ruby-2.1.1
+    version: 2.3.0
 
 database:
   override:
