@@ -189,6 +189,50 @@ class Money
     amounts.collect { |cents| Money.from_cents(cents) }
   end
 
+  # Allocates money between different parties up to the maximum amounts specified.
+  # Left over pennies will be assigned round-robin up to the maximum specified.
+  # Pennies are dropped when the maximums are attained.
+  #
+  # @example
+  #   Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)])
+  #     #=> [Money.new(26), Money.new(4.75)]
+  #
+  #   Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.74)]
+  #     #=> [Money.new(26), Money.new(4.74)]
+  #
+  #   Money.new(30).allocate_max_amounts([Money.new(15), Money.new(15)]
+  #     #=> [Money.new(15), Money.new(15)]
+  #
+  #   Money.new(1).allocate_max_amounts([Money.new(33), Money.new(33), Money.new(33)])
+  #     #=> [Money.new(0.34), Money.new(0.33), Money.new(0.33)]
+  #
+  #   Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)])
+  #     #=> [Money.new(5), Money.new(2)]
+  def allocate_max_amounts(maximums)
+    cents_maximums = maximums.map { |max_amount| max_amount.to_money.cents }
+    cents_maximums_total = cents_maximums.sum
+
+    splits = cents_maximums.map do |cents_max_amount|
+      BigDecimal.new(cents_max_amount.to_s) / cents_maximums_total
+    end
+
+    total_allocatable = [cents, cents_maximums_total].min
+
+    cents_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
+
+    cents_amounts.each_with_index do |amount, index|
+      break unless left_over > 0
+
+      max_amount = cents_maximums[index]
+      next unless amount < max_amount
+
+      left_over -= 1
+      cents_amounts[index] += 1
+    end
+
+    cents_amounts.map { |cents| Money.from_cents(cents) }
+  end
+
   # Split money amongst parties evenly without losing pennies.
   #
   # @param [2] number of parties.
@@ -226,11 +270,11 @@ class Money
     end
   end
 
-  def amounts_from_splits(allocations, splits)
-    left_over = cents
+  def amounts_from_splits(allocations, splits, cents_to_split = cents)
+    left_over = cents_to_split
 
     amounts = splits.collect do |ratio|
-      (value_to_decimal(cents * ratio) / allocations).floor.tap do |frac|
+      (value_to_decimal(cents_to_split * ratio) / allocations).floor.tap do |frac|
         left_over -= frac
       end
     end
