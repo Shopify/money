@@ -345,6 +345,36 @@ describe "Money" do
       rate = Rational(-5, 1201)
       expect { Money.new(1).allocate([rate, 1 - rate]) }.not_to raise_error
     end
+
+    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder" do
+      expect(
+        Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
+      ).to eq([Money.new(26), Money.new(4.75)])
+    end
+
+    specify "#allocate_max_amounts drops the remainder when returning the weighted allocation without exceeding the maxima when there is no room for the remainder" do
+      expect(
+        Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.74)]),
+      ).to eq([Money.new(26), Money.new(4.74)])
+    end
+
+    specify "#allocate_max_amounts returns the weighted allocation when there is no remainder" do
+      expect(
+        Money.new(30).allocate_max_amounts([Money.new(15), Money.new(15)]),
+      ).to eq([Money.new(15), Money.new(15)])
+    end
+
+    specify "#allocate_max_amounts allocates the remainder round-robin when the maxima are not reached" do
+      expect(
+        Money.new(1).allocate_max_amounts([Money.new(33), Money.new(33), Money.new(33)]),
+      ).to eq([Money.new(0.34), Money.new(0.33), Money.new(0.33)])
+    end
+
+    specify "#allocate_max_amounts allocates up to the maxima specified" do
+      expect(
+        Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)]),
+      ).to eq([Money.new(5), Money.new(2)])
+    end
   end
 
   describe "split" do
