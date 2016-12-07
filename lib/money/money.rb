@@ -34,11 +34,7 @@ class Money
   end
 
   def *(numeric)
-    if numeric.is_a?(Float)
-      Money.new(value.to_r * numeric.rationalize)
-    else
-      Money.new(value.to_r * numeric.to_r)
-    end
+    Money.new(value * numeric)
   end
 
   def /(numeric)
