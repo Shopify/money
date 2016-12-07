@@ -114,9 +114,19 @@ describe "Money" do
     expect((0.50 * Money.new(1.00))).to eq(Money.new(0.50))
   end
 
+  it "is multipliable by a rational" do
+    expect((Money.new(3.3) * Rational(1, 12))).to eq(Money.new(0.28))
+    expect((Rational(1, 12) * Money.new(3.3))).to eq(Money.new(0.28))
+  end
+
   it "is multipliable by a repeatable floating point number" do
     expect((Money.new(24.00) * (1 / 30.0))).to eq(Money.new(0.80))
     expect(((1 / 30.0) * Money.new(24.00))).to eq(Money.new(0.80))
+  end
+
+  it "is multipliable by a repeatable floating point number where the floating point error rounds down" do
+    expect((Money.new(3.3) * (1.0 / 12))).to eq(Money.new(0.28))
+    expect(((1.0 / 12) * Money.new(3.3))).to eq(Money.new(0.28))
   end
 
   it "rounds multiplication result with fractional penny of 5 or higher up" do
