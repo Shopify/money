@@ -34,7 +34,7 @@ class Money
   end
 
   def *(numeric)
-    Money.new(value * numeric)
+    Money.new(value.to_r * numeric)
   end
 
   def /(numeric)
