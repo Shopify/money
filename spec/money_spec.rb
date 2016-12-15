@@ -385,6 +385,12 @@ describe "Money" do
         Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)]),
       ).to eq([Money.new(5), Money.new(2)])
     end
+
+    specify "#allocate_max_amounts supports all-zero maxima" do
+      expect(
+        Money.new(3).allocate_max_amounts([Money.empty, Money.empty, Money.empty]),
+      ).to eq([Money.empty, Money.empty, Money.empty])
+    end
   end
 
   describe "split" do
