@@ -213,6 +213,7 @@ class Money
     cents_maximums_total = cents_maximums.sum
 
     splits = cents_maximums.map do |cents_max_amount|
+      next(Money.empty) if cents_maximums_total.zero?
       BigDecimal.new(cents_max_amount.to_s) / cents_maximums_total
     end
 
