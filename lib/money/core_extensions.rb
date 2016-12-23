@@ -3,7 +3,7 @@
 #   100.37.to_money => #<Money @cents=10037>
 class Numeric
   def to_money
-    Money.new(self)
+    ShopifyMoney.new(self)
   end
 end
 
@@ -13,6 +13,6 @@ end
 #   '100.37'.to_money => #<Money @cents=10037>
 class String
   def to_money
-    empty? ? Money.empty : Money.parse(self)
+    empty? ? ShopifyMoney.empty : ShopifyMoney.parse(self)
   end
 end

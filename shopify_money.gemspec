@@ -4,7 +4,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{money}
+  s.name = %q{shopify_money}
   s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -24,10 +24,10 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
-    "lib/money.rb",
+    "lib/shopify_money.rb",
     "lib/money/accounting_money_parser.rb",
     "lib/money/core_extensions.rb",
-    "lib/money/money.rb",
+    "lib/money/shopify_money.rb",
     "lib/money/money_parser.rb",
     "lib/money_column.rb",
     "lib/money_column/active_record_hooks.rb",
@@ -36,7 +36,7 @@ Gem::Specification.new do |s|
     "spec/accounting_money_parser_spec.rb",
     "spec/core_extensions_spec.rb",
     "spec/money_parser_spec.rb",
-    "spec/money_spec.rb",
+    "spec/shopify_money_spec.rb",
     "spec/spec.opts",
     "spec/spec_helper.rb"
   ]

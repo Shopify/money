@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
 require 'rails'
 require 'active_record'
-require 'money'
+require 'shopify_money'
 
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
 

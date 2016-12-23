@@ -15,7 +15,7 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "money"
+  gem.name = "shopify_money"
   gem.homepage = "http://github.com/ssoroka/money"
   gem.license = "MIT"
   gem.summary = %Q{Shopify's money gem}
@@ -44,7 +44,7 @@ RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "money #{version}"
+  rdoc.title = "shopify_money #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

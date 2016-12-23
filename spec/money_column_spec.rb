@@ -9,13 +9,13 @@ describe "MoneyColumn" do
   it "typecasts string to money" do
     m = MoneyRecord.new(:price => "100")
 
-    expect(m.price).to eq(Money.new(100))
+    expect(m.price).to eq(ShopifyMoney.new(100))
   end
 
   it "typecasts numeric to money" do
     m = MoneyRecord.new(:price => 100)
 
-    expect(m.price).to eq(Money.new(100))
+    expect(m.price).to eq(ShopifyMoney.new(100))
   end
 
   it "typecasts blank to nil" do
@@ -27,7 +27,7 @@ describe "MoneyColumn" do
   it "ypecasts invalid string to empty money" do
     m = MoneyRecord.new(:price => "magic")
 
-    expect(m.price).to eq(Money.new(0))
+    expect(m.price).to eq(ShopifyMoney.new(0))
   end
 
   it "typecasts value that does not respond to to_money as nil" do

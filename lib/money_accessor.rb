@@ -13,7 +13,7 @@ module MoneyAccessor
 
         define_method(name) do
           value = public_send(variable_get, variable_name)
-          value.blank? ? nil : Money.new(value)
+          value.blank? ? nil : ShopifyMoney.new(value)
         end
 
         define_method("#{name}=") do |value|

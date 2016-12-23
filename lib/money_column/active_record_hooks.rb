@@ -9,7 +9,7 @@ module MoneyColumn
         Array(columns).flatten.each do |name|
           define_method(name) do
             value = read_attribute(name)
-            value.blank? ? nil : Money.new(value)
+            value.blank? ? nil : ShopifyMoney.new(value)
           end
 
           define_method("#{name}_before_type_cast") do

@@ -1,7 +1,7 @@
 require 'bigdecimal'
 require 'bigdecimal/util'
 
-class Money
+class ShopifyMoney
   include Comparable
 
   attr_reader :value, :cents
@@ -30,7 +30,7 @@ class Money
   end
 
   def -@
-    Money.new(-value)
+    ShopifyMoney.new(-value)
   end
 
   def <=>(other)
@@ -40,16 +40,16 @@ class Money
 
   def +(other)
     raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    Money.new(value + other.to_money.value)
+    ShopifyMoney.new(value + other.to_money.value)
   end
 
   def -(other)
     raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    Money.new(value - other.to_money.value)
+    ShopifyMoney.new(value - other.to_money.value)
   end
 
   def *(numeric)
-    Money.new(value.to_r * numeric)
+    ShopifyMoney.new(value.to_r * numeric)
   end
 
   def /(numeric)
@@ -115,7 +115,7 @@ class Money
   end
 
   def self.from_cents(cents)
-    Money.new(cents.round.to_f / 100)
+    ShopifyMoney.new(cents.round.to_f / 100)
   end
 
   def to_money
@@ -152,22 +152,22 @@ class Money
   end
 
   def abs
-    Money.new(value.abs)
+    ShopifyMoney.new(value.abs)
   end
 
   def floor
-    Money.new(value.floor)
+    ShopifyMoney.new(value.floor)
   end
 
   def round(ndigits=0)
-    Money.new(value.round(ndigits))
+    ShopifyMoney.new(value.round(ndigits))
   end
 
   def fraction(rate)
     raise ArgumentError, "rate should be positive" if rate < 0
 
     result = value / (1 + rate)
-    Money.new(result)
+    ShopifyMoney.new(result)
   end
 
   # Allocates money between different parties without losing pennies.
@@ -197,7 +197,7 @@ class Money
 
     left_over.to_i.times { |i| amounts[i % amounts.length] += 1 }
 
-    amounts.collect { |cents| Money.from_cents(cents) }
+    amounts.collect { |cents| ShopifyMoney.from_cents(cents) }
   end
 
   # Allocates money between different parties up to the maximum amounts specified.
@@ -224,7 +224,7 @@ class Money
     cents_maximums_total = cents_maximums.sum
 
     splits = cents_maximums.map do |cents_max_amount|
-      next(Money.empty) if cents_maximums_total.zero?
+      next(ShopifyMoney.empty) if cents_maximums_total.zero?
       BigDecimal.new(cents_max_amount.to_s) / cents_maximums_total
     end
 
@@ -242,7 +242,7 @@ class Money
       cents_amounts[index] += 1
     end
 
-    cents_amounts.map { |cents| Money.from_cents(cents) }
+    cents_amounts.map { |cents| ShopifyMoney.from_cents(cents) }
   end
 
   # Split money amongst parties evenly without losing pennies.
@@ -255,8 +255,8 @@ class Money
   #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
     raise ArgumentError, "need at least one party" if num < 1
-    low = Money.from_cents(cents / num)
-    high = Money.from_cents(low.cents + 1)
+    low = ShopifyMoney.from_cents(cents / num)
+    high = ShopifyMoney.from_cents(low.cents + 1)
 
     remainder = cents % num
     result = []
@@ -279,7 +279,7 @@ class Money
     case num
     when nil
       DECIMAL_ZERO
-    when Money
+    when ShopifyMoney
       num.value
     when Rational
       num.to_d(16)
