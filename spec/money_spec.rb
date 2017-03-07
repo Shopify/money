@@ -485,4 +485,16 @@ describe "Money" do
     end
 
   end
+
+  describe "from_amount quacks like RubyMoney" do
+    it "accepts numeric values" do
+      expect(Money.from_amount(1)).to eq Money.from_cents(1_00)
+      expect(Money.from_amount(1.0)).to eq Money.from_cents(1_00)
+      expect(Money.from_amount("1".to_d)).to eq Money.from_cents(1_00)
+    end
+
+    it "raises ArgumentError with unsupported argument" do
+      expect { Money.from_amount(Object.new) }.to raise_error(ArgumentError)
+    end
+  end
 end

@@ -6,6 +6,10 @@ class Money
 
   attr_reader :value, :cents
 
+  def self.from_amount(value)
+    new(value)
+  end
+
   def initialize(value = 0)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
 
