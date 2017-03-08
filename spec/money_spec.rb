@@ -39,7 +39,7 @@ describe "Money" do
   end
 
   it "raises error if added other is not compatible" do
-    expect{ Money.new(5.00) + nil }.to raise_error
+    expect{ Money.new(5.00) + nil }.to raise_error(TypeError)
   end
 
   it "is able to add $0 + $0" do
@@ -51,7 +51,7 @@ describe "Money" do
   end
 
   it "raises error if subtracted other is not compatible" do
-    expect{ Money.new(5.00) - nil }.to raise_error
+    expect{ Money.new(5.00) - nil }.to raise_error(TypeError)
   end
 
   it "is subtractable to $0" do
@@ -160,7 +160,7 @@ describe "Money" do
   end
 
   it "raises if divided" do
-    expect { Money.new(55.00) / 55 }.to raise_error
+    expect { Money.new(55.00) / 55 }.to raise_error(RuntimeError)
   end
 
   it "returns cents in to_liquid" do
@@ -196,7 +196,7 @@ describe "Money" do
   end
 
   it "raises when constructed with a NaN value" do
-    expect { Money.new( 0.0 / 0) }.to raise_error
+    expect { Money.new( 0.0 / 0) }.to raise_error(ArgumentError)
   end
 
   it "is comparable with non-money objects" do
@@ -244,7 +244,7 @@ describe "Money" do
     end
 
     it "raises error if compared other is not compatible" do
-      expect{ Money.new(5.00) <=> nil }.to raise_error
+      expect{ Money.new(5.00) <=> nil }.to raise_error(TypeError)
     end
 
     it "have the same hash value as $1" do
