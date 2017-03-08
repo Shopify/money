@@ -6,11 +6,11 @@ class Money
 
   attr_reader :value, :cents
 
-  def self.from_amount(value)
-    new(value)
+  class << self
+    alias_method :from_amount, :new
   end
 
-  def initialize(value = 0)
+  def initialize(value = 0, _currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
 
     @value = value_to_decimal(value).round(2)
@@ -104,7 +104,7 @@ class Money
   end
 
   def self.empty
-    Money.new
+    Money.new(0)
   end
 
   def self.from_cents(cents)
@@ -270,8 +270,10 @@ class Money
   def value_to_decimal(num)
     if num.respond_to?(:to_d)
       num.is_a?(Rational) ? num.to_d(16) : num.to_d
-    else
+    elsif num.is_a?(Money)
       BigDecimal.new(num.to_s)
+    else
+      raise ArgumentError, "value_to_decimal could not parse #{num.inspect}"
     end
   end
 

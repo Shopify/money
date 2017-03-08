@@ -493,6 +493,14 @@ describe "Money" do
       expect(Money.from_amount("1".to_d)).to eq Money.from_cents(1_00)
     end
 
+    it "accepts string values" do
+      expect(Money.from_amount("1")).to eq Money.from_cents(1_00)
+    end
+
+    it "accepts an optional currency parameter" do
+      expect { Money.from_amount(1, "CAD") }.to_not raise_error
+    end
+
     it "raises ArgumentError with unsupported argument" do
       expect { Money.from_amount(Object.new) }.to raise_error(ArgumentError)
     end
