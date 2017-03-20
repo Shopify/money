@@ -39,7 +39,7 @@ describe "Money" do
   end
 
   it "raises error if added other is not compatible" do
-    expect{ Money.new(5.00) + nil }.to raise_error
+    expect{ Money.new(5.00) + nil }.to raise_error(TypeError)
   end
 
   it "is able to add $0 + $0" do
@@ -51,7 +51,7 @@ describe "Money" do
   end
 
   it "raises error if subtracted other is not compatible" do
-    expect{ Money.new(5.00) - nil }.to raise_error
+    expect{ Money.new(5.00) - nil }.to raise_error(TypeError)
   end
 
   it "is subtractable to $0" do
@@ -160,7 +160,7 @@ describe "Money" do
   end
 
   it "raises if divided" do
-    expect { Money.new(55.00) / 55 }.to raise_error
+    expect { Money.new(55.00) / 55 }.to raise_error(RuntimeError)
   end
 
   it "returns cents in to_liquid" do
@@ -196,7 +196,7 @@ describe "Money" do
   end
 
   it "raises when constructed with a NaN value" do
-    expect { Money.new( 0.0 / 0) }.to raise_error
+    expect { Money.new( 0.0 / 0) }.to raise_error(ArgumentError)
   end
 
   it "is comparable with non-money objects" do
@@ -244,7 +244,7 @@ describe "Money" do
     end
 
     it "raises error if compared other is not compatible" do
-      expect{ Money.new(5.00) <=> nil }.to raise_error
+      expect{ Money.new(5.00) <=> nil }.to raise_error(TypeError)
     end
 
     it "have the same hash value as $1" do
@@ -484,5 +484,25 @@ describe "Money" do
       expect(Money.new(27.55).round(1)).to eq(Money.new(27.6))
     end
 
+  end
+
+  describe "from_amount quacks like RubyMoney" do
+    it "accepts numeric values" do
+      expect(Money.from_amount(1)).to eq Money.from_cents(1_00)
+      expect(Money.from_amount(1.0)).to eq Money.from_cents(1_00)
+      expect(Money.from_amount("1".to_d)).to eq Money.from_cents(1_00)
+    end
+
+    it "accepts string values" do
+      expect(Money.from_amount("1")).to eq Money.from_cents(1_00)
+    end
+
+    it "accepts an optional currency parameter" do
+      expect { Money.from_amount(1, "CAD") }.to_not raise_error
+    end
+
+    it "raises ArgumentError with unsupported argument" do
+      expect { Money.from_amount(Object.new) }.to raise_error(ArgumentError)
+    end
   end
 end
