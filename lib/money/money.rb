@@ -268,7 +268,9 @@ class Money
   end
 
   def value_to_decimal(num)
-    if num.respond_to?(:to_d)
+    if num.nil?
+      BigDecimal.new(0)
+    elsif num.respond_to?(:to_d)
       num.is_a?(Rational) ? num.to_d(16) : num.to_d
     elsif num.is_a?(Money)
       BigDecimal.new(num.to_s)
