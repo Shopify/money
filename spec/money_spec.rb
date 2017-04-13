@@ -179,10 +179,6 @@ describe "Money" do
     expect(Money.new(1.50).to_i).to eq(1)
   end
 
-  it "supports to_d" do
-    expect(Money.new(1).to_d).to eq(BigDecimal(1))
-  end
-
   it "supports to_f" do
     expect(Money.new(1.50).to_f.to_s).to eq("1.5")
   end
