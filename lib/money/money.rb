@@ -128,6 +128,10 @@ class Money
     value.to_f
   end
 
+  def to_d
+    value
+  end
+
   def to_s
     sprintf("%.2f", value.to_f)
   end
