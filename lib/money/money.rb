@@ -104,7 +104,7 @@ class Money
   end
 
   def self.empty
-    Money.new(0)
+    @@empty ||= Money.new(0).freeze
   end
 
   def self.from_cents(cents)
