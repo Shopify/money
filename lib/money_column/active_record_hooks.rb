@@ -1,24 +1,32 @@
 module MoneyColumn
-  class Type < ActiveRecord::Type::Value
-    def cast(value)
-      return nil if value.blank? || !value.respond_to?(:to_money)
-      value.to_money
-    end
-
-    def serialize(money)
-      case money
-      when ::Money
-        money.value
-      else
-        money
-      end
-    end
-  end
-
   module ActiveRecordHooks
-    def money_column(*columns)
-      Array(columns).flatten.each do |name|
-        attribute name, MoneyColumn::Type.new
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
+    module ClassMethods
+      def money_column(*columns)
+        Array(columns).flatten.each do |name|
+          define_method(name) do
+            value = read_attribute(name)
+            value.blank? ? nil : Money.new(value)
+          end
+
+          define_method("#{name}_before_type_cast") do
+            send(name) && sprintf("%.2f", send(name))
+          end
+
+          define_method("#{name}=") do |value|
+            if value.blank? || !value.respond_to?(:to_money)
+              write_attribute(name, nil)
+              nil
+            else
+              money = value.to_money
+              write_attribute(name, money.value)
+              money
+            end
+          end
+        end
       end
     end
   end
