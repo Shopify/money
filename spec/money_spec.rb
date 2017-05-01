@@ -209,6 +209,11 @@ describe "Money" do
     expect(Money.new(21).floor).to eq(Money.new(21))
   end
 
+  it "can be converted from an amount of cents that cannot be represented as an IEEE 754 double precision float" do
+    amount = 2**53 + 1
+    expect(Money.from_cents(amount).cents).to eq(amount)
+  end
+
   describe "frozen with amount of $1" do
     before(:each) do
       @money = Money.new(1.00).freeze
