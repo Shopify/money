@@ -9,7 +9,7 @@ end
 describe Integer do
   before(:each) do 
     @value = 1
-    @money = Money.new("1.00")
+    @money = ShopifyMoney.new("1.00")
   end
   
   it_should_behave_like "an object supporting to_money"
@@ -18,7 +18,7 @@ end
 describe Float do
   before(:each) do 
     @value = 1.23
-    @money = Money.new("1.23")
+    @money = ShopifyMoney.new("1.23")
   end
   
   it_should_behave_like "an object supporting to_money"
@@ -27,7 +27,7 @@ end
 describe String do
   before(:each) do 
     @value = "1.23"
-    @money = Money.new("1.23")
+    @money = ShopifyMoney.new("1.23")
   end
   
   it_should_behave_like "an object supporting to_money"
@@ -36,7 +36,7 @@ end
 describe BigDecimal do
   before(:each) do 
     @value = BigDecimal.new("1.23")
-    @money = Money.new("1.23")
+    @money = ShopifyMoney.new("1.23")
   end
   
   it_should_behave_like "an object supporting to_money"

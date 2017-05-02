@@ -7,7 +7,7 @@ class MoneyParser
   end
   
   def parse(input)
-    Money.new(extract_money(input))
+    ShopifyMoney.new(extract_money(input))
   end
   
   private
