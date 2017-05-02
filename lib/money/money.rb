@@ -8,6 +8,16 @@ class Money
 
   class << self
     alias_method :from_amount, :new
+
+    def new(value = 0, _currency = nil)
+      if value == 0
+        @empty ||= from_amount(0)
+      else
+        from_amount(value, _currency)
+      end
+    end
+
+    alias_method :empty, :new
   end
 
   def initialize(value = 0, _currency = nil)
@@ -16,6 +26,7 @@ class Money
     @value = value_to_decimal(value).round(2)
     @value = 0.to_d if @value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
     @cents = (@value * 100).to_i
+    freeze
   end
 
   def -@
@@ -101,10 +112,6 @@ class Money
 
   def self.parser=(new_parser_class)
     @@parser = new_parser_class
-  end
-
-  def self.empty
-    @@empty ||= Money.new(0).freeze
   end
 
   def self.from_cents(cents)
