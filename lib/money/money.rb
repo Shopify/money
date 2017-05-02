@@ -274,15 +274,21 @@ class Money
     splits.all? { |split| split.is_a?(Rational) }
   end
 
+  DECIMAL_ZERO = BigDecimal.new(0).freeze
   def value_to_decimal(num)
-    if num.nil?
-      BigDecimal.new(0)
-    elsif num.respond_to?(:to_d)
-      num.is_a?(Rational) ? num.to_d(16) : num.to_d
-    elsif num.is_a?(Money)
-      BigDecimal.new(num.to_s)
+    case num
+    when nil
+      DECIMAL_ZERO
+    when Money
+      num.value
+    when Rational
+      num.to_d(16)
     else
-      raise ArgumentError, "value_to_decimal could not parse #{num.inspect}"
+      if num.respond_to?(:to_d)
+        num.to_d
+      else
+        raise ArgumentError, "value_to_decimal could not parse #{num.inspect}"
+      end
     end
   end
 
@@ -290,9 +296,9 @@ class Money
     left_over = cents_to_split
 
     amounts = splits.collect do |ratio|
-      (value_to_decimal(cents_to_split * ratio) / allocations).floor.tap do |frac|
-        left_over -= frac
-      end
+      frac = (value_to_decimal(cents_to_split * ratio) / allocations).floor
+      left_over -= frac
+      frac
     end
 
     [amounts, left_over]
