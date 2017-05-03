@@ -29,6 +29,10 @@ class Money
     freeze
   end
 
+  def init_with(coder)
+    initialize(coder.map['value'.freeze])
+  end
+
   def -@
     Money.new(-value)
   end
@@ -277,6 +281,8 @@ class Money
   DECIMAL_ZERO = BigDecimal.new(0).freeze
   def value_to_decimal(num)
     case num
+    when BigDecimal
+      num
     when nil
       DECIMAL_ZERO
     when Money
