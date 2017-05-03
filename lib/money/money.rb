@@ -29,6 +29,10 @@ class Money
     freeze
   end
 
+  def init_with(coder)
+    initialize(coder.map['value'.freeze])
+  end
+
   def -@
     Money.new(-value)
   end

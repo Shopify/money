@@ -509,4 +509,28 @@ describe "Money" do
       expect { Money.from_amount(Object.new) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "YAML loading of old versions" do
+    it "accepts BigDecimal values" do
+      money = YAML.load(<<~EOS)
+        ---
+        !ruby/object:Money
+          value: !ruby/object:BigDecimal 18:0.75E3
+          cents: 75000
+      EOS
+      expect(money).to be == Money.new(750)
+      expect(money.value).to be_a BigDecimal
+    end
+
+    it "accepts old float values..." do
+      money = YAML.load(<<~EOS)
+        ---
+        !ruby/object:Money
+          value: 750.00
+          cents: 75000
+      EOS
+      expect(money).to be == Money.new(750)
+      expect(money.value).to be_a BigDecimal
+    end
+  end
 end
