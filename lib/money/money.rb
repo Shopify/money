@@ -34,7 +34,7 @@ class Money
   end
 
   def -@
-    Money.new(-value)
+    Money.from_amount(-value)
   end
 
   def <=>(other)
@@ -44,16 +44,16 @@ class Money
 
   def +(other)
     raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    Money.new(value + other.to_money.value)
+    Money.from_amount(value + other.to_money.value)
   end
 
   def -(other)
     raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    Money.new(value - other.to_money.value)
+    Money.from_amount(value - other.to_money.value)
   end
 
   def *(numeric)
-    Money.new(value.to_r * numeric)
+    Money.from_amount(value.to_r * numeric)
   end
 
   def /(numeric)
@@ -119,7 +119,7 @@ class Money
   end
 
   def self.from_cents(cents)
-    Money.new(cents.round.to_f / 100)
+    Money.from_amount(cents.round.to_f / 100)
   end
 
   def to_money
@@ -156,22 +156,22 @@ class Money
   end
 
   def abs
-    Money.new(value.abs)
+    Money.from_amount(value.abs)
   end
 
   def floor
-    Money.new(value.floor)
+    Money.from_amount(value.floor)
   end
 
   def round(ndigits=0)
-    Money.new(value.round(ndigits))
+    Money.from_amount(value.round(ndigits))
   end
 
   def fraction(rate)
     raise ArgumentError, "rate should be positive" if rate < 0
 
     result = value / (1 + rate)
-    Money.new(result)
+    Money.from_amount(result)
   end
 
   # Allocates money between different parties without losing pennies.
@@ -184,8 +184,8 @@ class Money
   # @return [Array<Money, Money, Money>]
   #
   # @example
-  #   Money.new(5, "USD").allocate([0.3,0.7)) #=> [Money.new(2), Money.new(3)]
-  #   Money.new(100, "USD").allocate([0.33,0.33,0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
+  #   Money.from_amount(5, "USD").allocate([0.3,0.7)) #=> [Money.from_amount(2), Money.from_amount(3)]
+  #   Money.from_amount(100, "USD").allocate([0.33,0.33,0.33]) #=> [Money.from_amount(34), Money.from_amount(33), Money.from_amount(33)]
   def allocate(splits)
     if all_rational?(splits)
       allocations = splits.inject(0) { |sum, n| sum + n }
@@ -209,20 +209,20 @@ class Money
   # Pennies are dropped when the maximums are attained.
   #
   # @example
-  #   Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)])
-  #     #=> [Money.new(26), Money.new(4.75)]
+  #   Money.from_amount(30.75).allocate_max_amounts([Money.from_amount(26), Money.from_amount(4.75)])
+  #     #=> [Money.from_amount(26), Money.from_amount(4.75)]
   #
-  #   Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.74)]
-  #     #=> [Money.new(26), Money.new(4.74)]
+  #   Money.from_amount(30.75).allocate_max_amounts([Money.from_amount(26), Money.from_amount(4.74)]
+  #     #=> [Money.from_amount(26), Money.from_amount(4.74)]
   #
-  #   Money.new(30).allocate_max_amounts([Money.new(15), Money.new(15)]
-  #     #=> [Money.new(15), Money.new(15)]
+  #   Money.from_amount(30).allocate_max_amounts([Money.from_amount(15), Money.from_amount(15)]
+  #     #=> [Money.from_amount(15), Money.from_amount(15)]
   #
-  #   Money.new(1).allocate_max_amounts([Money.new(33), Money.new(33), Money.new(33)])
-  #     #=> [Money.new(0.34), Money.new(0.33), Money.new(0.33)]
+  #   Money.from_amount(1).allocate_max_amounts([Money.from_amount(33), Money.from_amount(33), Money.from_amount(33)])
+  #     #=> [Money.from_amount(0.34), Money.from_amount(0.33), Money.from_amount(0.33)]
   #
-  #   Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)])
-  #     #=> [Money.new(5), Money.new(2)]
+  #   Money.from_amount(100).allocate_max_amounts([Money.from_amount(5), Money.from_amount(2)])
+  #     #=> [Money.from_amount(5), Money.from_amount(2)]
   def allocate_max_amounts(maximums)
     cents_maximums = maximums.map { |max_amount| max_amount.to_money.cents }
     cents_maximums_total = cents_maximums.sum
@@ -256,7 +256,7 @@ class Money
   # @return [Array<Money, Money, Money>]
   #
   # @example
-  #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
+  #   Money.from_amount(100, "USD").split(3) #=> [Money.from_amount(34), Money.from_amount(33), Money.from_amount(33)]
   def split(num)
     raise ArgumentError, "need at least one party" if num < 1
     low = Money.from_cents(cents / num)

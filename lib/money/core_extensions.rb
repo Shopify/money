@@ -3,7 +3,7 @@
 #   100.37.to_money => #<Money @cents=10037>
 class Numeric
   def to_money
-    Money.new(self)
+    Money.from_amount(self)
   end
 end
 
