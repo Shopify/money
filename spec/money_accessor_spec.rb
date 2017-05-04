@@ -20,7 +20,7 @@ shared_examples_for "an object with a money accessor" do
   it "generates an attribute reader that returns a money object" do
     object = described_class.new(100)
 
-    expect(object.price).to eq(Money.new(100))
+    expect(object.price).to eq(Money.from_amount(100))
   end
 
   it "generates an attribute reader that returns a nil object if the value was nil" do
@@ -37,23 +37,23 @@ shared_examples_for "an object with a money accessor" do
 
   it "generates an attribute writer that allow setting a money object" do
     object = described_class.new(0)
-    object.price = Money.new(10)
+    object.price = Money.from_amount(10)
 
-    expect(object.price).to eq(Money.new(10))
+    expect(object.price).to eq(Money.from_amount(10))
   end
 
   it "generates an attribute writer that allow setting a integer value" do
     object = described_class.new(0)
     object.price = 10
 
-    expect(object.price).to eq(Money.new(10))
+    expect(object.price).to eq(Money.from_amount(10))
   end
 
   it "generates an attribute writer that allow setting a float value" do
     object = described_class.new(0)
     object.price = 10.12
 
-    expect(object.price).to eq(Money.new(10.12))
+    expect(object.price).to eq(Money.from_amount(10.12))
   end
 
   it "generates an attribute writer that allow setting a nil value" do
