@@ -7,17 +7,19 @@ class Money
   attr_reader :value, :cents
 
   class << self
-    alias_method :from_amount, :new
-
     def new(value = 0, _currency = nil)
       if value == 0
-        @empty ||= from_amount(0)
+        @empty ||= super(0)
       else
-        from_amount(value, _currency)
+        super(value, _currency)
       end
     end
 
-    alias_method :empty, :new
+    def empty
+      new(0)
+    end
+
+    alias_method :from_amount, :new
   end
 
   def initialize(value = 0, _currency = nil)
