@@ -190,4 +190,32 @@ describe MoneyParser do
       expect(@parser.parse("50.10")).to eq(Money.new(50.10))
     end
   end
+
+  describe "parsing of fixnum" do
+    before(:each) do
+      @parser = MoneyParser.new
+    end
+    
+    it "parses 1" do
+      expect(@parser.parse(1)).to eq(Money.new(1))
+    end
+
+    it "parses 50" do
+      expect(@parser.parse(50)).to eq(Money.new(50))
+    end
+  end
+
+  describe "parsing of float" do
+    before(:each) do
+      @parser = MoneyParser.new
+    end
+
+    it "parses 1.00" do
+      expect(@parser.parse(1.00)).to eq(Money.new(1.00))
+    end
+
+    it "parses 1.32" do
+      expect(@parser.parse(1.32)).to eq(Money.new(1.32))
+    end   
+  end
 end
