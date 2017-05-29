@@ -1,0 +1,9 @@
+# For internal use, but the requirements below
+# describe the required dependencies
+---
+name: money
+up:
+- ruby: 2.3.3
+- bundler
+commands:
+  test: bundle exec rspec
