@@ -39,7 +39,11 @@ describe "Money" do
   end
 
   it "is construcatable with a Float" do
-    expect(Money.new(3.00)).to eq(Money.new(3.00))
+    expect(Money.new(3.00)).to eq(Money.new(BigDecimal.new('3.00')))
+  end
+
+  it "is construcatable with a String" do
+    expect(Money.new('3.00')).to eq(Money.new(3.00))
   end
 
   it "is addable" do

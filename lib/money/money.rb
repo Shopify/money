@@ -297,8 +297,10 @@ class Money
       num.value
     when Rational
       num.to_d(16)
+    when Numeric
+      num.to_d
     else
-      if num.respond_to?(:to_d)
+      if num.is_a?(String) && num =~ /\A-?\d*\.*\d*\z/
         num.to_d
       else
         raise ArgumentError, "value_to_decimal could not parse #{num.inspect}"
