@@ -20,3 +20,4 @@ money_column expects a decimal 8,2 database field.
 
 Copyright (c) 2011 Shopify. See LICENSE.txt for
 further details.
+

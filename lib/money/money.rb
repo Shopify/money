@@ -4,6 +4,8 @@ require 'bigdecimal/util'
 class Money
   include Comparable
 
+  DECIMAL_ZERO = BigDecimal.new(0).freeze
+
   attr_reader :value, :cents
 
   class << self
@@ -284,12 +286,12 @@ class Money
     splits.all? { |split| split.is_a?(Rational) }
   end
 
-  DECIMAL_ZERO = BigDecimal.new(0).freeze
   def value_to_decimal(num)
     case num
     when BigDecimal
       num
     when nil
+      ActiveSupport::Deprecation.warn('Money.new(nil) is deprecated in favor of Money.new(0). Support for passing a nil amount will be removed from the next major revision.') if defined?(ActiveSupport)
       DECIMAL_ZERO
     when Money
       num.value
