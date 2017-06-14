@@ -1,17 +1,20 @@
+require 'simplecov'
+SimpleCov.start do
+  add_filter "/spec/"
+end
+
+if ENV['CI'] == 'true'
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+
 require 'rspec'
 require 'rails'
 require 'active_record'
 require 'money'
-
-require 'simplecov'
-if ENV['CIRCLE_ARTIFACTS']
-  SimpleCov.coverage_dir(File.join(ENV['CIRCLE_ARTIFACTS'], "coverage"))
-end
-SimpleCov.start
-require 'codecov'
-SimpleCov.formatter = SimpleCov::Formatter::Codecov
 
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
 

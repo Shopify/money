@@ -1,6 +1,4 @@
 machine:
-  environment:
-    codecov_token: 2b263b04-1765-4e71-981d-92e32133111e
   ruby:
     version: 2.3.0
 
@@ -11,3 +9,5 @@ database:
 test:
   override:
     - bundle exec rake
+  post:
+    - bash <(curl -s https://codecov.io/bash)
