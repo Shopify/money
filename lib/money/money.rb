@@ -16,12 +16,28 @@ class Money
         super(value, _currency)
       end
     end
+    alias_method :from_amount, :new
 
     def empty
       new(0)
     end
 
-    alias_method :from_amount, :new
+    def parse(input)
+      parser.parse(input)
+    end
+
+    # allow parser to be set via dependency injection.
+    def parser
+      @@parser ||= MoneyParser
+    end
+
+    def parser=(new_parser_class)
+      @@parser = new_parser_class
+    end
+
+    def from_cents(cents)
+      new(cents.round.to_f / 100)
+    end
   end
 
   def initialize(value = 0, _currency = nil)
@@ -107,23 +123,6 @@ class Money
 
   def hash
     value.hash
-  end
-
-  def self.parse(input)
-    parser.parse(input)
-  end
-
-  # allow parser to be set via dependency injection.
-  def self.parser
-    @@parser ||= MoneyParser
-  end
-
-  def self.parser=(new_parser_class)
-    @@parser = new_parser_class
-  end
-
-  def self.from_cents(cents)
-    Money.new(cents.round.to_f / 100)
   end
 
   def to_money
