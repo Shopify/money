@@ -14,3 +14,5 @@ group :development do
   gem "rails"
   gem "sqlite3"
 end
+
+gem 'codecov', :require => false, :group => :test
