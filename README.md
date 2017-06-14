@@ -1,6 +1,6 @@
 # money
 
-[![Build Status](https://circleci.com/gh/Shopify/money.png?circle-token=88060f61185838446bb65723d96658bdd74ebb3c)](https://circleci.com/gh/Shopify/money)
+[![Build Status](https://circleci.com/gh/Shopify/money.png?circle-token=88060f61185838446bb65723d96658bdd74ebb3c)](https://circleci.com/gh/Shopify/money) [![codecov](https://codecov.io/gh/Shopify/money/branch/master/graph/badge.svg)](https://codecov.io/gh/Shopify/money)
 
 Manage money in shopify with a class that wont lose pennies during division!
 
