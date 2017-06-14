@@ -18,8 +18,8 @@ describe "Money" do
     expect(@money).to eq(Money.new(0.00))
   end
 
-  it "defaults to 0 when constructed with an invalid string" do
-    expect(Money.new('invalid')).to eq(Money.new(0.00))
+  it "defaults raise when constructed with an invalid string" do
+    expect{ Money.new('invalid') }.to raise_error(ArgumentError)
   end
 
   it "to_s as a float with 2 decimal places" do
@@ -46,6 +46,10 @@ describe "Money" do
     expect(Money.new('3.00')).to eq(Money.new(3.00))
   end
 
+  it "is aware of the currency" do
+    expect(Money.new(1.00, 'CAD').currency.iso_code).to eq('CAD')
+  end
+
   it "is addable" do
     expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
   end
@@ -56,6 +60,11 @@ describe "Money" do
 
   it "is able to add $0 + $0" do
     expect((Money.new + Money.new)).to eq(Money.new)
+  end
+
+  it "adds a deprecation warning for inconsistent currencies" do
+    expect(Money).to receive(:deprecate).once
+    expect((Money.new(5, 'USD') + Money.new(1, 'CAD'))).to eq(Money.new(6, 'USD'))
   end
 
   it "is subtractable" do

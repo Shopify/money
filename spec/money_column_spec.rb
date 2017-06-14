@@ -8,8 +8,8 @@ end
 describe "MoneyColumn" do
 
   it "typecasts string to money" do
-    m = MoneyRecord.new(:price => '1.00')
-    expect(m.price).to eq(Money.new(1.00))
+    m = MoneyRecord.new(:price => '1.01')
+    expect(m.price).to eq(Money.new(1.01))
   end
 
   it "typecasts numeric to money" do
@@ -22,7 +22,7 @@ describe "MoneyColumn" do
     expect(m.price).to eq(nil)
   end
 
-  it "ypecasts invalid string to empty money" do
+  it "typecasts invalid string to empty money" do
     m = MoneyRecord.new(:price => "magic")
     expect(m.price).to eq(Money.new(0))
   end

@@ -2,8 +2,8 @@
 #   100.to_money => #<Money @cents=10000>
 #   100.37.to_money => #<Money @cents=10037>
 class Numeric
-  def to_money
-    Money.new(self)
+  def to_money(currency = Money.default_currency)
+    Money.new(self, currency)
   end
 end
 
@@ -12,7 +12,7 @@ end
 #   '100'.to_money => #<Money @cents=10000>
 #   '100.37'.to_money => #<Money @cents=10037>
 class String
-  def to_money
-    empty? ? Money.empty : Money.parse(self)
+  def to_money(currency = Money.default_currency)
+    empty? ? Money.empty : Money.parse(self, currency)
   end
 end

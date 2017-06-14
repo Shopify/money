@@ -1,45 +1,51 @@
 class Money
   include Comparable
 
-  DECIMAL_ZERO = BigDecimal.new(0).freeze
+  @@mutex = Mutex.new
+  @@zero_money = nil
 
-  attr_reader :value, :cents
+  DECIMAL_ZERO = BigDecimal.new(0).freeze
+  NUMERIC_REGEX = /\A-?\d*\.?\d*\z/.freeze
+
+  attr_reader :value, :cents, :currency
 
   class << self
-    attr_accessor :parser
+    attr_accessor :parser, :default_currency
 
-    def new(value = 0, _currency = nil)
-      if value == 0
-        @empty ||= super(0)
-      else
-        super(value, _currency)
+    def new(value = nil, currency = default_currency)
+      if value.nil?
+        value = 0
+        deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0) or Money.zero instead.\n")
       end
+      return super(value, currency) unless value == 0
+      @@zero_money || @@mutex.synchronize { @@zero_money = super(0) }
     end
     alias_method :from_amount, :new
 
     def empty
       new(0)
     end
+    alias_method :zero, :empty
 
-    def parse(input)
+    def parse(input, _currency = default_currency)
       parser.parse(input)
     end
 
-    def from_cents(cents)
-      new(cents.round.to_f / 100)
+    def from_cents(cents, currency = default_currency)
+      new(cents.round.to_f / 100, currency)
     end
 
-    def settings_defaults
+    def default_settings
       self.parser = MoneyParser
+      self.default_currency = nil
     end
   end
-  settings_defaults
+  default_settings
 
-  def initialize(value = 0, _currency = nil)
+  def initialize(value, currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
-
+    @currency = currency.is_a?(Money::Currency) ? currency : Currency.find(currency)
     @value = value_to_decimal(value).round(2)
-    @value = 0.to_d if @value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
     @cents = (@value * 100).to_i
     freeze
   end
@@ -49,26 +55,30 @@ class Money
   end
 
   def -@
-    Money.new(-value)
+    Money.new(-value, currency)
   end
 
   def <=>(other)
-    raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    cents <=> other.to_money.cents
+    arithmetic(other) do |money|
+      cents <=> money.cents
+    end
   end
 
   def +(other)
-    raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    Money.new(value + other.to_money.value)
+    arithmetic(other) do |money|
+      Money.new(value + money.value, currency)
+    end
   end
 
   def -(other)
-    raise TypeError, "#{other.class.name} can't be coerced into Money" unless other.respond_to?(:to_money)
-    Money.new(value - other.to_money.value)
+    arithmetic(other) do |money|
+      Money.new(value - money.value, currency)
+    end
   end
 
   def *(numeric)
-    Money.new(value.to_r * numeric)
+    raise TypeError, "#{numeric} is not Numeric" unless numeric.is_a?(Numeric)
+    Money.new(value.to_r * numeric, currency)
   end
 
   def /(numeric)
@@ -84,7 +94,10 @@ class Money
   end
 
   def eql?(other)
-    self.class == other.class && value == other.value
+    return false unless other.is_a?(Money)
+    arithmetic(other) do |money|
+      value == money.value
+    end
   end
 
   class ReverseOperationProxy
@@ -120,7 +133,7 @@ class Money
     value.hash
   end
 
-  def to_money
+  def to_money(_currency = nil)
     self
   end
 
@@ -158,22 +171,22 @@ class Money
   end
 
   def abs
-    Money.new(value.abs)
+    Money.new(value.abs, currency)
   end
 
   def floor
-    Money.new(value.floor)
+    Money.new(value.floor, currency)
   end
 
   def round(ndigits=0)
-    Money.new(value.round(ndigits))
+    Money.new(value.round(ndigits), currency)
   end
 
   def fraction(rate)
     raise ArgumentError, "rate should be positive" if rate < 0
 
     result = value / (1 + rate)
-    Money.new(result)
+    Money.new(result, currency)
   end
 
   # Allocates money between different parties without losing pennies.
@@ -203,7 +216,7 @@ class Money
 
     left_over.to_i.times { |i| amounts[i % amounts.length] += 1 }
 
-    amounts.collect { |cents| Money.from_cents(cents) }
+    amounts.collect { |cents| Money.from_cents(cents, currency) }
   end
 
   # Allocates money between different parties up to the maximum amounts specified.
@@ -248,7 +261,7 @@ class Money
       cents_amounts[index] += 1
     end
 
-    cents_amounts.map { |cents| Money.from_cents(cents) }
+    cents_amounts.map { |cents| Money.from_cents(cents, currency) }
   end
 
   # Split money amongst parties evenly without losing pennies.
@@ -261,8 +274,8 @@ class Money
   #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
     raise ArgumentError, "need at least one party" if num < 1
-    low = Money.from_cents(cents / num)
-    high = Money.from_cents(low.cents + 1)
+    low = Money.from_cents(cents / num, currency)
+    high = Money.from_cents(low.cents + 1, currency)
 
     remainder = cents % num
     result = []
@@ -281,25 +294,25 @@ class Money
   end
 
   def value_to_decimal(num)
-    case num
-    when BigDecimal
-      num
-    when nil
-      ActiveSupport::Deprecation.warn('Money.new(nil) is deprecated in favor of Money.new(0). Support for passing a nil amount will be removed from the next major revision.') if defined?(ActiveSupport)
-      DECIMAL_ZERO
-    when Money
-      num.value
-    when Rational
-      num.to_d(16)
-    when Numeric
-      num.to_d
-    else
-      if num.is_a?(String) && num =~ /\A-?\d*\.*\d*\z/
+    value =
+      case num
+      when BigDecimal
+        num
+      when Money
+        num.value
+      when Rational
+        num.to_d(16)
+      when Numeric
         num.to_d
       else
-        raise ArgumentError, "value_to_decimal could not parse #{num.inspect}"
+        if num.is_a?(String) && num =~ NUMERIC_REGEX
+          num.to_d
+        else
+          raise ArgumentError, "could not parse #{num.inspect}"
+        end
       end
-    end
+    return DECIMAL_ZERO if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
+    value
   end
 
   def amounts_from_splits(allocations, splits, cents_to_split = cents)
@@ -312,5 +325,14 @@ class Money
     end
 
     [amounts, left_over]
+  end
+
+  def arithmetic(money_or_numeric)
+    raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
+    other = money_or_numeric.to_money(currency)
+    unless currency == other.currency
+      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}")
+    end
+    yield(other)
   end
 end
