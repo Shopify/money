@@ -18,8 +18,16 @@ describe "Money" do
     expect(@money).to eq(Money.new(0.00))
   end
 
+  it "defaults to 0 when constructed with an invalid string" do
+    expect(Money.new('invalid')).to eq(Money.new(0.00))
+  end
+
   it "to_s as a float with 2 decimal places" do
     expect(@money.to_s).to eq("0.00")
+  end
+
+  it "as_json as a float with 2 decimal places" do
+    expect(@money.as_json).to eq("0.00")
   end
 
   it "is constructable with a BigDecimal" do
