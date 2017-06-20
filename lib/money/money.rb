@@ -1,6 +1,3 @@
-require 'bigdecimal'
-require 'bigdecimal/util'
-
 class Money
   include Comparable
 
