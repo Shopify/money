@@ -5,11 +5,13 @@ module MoneyColumn
     end
 
     module ClassMethods
-      def money_column(*columns)
+      def money_column(*columns, currency_column: 'currency')
         Array(columns).flatten.each do |name|
           define_method(name) do
             value = read_attribute(name)
-            value.blank? ? nil : Money.new(value)
+            return nil if value.blank?
+            currency = read_attribute(currency_column)
+            Money.new(value, currency)
           end
 
           define_method("#{name}_before_type_cast") do
@@ -22,6 +24,12 @@ module MoneyColumn
               nil
             else
               money = value.to_money
+              currency = read_attribute(currency_column)
+
+              if money.currency && Currency.find(currency) != money.currency
+                Money.deprecate("currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
+              end
+
               write_attribute(name, money.value)
               money
             end
