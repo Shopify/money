@@ -4,9 +4,6 @@ class Money
   @@mutex = Mutex.new
   @@zero_money = nil
 
-  DECIMAL_ZERO = BigDecimal.new(0).freeze
-  NUMERIC_REGEX = /\A-?\d*\.?\d*\z/.freeze
-
   attr_reader :value, :cents, :currency
 
   class << self
@@ -45,7 +42,7 @@ class Money
   def initialize(value, currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
     @currency = currency.is_a?(Money::Currency) ? currency : Currency.find(currency)
-    @value = value_to_decimal(value).round(2)
+    @value = Helpers.value_to_decimal(value).round(2)
     @cents = (@value * 100).to_i
     freeze
   end
@@ -205,7 +202,7 @@ class Money
     if all_rational?(splits)
       allocations = splits.inject(0) { |sum, n| sum + n }
     else
-      allocations = splits.inject(0) { |sum, n| sum + value_to_decimal(n) }
+      allocations = splits.inject(0) { |sum, n| sum + Helpers.value_to_decimal(n) }
     end
 
     if (allocations - BigDecimal("1")) > Float::EPSILON
@@ -293,33 +290,11 @@ class Money
     splits.all? { |split| split.is_a?(Rational) }
   end
 
-  def value_to_decimal(num)
-    value =
-      case num
-      when BigDecimal
-        num
-      when Money
-        num.value
-      when Rational
-        num.to_d(16)
-      when Numeric
-        num.to_d
-      else
-        if num.is_a?(String) && num =~ NUMERIC_REGEX
-          num.to_d
-        else
-          raise ArgumentError, "could not parse #{num.inspect}"
-        end
-      end
-    return DECIMAL_ZERO if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
-    value
-  end
-
   def amounts_from_splits(allocations, splits, cents_to_split = cents)
     left_over = cents_to_split
 
     amounts = splits.collect do |ratio|
-      frac = (value_to_decimal(cents_to_split * ratio) / allocations).floor
+      frac = (Helpers.value_to_decimal(cents_to_split * ratio) / allocations).floor
       left_over -= frac
       frac
     end
