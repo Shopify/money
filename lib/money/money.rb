@@ -28,8 +28,14 @@ class Money
       parser.parse(input)
     end
 
-    def from_cents(cents, currency = default_currency)
+    def from_cents(cents, currency = nil)
       new(cents.round.to_f / 100, currency)
+    end
+
+    def from_subunits(subunits, currency_iso)
+      currency = Currency.new(currency_iso)
+      value = Helpers.value_to_decimal(subunits) / currency.subunit_to_unit
+      new(value, currency)
     end
 
     def default_settings

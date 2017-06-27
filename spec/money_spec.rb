@@ -220,6 +220,14 @@ describe "Money" do
     expect(Money.from_cents(1950.5)).to eq(Money.new(19.51))
   end
 
+  it "is creatable from an integer value in cents and currency" do
+    expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50))
+  end
+
+  it "is creatable from an integer value in dollars and currency with no cents" do
+    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950))
+  end
+
   it "raises when constructed with a NaN value" do
     expect { Money.new( 0.0 / 0) }.to raise_error(ArgumentError)
   end
