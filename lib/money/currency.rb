@@ -6,9 +6,7 @@ class Money
 
     @@mutex = Mutex.new
 
-    attr_reader :priority, :iso_code, :iso_numeric, :name, :symbol,
-      :disambiguate_symbol, :html_entity, :subunit, :subunit_to_unit, :decimal_mark,
-      :thousands_separator, :symbol_first, :smallest_denomination, :alternate_symbols
+    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_to_unit
 
     class << self
       def new(currency_iso)
@@ -36,20 +34,11 @@ class Money
       unless data = self.class.currencies_json[currency_iso]
         raise UnknownCurrency, "Unknown currency '#{currency_iso}'"
       end
-      @alternate_symbols     = data['alternate_symbols']
-      @decimal_mark          = data['decimal_mark']
-      @disambiguate_symbol   = data['disambiguate_symbol']
-      @html_entity           = data['html_entity']
       @iso_code              = data['iso_code']
       @iso_numeric           = data['iso_numeric']
       @name                  = data['name']
-      @priority              = data['priority']
       @smallest_denomination = data['smallest_denomination']
-      @subunit               = data['subunit']
       @subunit_to_unit       = data['subunit_to_unit']
-      @symbol                = data['symbol']
-      @symbol_first          = data['symbol_first']
-      @thousands_separator   = data['thousands_separator']
       freeze
     end
 
