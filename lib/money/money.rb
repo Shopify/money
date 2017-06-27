@@ -1,7 +1,6 @@
 class Money
   include Comparable
 
-  @@mutex = Mutex.new
   @@zero_money = nil
 
   attr_reader :value, :cents, :currency
@@ -14,8 +13,12 @@ class Money
         value = 0
         deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0) or Money.zero instead.\n")
       end
-      return super(value, currency) unless value == 0
-      @@zero_money || @@mutex.synchronize { @@zero_money = super(0) }
+
+      if value == 0
+        @@zero_money ||= super(0)
+      else
+        super(value, currency)
+      end
     end
     alias_method :from_amount, :new
 
