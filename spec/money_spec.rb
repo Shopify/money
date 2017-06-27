@@ -6,6 +6,10 @@ describe "Money" do
     @money = Money.new
   end
 
+  let (:amount_money) { Money.new(1.23, 'USD') }
+  let (:non_fractional_money) { Money.new(1, 'JPY') }
+  let (:zero_money) { Money.new(0) }
+
   it "is contructable with empty class method" do
     expect(Money.empty).to eq(@money)
   end
@@ -24,6 +28,26 @@ describe "Money" do
 
   it "to_s as a float with 2 decimal places" do
     expect(@money.to_s).to eq("0.00")
+  end
+
+  it "to_s with a legacy_cents style" do
+    expect(amount_money.to_s(:legacy_cents)).to eq("123")
+    expect(non_fractional_money.to_s(:legacy_cents)).to eq("100")
+  end
+
+  it "to_s with a minor_units style" do
+    expect(amount_money.to_s(:minor_units)).to eq("123")
+    expect(non_fractional_money.to_s(:minor_units)).to eq("1")
+  end
+
+  it "to_s with a legacy_dollars style" do
+    expect(amount_money.to_s(:legacy_dollars)).to eq("1.23")
+    expect(non_fractional_money.to_s(:legacy_dollars)).to eq("1.00")
+  end
+
+  it "to_s with a major_units style" do
+    expect(amount_money.to_s(:major_units)).to eq("1.23")
+    expect(non_fractional_money.to_s(:major_units)).to eq("1")
   end
 
   it "as_json as a float with 2 decimal places" do

@@ -157,8 +157,17 @@ class Money
     value
   end
 
-  def to_s
-    sprintf("%.2f", value.to_f)
+  def to_s(style = nil)
+    case style
+    when :legacy_dollars, nil
+      sprintf("%.2f", value)
+    when :legacy_cents
+      (value * 100).round.to_i.to_s
+    when :minor_units
+      (value * currency.subunit_to_unit).round.to_i.to_s
+    when :major_units
+      sprintf("%.#{currency.minor_units}f", value)
+    end
   end
 
   def to_liquid

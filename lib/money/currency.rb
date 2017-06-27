@@ -6,7 +6,7 @@ class Money
 
     @@mutex = Mutex.new
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_to_unit
+    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_to_unit, :minor_units
 
     class << self
       def new(currency_iso)
@@ -39,6 +39,7 @@ class Money
       @name                  = data['name']
       @smallest_denomination = data['smallest_denomination']
       @subunit_to_unit       = data['subunit_to_unit']
+      @minor_units           = subunit_to_unit == 0 ? 0 : Math.log(subunit_to_unit, 10).round.to_i
       freeze
     end
 

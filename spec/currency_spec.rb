@@ -7,7 +7,8 @@ describe "Currency" do
     "name": "United States Dollar",
     "subunit_to_unit": 100,
     "iso_numeric": "840",
-    "smallest_denomination": 1
+    "smallest_denomination": 1,
+    "minor_units": 2
   }}
 
   describe "#new" do
