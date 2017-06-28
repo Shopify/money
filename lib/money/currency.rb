@@ -2,7 +2,7 @@ class Money
   class Currency
     class UnknownCurrency < ArgumentError; end
 
-    CURRENCY_DATA_PATH = "#{File.expand_path('../../../config', __FILE__)}/currency_iso.json".freeze
+    CURRENCY_DATA_PATH = "#{File.expand_path('../../../config', __FILE__)}".freeze
 
     @@mutex = Mutex.new
 
@@ -28,18 +28,21 @@ class Money
 
       def currencies_json
         @@currencies_json ||= begin
-          json = File.read(CURRENCY_DATA_PATH)
-          json.force_encoding(::Encoding::UTF_8) if defined?(::Encoding)
-          JSON.parse(json)
+          currencies = {}
+          Dir.glob("#{CURRENCY_DATA_PATH}/*.json") do |currency_file|
+            json = File.read(currency_file)
+            json.force_encoding(::Encoding::UTF_8) if defined?(::Encoding)
+            currencies.merge!(JSON.parse(json))
+          end
+          currencies
         end
       end
     end
-    currencies_json
 
     def initialize(currency_iso)
-      unless data = self.class.currencies_json[currency_iso]
-        raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'"
-      end
+      data = self.class.currencies_json[currency_iso]
+      raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
+
       @iso_code              = data['iso_code']
       @iso_numeric           = data['iso_numeric']
       @name                  = data['name']

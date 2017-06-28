@@ -26,8 +26,8 @@ module MoneyColumn
               money = value.to_money
               currency = read_attribute(currency_column)
 
-              if money.currency && Currency.find(currency) != money.currency
-                Money.deprecate("currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
+              if money.currency && Money::Currency.find(currency) != money.currency
+                Money.deprecate("[money_column] currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
               end
 
               write_attribute(name, money.value)
