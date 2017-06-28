@@ -568,6 +568,18 @@ describe "Money" do
   end
 
   describe "YAML loading of old versions" do
+
+    it "accepts values with currencies" do
+      money = YAML.load(<<~EOS)
+        ---
+        !ruby/object:Money
+          value: !ruby/object:BigDecimal 18:0.75E3
+          cents: 75000
+          currency: 'usd'
+      EOS
+      expect(money).to be == Money.new(750, 'usd')
+    end
+
     it "accepts BigDecimal values" do
       money = YAML.load(<<~EOS)
         ---
