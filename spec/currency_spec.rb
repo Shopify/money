@@ -33,6 +33,30 @@ describe "Currency" do
     it "raises if the currency is invalid" do
       expect { Money::Currency.new('yyy') }.to raise_error(Money::Currency::UnknownCurrency)
     end
+
+    it "raises if the currency is nil" do
+      expect { Money::Currency.new(nil) }.to raise_error(Money::Currency::UnknownCurrency)
+    end
+  end
+
+  describe "#find" do
+    it "returns nil if the currency is invalid" do
+      expect(Money::Currency.find('yyy')).to eq(nil)
+    end
+
+    it "returns a valid currency" do
+      expect(Money::Currency.find('usd')).to eq(Money::Currency.new('usd'))
+    end
+  end
+
+  describe "#find!" do
+    it "raises if the currency is invalid" do
+      expect { Money::Currency.find!('yyy') }.to raise_error(Money::Currency::UnknownCurrency)
+    end
+
+    it "returns a valid currency" do
+      expect(Money::Currency.find!('CAD')).to eq(Money::Currency.new('CAD'))
+    end
   end
 
   describe "#eql?" do

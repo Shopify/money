@@ -13,10 +13,17 @@ class Money
         iso = currency_iso.to_s.downcase
         loaded_currencies[iso] || @@mutex.synchronize { loaded_currencies[iso] = super(iso) }
       end
-      alias_method :find, :new
+      alias_method :find!, :new
+
+      def find(currency_iso)
+        return nil if currency_iso.blank?
+        new(currency_iso)
+      rescue UnknownCurrency
+        nil
+      end
 
       def loaded_currencies
-        @loaded_currencies ||= {}
+        @@loaded_currencies ||= {}
       end
 
       def currencies_json
@@ -30,9 +37,8 @@ class Money
     currencies_json
 
     def initialize(currency_iso)
-      return nil if currency_iso.blank?
       unless data = self.class.currencies_json[currency_iso]
-        raise UnknownCurrency, "Unknown currency '#{currency_iso}'"
+        raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'"
       end
       @iso_code              = data['iso_code']
       @iso_numeric           = data['iso_numeric']
