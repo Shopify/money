@@ -9,7 +9,7 @@ class Money
     def new(value = nil, currency = nil)
       if value.nil?
         value = 0
-        deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0) or Money.zero instead.\n")
+        deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0) or Money.zero instead.")
       end
 
       if value == 0
@@ -323,7 +323,7 @@ class Money
     raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
     other = money_or_numeric.to_money(currency)
     unless currency == other.currency
-      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}")
+      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}.")
     end
     yield(other)
   end
