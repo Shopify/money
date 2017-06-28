@@ -1,8 +1,6 @@
 class Money
   include Comparable
 
-  @@zero_money = nil
-
   attr_reader :value, :cents, :currency
 
   class << self
@@ -15,17 +13,18 @@ class Money
       end
 
       if value == 0
-        @@zero_money ||= super(0)
+        @@zero_money ||= {}
+        @@zero_money[currency] ||= super(0, currency)
       else
         super(value, currency)
       end
     end
     alias_method :from_amount, :new
 
-    def empty
-      new(0)
+    def zero(currency = nil)
+      new(0, currency)
     end
-    alias_method :zero, :empty
+    alias_method :empty, :zero
 
     def parse(input, _currency = nil)
       parser.parse(input)
