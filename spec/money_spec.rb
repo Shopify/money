@@ -123,11 +123,11 @@ describe "Money" do
   end
 
   it "inspects to a presentable string" do
-    expect(@money.inspect).to eq("#<Money value:0.00>")
+    expect(@money.inspect).to eq("#<Money value:0.00 currency:XXX>")
   end
 
   it "is inspectable within an array" do
-    expect([@money].inspect).to eq("[#<Money value:0.00>]")
+    expect([@money].inspect).to eq("[#<Money value:0.00 currency:XXX>]")
   end
 
   it "correctly support eql? as a value object" do

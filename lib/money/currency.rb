@@ -63,5 +63,9 @@ class Money
     def to_s
       iso_code
     end
+
+    def xxx?
+      iso_code == 'XXX'
+    end
   end
 end
