@@ -84,7 +84,9 @@ class Money
   end
 
   def *(numeric)
-    raise TypeError, "#{numeric} is not Numeric" unless numeric.is_a?(Numeric)
+    unless numeric.is_a?(Numeric)
+      Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
+    end
     Money.new(value.to_r * numeric, currency)
   end
 
