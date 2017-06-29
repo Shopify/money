@@ -103,6 +103,16 @@ describe "Money" do
     expect((Money.new(5.00) - Money.new(5.00))).to eq(Money.new)
   end
 
+  it "logs a deprecation warning when adding across currencies" do
+    expect(Money).to receive(:deprecate)
+    expect(Money.new(10, 'USD') - Money.new(1, 'JPY')).to eq(Money.new(9, 'USD'))
+  end
+
+  it "logs a deprecation warning when adding across currencies" do
+    expect(Money).not_to receive(:deprecate)
+    expect((Money.new(10) - Money.new(1, 'JPY'))).to eq(Money.new(9, 'JPY'))
+  end
+
   it "is substractable to a negative amount" do
     expect((Money.new(0.00) - Money.new(1.00))).to eq(Money.new("-1.00"))
   end

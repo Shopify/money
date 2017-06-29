@@ -6,7 +6,9 @@ class Money
   class << self
     attr_accessor :parser, :default_currency
 
-    def new(value = nil, currency = default_currency)
+    def new(value = nil, currency = nil)
+      currency ||= default_currency
+
       if value.nil?
         value = 0
         deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0) or Money.zero instead.")
@@ -49,7 +51,7 @@ class Money
 
   def initialize(value, currency)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
-    @currency = currency.is_a?(Money::Currency) ? currency : Currency.find(currency)
+    @currency = currency.is_a?(Money::Currency) ? currency : Currency.find(currency || self.class.default_currency)
     @value = Helpers.value_to_decimal(value).round(2)
     @cents = (@value * 100).to_i
     freeze
