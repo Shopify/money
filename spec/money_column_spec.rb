@@ -5,6 +5,14 @@ class MoneyRecord < ActiveRecord::Base
   validates :price, numericality: true
 end
 
+class CurrencyMoneyRecord < ActiveRecord::Base
+  money_column :price
+end
+
+class CustomCurrencyMoneyRecord < ActiveRecord::Base
+  money_column :price, currency_column: 'custom_currency'
+end
+
 describe "MoneyColumn" do
 
   it "typecasts string to money" do
@@ -20,6 +28,21 @@ describe "MoneyColumn" do
   it "typecasts blank to nil" do
     m = MoneyRecord.new(:price => "")
     expect(m.price).to eq(nil)
+  end
+
+  it "typecasts money with missing currency column" do
+    m = MoneyRecord.new(price: Money.new(1.01, 'cad'))
+    expect(m.price).to eq(Money.new(1.01, 'XXX'))
+  end
+
+  it "typecasts money with currency" do
+    m = CurrencyMoneyRecord.new(price: 1.01, currency: 'cad')
+    expect(m.price).to eq(Money.new(1.01, 'CAD'))
+  end
+
+  it "typecasts money with a custom currency column" do
+    m = CustomCurrencyMoneyRecord.new(price: 1.01, custom_currency: 'cad')
+    expect(m.price).to eq(Money.new(1.01, 'CAD'))
   end
 
   it "typecasts invalid string to empty money" do
