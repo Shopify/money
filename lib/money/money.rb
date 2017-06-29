@@ -11,7 +11,7 @@ class Money
 
       if value.nil?
         value = 0
-        deprecate("Support for Money.new or Money.new(nil) will be removed from the next major revision. Please use Money.zero instead.")
+        deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0, currency) instead.")
       end
 
       if value == 0
