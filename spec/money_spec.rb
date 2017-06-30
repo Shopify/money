@@ -23,8 +23,8 @@ describe "Money" do
     expect(@money).to eq(Money.new(0.00))
   end
 
-  it "defaults raise when constructed with an invalid string" do
-    expect{ Money.new('invalid') }.to raise_error(ArgumentError)
+  it "defaults to 0 when constructed with an invalid string" do
+    expect(Money.new('invalid')).to eq(Money.new(0.00))
   end
 
   it "to_s as a float with 2 decimal places" do

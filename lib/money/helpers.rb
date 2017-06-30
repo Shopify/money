@@ -18,12 +18,13 @@ class Money
           BigDecimal.new(num)
         when Float, Rational
           BigDecimal.new(num, Float::DIG)
-        else
-          if num.is_a?(String) && num =~ NUMERIC_REGEX
-            BigDecimal.new(num)
-          else
-            raise ArgumentError, "could not parse #{num.inspect}"
+        when String
+          if num !~ NUMERIC_REGEX
+            Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
           end
+          BigDecimal.new(num)
+        else
+          raise ArgumentError, "could not parse #{num.inspect}"
         end
       return DECIMAL_ZERO if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
       value
