@@ -24,10 +24,12 @@ module MoneyColumn
               nil
             else
               money = value.to_money
-              currency = read_attribute(currency_column)
 
-              if money.currency && Money::Currency.find(currency) != money.currency
-                Money.deprecate("[money_column] currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
+              if money.currency
+                currency = Money::Currency.find(read_attribute(currency_column) || Money.default_currency)
+                if currency != money.currency
+                  Money.deprecate("[money_column] currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
+                end
               end
 
               write_attribute(name, money.value)
