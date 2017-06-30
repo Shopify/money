@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require 'spec_helper'
 
 describe AccountingMoneyParser do
   describe "parsing of amounts with period decimal separator" do
