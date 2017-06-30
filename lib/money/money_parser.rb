@@ -7,7 +7,7 @@ class MoneyParser
   end
 
   def parse(input, currency = nil)
-    Money.new(extract_money(input.to_s).to_d, currency)
+    Money.new(extract_money(input.to_s), currency)
   end
 
   private

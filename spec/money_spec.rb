@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'yaml'
 
 describe "Money" do
 
@@ -86,9 +87,9 @@ describe "Money" do
     expect((Money.new + Money.new)).to eq(Money.new)
   end
 
-  it "adds a deprecation warning for inconsistent currencies" do
+  it "adds inconsistent currencies" do
     expect(Money).to receive(:deprecate).once
-    expect((Money.new(5, 'USD') + Money.new(1, 'CAD'))).to eq(Money.new(6, 'USD'))
+    expect(Money.new(5, 'USD') + Money.new(1, 'CAD')).to eq(Money.new(6, 'USD'))
   end
 
   it "is subtractable" do
@@ -182,6 +183,11 @@ describe "Money" do
   it "is multipliable by a repeatable floating point number where the floating point error rounds down" do
     expect((Money.new(3.3) * (1.0 / 12))).to eq(Money.new(0.28))
     expect(((1.0 / 12) * Money.new(3.3))).to eq(Money.new(0.28))
+  end
+
+  it "is multipliable by a money object" do
+    expect(Money).to receive(:deprecate).once
+    expect((Money.new(3.3) * Money.new(1))).to eq(Money.new(3.3))
   end
 
   it "rounds multiplication result with fractional penny of 5 or higher up" do
@@ -557,7 +563,7 @@ describe "Money" do
     it "accepts numeric values" do
       expect(Money.from_amount(1)).to eq Money.from_cents(1_00)
       expect(Money.from_amount(1.0)).to eq Money.from_cents(1_00)
-      expect(Money.from_amount("1".to_d)).to eq Money.from_cents(1_00)
+      expect(Money.from_amount(BigDecimal.new("1"))).to eq Money.from_cents(1_00)
     end
 
     it "accepts string values" do

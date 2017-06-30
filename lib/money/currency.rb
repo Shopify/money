@@ -2,7 +2,7 @@ class Money
   class Currency
     class UnknownCurrency < ArgumentError; end
 
-    CURRENCY_DATA_PATH = "#{File.expand_path('../../../config', __FILE__)}".freeze
+    CURRENCY_DATA = "#{File.expand_path('../../../config', __FILE__)}/currency_iso.json".freeze
 
     @@mutex = Mutex.new
 
@@ -10,13 +10,13 @@ class Money
 
     class << self
       def new(currency_iso)
+        raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.empty?
         iso = currency_iso.to_s.downcase
         loaded_currencies[iso] || @@mutex.synchronize { loaded_currencies[iso] = super(iso) }
       end
       alias_method :find!, :new
 
       def find(currency_iso)
-        return nil if currency_iso.blank?
         new(currency_iso)
       rescue UnknownCurrency
         nil
@@ -26,21 +26,17 @@ class Money
         @@loaded_currencies ||= {}
       end
 
-      def currencies_json
-        @@currencies_json ||= begin
-          currencies = {}
-          Dir.glob("#{CURRENCY_DATA_PATH}/*.json") do |currency_file|
-            json = File.read(currency_file)
-            json.force_encoding(::Encoding::UTF_8) if defined?(::Encoding)
-            currencies.merge!(JSON.parse(json))
-          end
-          currencies
+      def currencies_data
+        @@currencies_data ||= begin
+          json = File.read(CURRENCY_DATA)
+          json.force_encoding(::Encoding::UTF_8) if defined?(::Encoding)
+          JSON.parse(json)
         end
       end
     end
 
     def initialize(currency_iso)
-      data = self.class.currencies_json[currency_iso]
+      data = self.class.currencies_data[currency_iso]
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
 
       @iso_code              = data['iso_code']
@@ -52,20 +48,15 @@ class Money
       freeze
     end
 
-    def ==(other)
-      eql?(other)
-    end
-
     def eql?(other)
       self.class == other.class && iso_code == other.iso_code
-    end
-
-    def to_s
-      iso_code
     end
 
     def xxx?
       iso_code == 'XXX'
     end
+
+    alias_method :==, :eql?
+    alias_method :to_s, :iso_code
   end
 end

@@ -1,17 +1,18 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe "Currency" do
-  let(:currency) { Money::Currency.new('usd') }
-  let(:currency_data) {{
+  CURRENCY_DATA = {
     "iso_code": "USD",
     "name": "United States Dollar",
     "subunit_to_unit": 100,
     "iso_numeric": "840",
     "smallest_denomination": 1,
     "minor_units": 2
-  }}
+  }
 
-  describe "#new" do
+  let(:currency) { Money::Currency.new('usd') }
+
+  describe ".new" do
     it "is constructable with a uppercase string" do
       expect(Money::Currency.new('USD').iso_code).to eq('USD')
     end
@@ -24,23 +25,17 @@ describe "Currency" do
       expect(Money::Currency.new('usd').iso_code).to eq('USD')
     end
 
-    it "has currency data accessible" do
-      currency_data.keys.each do |attribute|
-        expect(currency.public_send(attribute)).to eq(currency_data[attribute])
-      end
-    end
-
-    it "raises if the currency is invalid" do
+    it "raises when the currency is invalid" do
       expect { Money::Currency.new('yyy') }.to raise_error(Money::Currency::UnknownCurrency)
     end
 
-    it "raises if the currency is nil" do
+    it "raises when the currency is nil" do
       expect { Money::Currency.new(nil) }.to raise_error(Money::Currency::UnknownCurrency)
     end
   end
 
-  describe "#find" do
-    it "returns nil if the currency is invalid" do
+  describe ".find" do
+    it "returns nil when the currency is invalid" do
       expect(Money::Currency.find('yyy')).to eq(nil)
     end
 
@@ -49,8 +44,8 @@ describe "Currency" do
     end
   end
 
-  describe "#find!" do
-    it "raises if the currency is invalid" do
+  describe ".find!" do
+    it "raises when the currency is invalid" do
       expect { Money::Currency.find!('yyy') }.to raise_error(Money::Currency::UnknownCurrency)
     end
 
@@ -59,17 +54,31 @@ describe "Currency" do
     end
   end
 
-  describe "#eql?" do
-    it "returns true when both objects have the same iso_code" do
-      expect(currency == Money.new(1, 'USD').currency).to eq(true)
+  CURRENCY_DATA.each do |attribute, value|
+    describe "##{attribute}" do
+      it 'returns the correct value' do
+        expect(currency.public_send(attribute)).to eq(value)
+      end
     end
+  end
 
+  describe "#eql?" do
     it "returns true when both objects represent the same currency" do
       expect(currency.eql?(Money.new(1, 'USD').currency)).to eq(true)
     end
 
-    it "returns true when both objects represent the same currency" do
+    it "returns false when the currency iso is different" do
       expect(currency.eql?(Money.new(1, 'CAD').currency)).to eq(false)
+    end
+  end
+
+  describe "==" do
+    it "returns true when both objects have the same currency" do
+      expect(currency == Money.new(1, 'USD').currency).to eq(true)
+    end
+
+    it "returns false when the currency iso is different" do
+      expect(currency == Money.new(1, 'CAD').currency).to eq(false)
     end
   end
 

@@ -1,4 +1,20 @@
 {
+  "xxx": {
+    "priority": 999,
+    "iso_code": "XXX",
+    "name": "No Currency",
+    "symbol": "$",
+    "disambiguate_symbol": "XX$",
+    "alternate_symbols": ["XX$"],
+    "subunit": "Cent",
+    "subunit_to_unit": 100,
+    "symbol_first": true,
+    "html_entity": "$",
+    "decimal_mark": ".",
+    "thousands_separator": ",",
+    "iso_numeric": "999",
+    "smallest_denomination": 1
+  },
   "aed": {
     "priority": 100,
     "iso_code": "AED",
