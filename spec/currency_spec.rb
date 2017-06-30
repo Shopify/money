@@ -7,7 +7,9 @@ describe "Currency" do
     "subunit_to_unit": 100,
     "iso_numeric": "840",
     "smallest_denomination": 1,
-    "minor_units": 2
+    "minor_units": 2,
+    "symbol": '$',
+    "disambiguate_symbol": "US$"
   }
 
   let(:currency) { Money::Currency.new('usd') }

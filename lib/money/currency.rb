@@ -5,14 +5,16 @@ class Money
     CURRENCY_DATA = "#{File.expand_path('../../../config', __FILE__)}/currency_iso.json".freeze
 
     @@mutex = Mutex.new
+    @@loaded_currencies = {}
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_to_unit, :minor_units
+    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination,
+                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol
 
     class << self
       def new(currency_iso)
         raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.empty?
         iso = currency_iso.to_s.downcase
-        loaded_currencies[iso] || @@mutex.synchronize { loaded_currencies[iso] = super(iso) }
+        @@loaded_currencies[iso] || @@mutex.synchronize { @@loaded_currencies[iso] = super(iso) }
       end
       alias_method :find!, :new
 
@@ -20,10 +22,6 @@ class Money
         new(currency_iso)
       rescue UnknownCurrency
         nil
-      end
-
-      def loaded_currencies
-        @@loaded_currencies ||= {}
       end
 
       def currencies_data
@@ -38,7 +36,8 @@ class Money
     def initialize(currency_iso)
       data = self.class.currencies_data[currency_iso]
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
-
+      @symbol                = data['symbol']
+      @disambiguate_symbol   = data['disambiguate_symbol']
       @iso_code              = data['iso_code']
       @iso_numeric           = data['iso_numeric']
       @name                  = data['name']
