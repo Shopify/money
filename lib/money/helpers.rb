@@ -14,6 +14,8 @@ class Money
           num.value
         when BigDecimal
           num
+        when nil
+          DECIMAL_ZERO
         when Integer
           BigDecimal.new(num)
         when Float, Rational
