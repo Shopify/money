@@ -618,4 +618,18 @@ describe "Money" do
       expect(money.value).to be_a BigDecimal
     end
   end
+
+  describe('.deprecate') do
+    it "uses ruby warn if active support is not defined" do
+      stub_const("ACTIVE_SUPPORT_DEFINED", false)
+      expect(Kernel).to receive(:warn).once
+      Money.deprecate('ok')
+    end
+
+    it "uses active support warn if active support is defined" do
+      expect(Kernel).to receive(:warn).never
+      expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).once
+      Money.deprecate('ok')
+    end
+  end
 end

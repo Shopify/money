@@ -1,7 +1,15 @@
 Money.class_eval do
-  ACTIVESUPPORT_AVAILABLE = defined?(ActiveSupport)
+  ACTIVE_SUPPORT_DEFINED = defined?(ActiveSupport)
+
+  def self.active_support_deprecator
+    @active_support_deprecator ||= ActiveSupport::Deprecation.new('1.0.0', 'Shopify/Money')
+  end
 
   def self.deprecate(message)
-    ACTIVESUPPORT_AVAILABLE ? ActiveSupport::Deprecation.warn("#{message}\n") : warn("DEPRECATION WARNING: #{message}\n")
+    if ACTIVE_SUPPORT_DEFINED
+      active_support_deprecator.warn("#{message}\n")
+    else
+      Kernel.warn("DEPRECATION WARNING: [Shopify/Money] #{message}\n")
+    end
   end
 end
