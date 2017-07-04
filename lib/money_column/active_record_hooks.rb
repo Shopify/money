@@ -27,7 +27,7 @@ module MoneyColumn
 
               if money.currency
                 currency = Money::Currency.find(read_attribute(currency_column) || Money.default_currency)
-                if currency != money.currency
+                if currency != money.currency && !currency.xxx? && !money.currency.xxx?
                   Money.deprecate("[money_column] currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
                 end
               end

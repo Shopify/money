@@ -32,7 +32,7 @@ class Money
     end
 
     def from_subunits(subunits, currency_iso)
-      currency = Currency.new(currency_iso)
+      currency = Currency.find!(currency_iso)
       value = Helpers.value_to_decimal(subunits) / currency.subunit_to_unit
       new(value, currency)
     end
@@ -44,9 +44,9 @@ class Money
   end
   default_settings
 
-  def initialize(value = 0, currency)
+  def initialize(value = 0, currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
-    @currency = currency.is_a?(Money::Currency) ? currency : Currency.find(currency || self.class.default_currency)
+    @currency = Helpers.value_to_currency(currency)
     @value = Helpers.value_to_decimal(value).round(2)
     @cents = (@value * 100).to_i
     freeze

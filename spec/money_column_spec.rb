@@ -59,4 +59,11 @@ describe "MoneyColumn" do
     m = MoneyRecord.new(:price => '1.00')
     expect(m.valid?).to eq(true)
   end
+
+  it "does not save the currency but shows a deprecation warning" do
+    m = CustomCurrencyMoneyRecord.new(price: 1.01, custom_currency: 'cad')
+    expect(Money).to receive(:deprecate).once
+    m.price = Money.new(10, 'USD')
+    expect(m.price).to eq(Money.new(10, 'CAD'))
+  end
 end

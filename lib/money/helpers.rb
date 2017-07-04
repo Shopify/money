@@ -26,10 +26,21 @@ class Money
           end
           BigDecimal.new(num)
         else
-          raise ArgumentError, "could not parse #{num.inspect}"
+          raise ArgumentError, "could not parse as decimal #{num.inspect}"
         end
       return DECIMAL_ZERO if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
       value
+    end
+
+    def value_to_currency(currency)
+      case currency
+      when Money::Currency
+        currency
+      when String
+        Currency.find!(currency.empty? ? Money.default_currency : currency)
+      else
+        Currency.find!(currency || Money.default_currency)
+      end
     end
   end
 end
