@@ -89,4 +89,22 @@ describe "Currency" do
       expect(currency.to_s).to eq('USD')
     end
   end
+
+  describe "No money currency" do
+    let (:money) {Money::Currency.find!('xxx')}
+
+    it "has a valid XXX iso4217 currency code" do
+      expect(money.iso_code).to eq('XXX')
+    end
+
+    it "quacks like USD" do
+      expect(money.symbol).to eq('$')
+      expect(money.subunit_to_unit).to eq(100)
+      expect(money.smallest_denomination).to eq(1)
+    end
+
+    it "has the name No Currency" do
+      expect(money.name).to eq('No Currency')
+    end
+  end
 end
