@@ -9,10 +9,6 @@ class Money
     def new(value = 0, currency = nil)
       currency ||= default_currency
 
-      if value.nil?
-        deprecate("Support for Money.new(nil) will be removed from the next major revision. Please use Money.new(0, currency) instead.")
-      end
-
       if value == 0
         @@zero_money ||= {}
         @@zero_money[currency] ||= super(0, currency)
