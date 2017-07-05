@@ -28,3 +28,17 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 RSpec.configure do |config|
 
 end
+
+RSpec::Matchers.define :quack_like do
+  match do
+    missing_methods.empty?
+  end
+
+  failure_message do
+    "expected #{actual.name} to respond to #{missing_methods.join(', ')}"
+  end
+
+  def missing_methods
+    expected.instance_methods - actual.instance_methods
+  end
+end

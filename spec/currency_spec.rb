@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require 'spec_helper'
 
 describe "Currency" do
   CURRENCY_DATA = {
@@ -90,21 +90,22 @@ describe "Currency" do
     end
   end
 
-  describe "No money currency" do
-    let (:money) {Money::Currency.find!('xxx')}
+  describe "#compatible" do
 
-    it "has a valid XXX iso4217 currency code" do
-      expect(money.iso_code).to eq('XXX')
+    it "returns true for the same currency" do
+      expect(currency.compatible?(Money::Currency.new('USD'))).to eq(true)
     end
 
-    it "quacks like USD" do
-      expect(money.symbol).to eq('$')
-      expect(money.subunit_to_unit).to eq(100)
-      expect(money.smallest_denomination).to eq(1)
+    it "returns true for null_currency" do
+      expect(currency.compatible?(Money::NullCurrency.instance)).to eq(true)
     end
 
-    it "has the name No Currency" do
-      expect(money.name).to eq('No Currency')
+    it "returns false for nil" do
+      expect(currency.compatible?(nil)).to eq(false)
+    end
+
+    it "returns false for a different currency" do
+      expect(currency.compatible?(Money::Currency.new('JPY'))).to eq(false)
     end
   end
 end

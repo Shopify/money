@@ -32,14 +32,14 @@ class Money
     end
 
     def from_subunits(subunits, currency_iso)
-      currency = Currency.find!(currency_iso)
+      currency = Helpers.value_to_currency(currency_iso)
       value = Helpers.value_to_decimal(subunits) / currency.subunit_to_unit
       new(value, currency)
     end
 
     def default_settings
       self.parser = MoneyParser
-      self.default_currency = 'xxx'
+      self.default_currency = Money::NullCurrency.instance
     end
   end
   default_settings
@@ -322,7 +322,7 @@ class Money
     raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
     other = money_or_numeric.to_money(currency)
 
-    unless currency == other.currency || currency.xxx? || other.currency.xxx?
+    unless currency.compatible?(other.currency)
       Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}.")
     end
     yield(other)

@@ -26,8 +26,8 @@ module MoneyColumn
               money = value.to_money
 
               if money.currency
-                currency = Money::Currency.find(read_attribute(currency_column) || Money.default_currency)
-                if currency != money.currency && !currency.xxx? && !money.currency.xxx?
+                currency = Money::Helpers.value_to_currency(read_attribute(currency_column))
+                unless currency.compatible?(money.currency)
                   Money.deprecate("[money_column] currency mismatch between #{currency || 'nil'} and #{money.currency || 'nil'}.")
                 end
               end

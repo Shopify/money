@@ -34,12 +34,14 @@ class Money
 
     def value_to_currency(currency)
       case currency
-      when Money::Currency
+      when Money::Currency, Money::NullCurrency
         currency
-      when String
-        Currency.find!(currency.empty? ? Money.default_currency : currency)
       else
-        Currency.find!(currency || Money.default_currency)
+        if currency.nil? || currency.empty?
+          Money.default_currency
+        else
+          Currency.find!(currency)
+        end
       end
     end
   end

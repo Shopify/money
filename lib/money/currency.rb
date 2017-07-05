@@ -51,8 +51,8 @@ class Money
       self.class == other.class && iso_code == other.iso_code
     end
 
-    def xxx?
-      iso_code == 'XXX'
+    def compatible?(other)
+      other.is_a?(NullCurrency) || eql?(other)
     end
 
     alias_method :==, :eql?
