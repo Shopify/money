@@ -32,7 +32,7 @@ describe "MoneyColumn" do
 
   it "typecasts money with missing currency column" do
     m = MoneyRecord.new(price: Money.new(1.01, 'cad'))
-    expect(m.price).to eq(Money.new(1.01, Money::NullCurrency.instance))
+    expect(m.price).to eq(Money.new(1.01, Money::NullCurrency.new))
   end
 
   it "typecasts money with currency" do

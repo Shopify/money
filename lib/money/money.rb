@@ -39,7 +39,7 @@ class Money
 
     def default_settings
       self.parser = MoneyParser
-      self.default_currency = Money::NullCurrency.instance
+      self.default_currency = Money::NullCurrency.new
     end
   end
   default_settings

@@ -1,8 +1,5 @@
-require 'singleton'
-
 class Money
   class NullCurrency
-    include Singleton
 
     attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination,
                 :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol

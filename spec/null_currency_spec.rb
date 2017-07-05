@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "NullCurrency" do
-  let (:null_currency) {Money::NullCurrency.instance}
+  let (:null_currency) {Money::NullCurrency.new}
 
   it 'exposes the same public interface as Currency' do
     expect(Money::NullCurrency).to quack_like Money::Currency
@@ -30,7 +30,7 @@ describe "NullCurrency" do
     end
 
     it "returns true for null_currency" do
-      expect(null_currency.compatible?(Money::NullCurrency.instance)).to eq(true)
+      expect(null_currency.compatible?(Money::NullCurrency.new)).to eq(true)
     end
 
     it "returns false for nil" do
