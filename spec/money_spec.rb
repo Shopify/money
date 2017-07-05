@@ -1,10 +1,15 @@
 require 'spec_helper'
+require 'yaml'
 
 describe "Money" do
 
   before(:each) do
     @money = Money.new
   end
+
+  let (:amount_money) { Money.new(1.23, 'USD') }
+  let (:non_fractional_money) { Money.new(1, 'JPY') }
+  let (:zero_money) { Money.new(0) }
 
   it "is contructable with empty class method" do
     expect(Money.empty).to eq(@money)
@@ -26,6 +31,26 @@ describe "Money" do
     expect(@money.to_s).to eq("0.00")
   end
 
+  it "to_s with a legacy_cents style" do
+    expect(amount_money.to_s(:legacy_cents)).to eq("123")
+    expect(non_fractional_money.to_s(:legacy_cents)).to eq("100")
+  end
+
+  it "to_s with a minor_units style" do
+    expect(amount_money.to_s(:minor_units)).to eq("123")
+    expect(non_fractional_money.to_s(:minor_units)).to eq("1")
+  end
+
+  it "to_s with a legacy_dollars style" do
+    expect(amount_money.to_s(:legacy_dollars)).to eq("1.23")
+    expect(non_fractional_money.to_s(:legacy_dollars)).to eq("1.00")
+  end
+
+  it "to_s with a major_units style" do
+    expect(amount_money.to_s(:major_units)).to eq("1.23")
+    expect(non_fractional_money.to_s(:major_units)).to eq("1")
+  end
+
   it "as_json as a float with 2 decimal places" do
     expect(@money.as_json).to eq("0.00")
   end
@@ -39,7 +64,15 @@ describe "Money" do
   end
 
   it "is construcatable with a Float" do
-    expect(Money.new(3.00)).to eq(Money.new(3.00))
+    expect(Money.new(3.00)).to eq(Money.new(BigDecimal.new('3.00')))
+  end
+
+  it "is construcatable with a String" do
+    expect(Money.new('3.00')).to eq(Money.new(3.00))
+  end
+
+  it "is aware of the currency" do
+    expect(Money.new(1.00, 'CAD').currency.iso_code).to eq('CAD')
   end
 
   it "is addable" do
@@ -54,6 +87,11 @@ describe "Money" do
     expect((Money.new + Money.new)).to eq(Money.new)
   end
 
+  it "adds inconsistent currencies" do
+    expect(Money).to receive(:deprecate).once
+    expect(Money.new(5, 'USD') + Money.new(1, 'CAD')).to eq(Money.new(6, 'USD'))
+  end
+
   it "is subtractable" do
     expect((Money.new(5.00) - Money.new(3.49))).to eq(Money.new(1.51))
   end
@@ -66,6 +104,16 @@ describe "Money" do
     expect((Money.new(5.00) - Money.new(5.00))).to eq(Money.new)
   end
 
+  it "logs a deprecation warning when adding across currencies" do
+    expect(Money).to receive(:deprecate)
+    expect(Money.new(10, 'USD') - Money.new(1, 'JPY')).to eq(Money.new(9, 'USD'))
+  end
+
+  it "logs a deprecation warning when adding across currencies" do
+    expect(Money).not_to receive(:deprecate)
+    expect((Money.new(10) - Money.new(1, 'JPY'))).to eq(Money.new(9, 'JPY'))
+  end
+
   it "is substractable to a negative amount" do
     expect((Money.new(0.00) - Money.new(1.00))).to eq(Money.new("-1.00"))
   end
@@ -76,11 +124,11 @@ describe "Money" do
   end
 
   it "inspects to a presentable string" do
-    expect(@money.inspect).to eq("#<Money value:0.00>")
+    expect(@money.inspect).to eq("#<Money value:0.00 currency:XXX>")
   end
 
   it "is inspectable within an array" do
-    expect([@money].inspect).to eq("[#<Money value:0.00>]")
+    expect([@money].inspect).to eq("[#<Money value:0.00 currency:XXX>]")
   end
 
   it "correctly support eql? as a value object" do
@@ -135,6 +183,11 @@ describe "Money" do
   it "is multipliable by a repeatable floating point number where the floating point error rounds down" do
     expect((Money.new(3.3) * (1.0 / 12))).to eq(Money.new(0.28))
     expect(((1.0 / 12) * Money.new(3.3))).to eq(Money.new(0.28))
+  end
+
+  it "is multipliable by a money object" do
+    expect(Money).to receive(:deprecate).once
+    expect((Money.new(3.3) * Money.new(1))).to eq(Money.new(3.3))
   end
 
   it "rounds multiplication result with fractional penny of 5 or higher up" do
@@ -205,6 +258,14 @@ describe "Money" do
 
   it "is creatable from a float cents amount" do
     expect(Money.from_cents(1950.5)).to eq(Money.new(19.51))
+  end
+
+  it "is creatable from an integer value in cents and currency" do
+    expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50))
+  end
+
+  it "is creatable from an integer value in dollars and currency with no cents" do
+    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950))
   end
 
   it "raises when constructed with a NaN value" do
@@ -502,7 +563,7 @@ describe "Money" do
     it "accepts numeric values" do
       expect(Money.from_amount(1)).to eq Money.from_cents(1_00)
       expect(Money.from_amount(1.0)).to eq Money.from_cents(1_00)
-      expect(Money.from_amount("1".to_d)).to eq Money.from_cents(1_00)
+      expect(Money.from_amount(BigDecimal.new("1"))).to eq Money.from_cents(1_00)
     end
 
     it "accepts string values" do
@@ -523,6 +584,18 @@ describe "Money" do
   end
 
   describe "YAML loading of old versions" do
+
+    it "accepts values with currencies" do
+      money = YAML.load(<<~EOS)
+        ---
+        !ruby/object:Money
+          value: !ruby/object:BigDecimal 18:0.75E3
+          cents: 75000
+          currency: 'usd'
+      EOS
+      expect(money).to be == Money.new(750, 'usd')
+    end
+
     it "accepts BigDecimal values" do
       money = YAML.load(<<~EOS)
         ---
@@ -543,6 +616,20 @@ describe "Money" do
       EOS
       expect(money).to be == Money.new(750)
       expect(money.value).to be_a BigDecimal
+    end
+  end
+
+  describe('.deprecate') do
+    it "uses ruby warn if active support is not defined" do
+      stub_const("ACTIVE_SUPPORT_DEFINED", false)
+      expect(Kernel).to receive(:warn).once
+      Money.deprecate('ok')
+    end
+
+    it "uses active support warn if active support is defined" do
+      expect(Kernel).to receive(:warn).never
+      expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).once
+      Money.deprecate('ok')
     end
   end
 end
