@@ -82,7 +82,7 @@ Money.default_currency = Money::Currency.new("USD")
 
 If you use Rails, then `environment.rb` is a very good place to put this.
 
-### Currency Exponent
+### Currency Minor Units
 
 The exponent of a money value is the number of digits after the decimal
 separator (which separates the major unit from the minor unit).
