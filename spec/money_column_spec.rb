@@ -66,4 +66,10 @@ describe "MoneyColumn" do
     m.price = Money.new(10, 'USD')
     expect(m.price).to eq(Money.new(10, 'CAD'))
   end
+
+  it "does not raise when an invalid currency is stored in the db" do
+    m = CurrencyMoneyRecord.new(price: 1.01, currency: 'invalid')
+    expect(Money).to receive(:deprecate).once
+    m.price = Money.new(10, 'USD')
+  end
 end
