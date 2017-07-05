@@ -1,3 +1,5 @@
+require 'singleton'
+
 class Money
   class NullCurrency
     include Singleton

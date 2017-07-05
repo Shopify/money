@@ -37,7 +37,7 @@ class Money
       data = self.class.currencies_data[currency_iso]
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
       @symbol                = data['symbol']
-      @disambiguate_symbol   = data['disambiguate_symbol']
+      @disambiguate_symbol   = data['disambiguate_symbol'] || data['symbol']
       @iso_code              = data['iso_code']
       @iso_numeric           = data['iso_numeric']
       @name                  = data['name']
