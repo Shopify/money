@@ -583,17 +583,18 @@ describe "Money" do
     end
   end
 
-  describe "YAML loading of old versions" do
+  describe "YAML serialization" do
+    it "accepts values with currencies" do
+      money = YAML.dump(Money.new(750, 'usd'))
+      expect(money).to eq("--- !ruby/object:Money\nvalue: !ruby/object:BigDecimal 18:0.75E3\ncurrency: USD\n")
+    end
+  end
+
+  describe "YAML deserialization" do
 
     it "accepts values with currencies" do
-      money = YAML.load(<<~EOS)
-        ---
-        !ruby/object:Money
-          value: !ruby/object:BigDecimal 18:0.75E3
-          cents: 75000
-          currency: 'usd'
-      EOS
-      expect(money).to be == Money.new(750, 'usd')
+      money = YAML.load("--- !ruby/object:Money\nvalue: !ruby/object:BigDecimal 18:0.75E3\ncurrency: USD\n")
+      expect(money).to eq(Money.new(750, 'usd'))
     end
 
     it "accepts BigDecimal values" do
