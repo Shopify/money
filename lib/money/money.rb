@@ -1,7 +1,7 @@
 class Money
   include Comparable
 
-  attr_reader :value, :cents, :currency
+  attr_reader :value, :subunits, :currency
 
   class << self
     attr_accessor :parser, :default_currency
@@ -70,7 +70,7 @@ class Money
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
     @currency = Helpers.value_to_currency(currency)
     @value = Helpers.value_to_decimal(value).round(2)
-    @cents = (@value * 100).to_i
+    @subunits = (@value * @currency.subunit_to_unit).to_i
     freeze
   end
 
@@ -83,8 +83,10 @@ class Money
     coder['currency'] = @currency.iso_code
   end
 
-  def subunits
-    (value * currency.subunit_to_unit).to_i
+  def cents
+    Money.deprecate('`money.cents` is deprecated and will be removed in the next major release.
+      Please use `money.subunits` instead. Keep in mind, subunits are currency aware.')
+    (value * 100).to_i
   end
 
   def -@
