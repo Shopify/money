@@ -57,7 +57,7 @@ class Money
   end
 
   def encode_with(coder)
-    coder['value'] = @value
+    coder['value'] = @value.to_s('F')
     coder['currency'] = @currency.iso_code
   end
 

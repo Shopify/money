@@ -586,14 +586,14 @@ describe "Money" do
   describe "YAML serialization" do
     it "accepts values with currencies" do
       money = YAML.dump(Money.new(750, 'usd'))
-      expect(money).to eq("--- !ruby/object:Money\nvalue: !ruby/object:BigDecimal 18:0.75E3\ncurrency: USD\n")
+      expect(money).to eq("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
     end
   end
 
   describe "YAML deserialization" do
 
     it "accepts values with currencies" do
-      money = YAML.load("--- !ruby/object:Money\nvalue: !ruby/object:BigDecimal 18:0.75E3\ncurrency: USD\n")
+      money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
       expect(money).to eq(Money.new(750, 'usd'))
     end
 
