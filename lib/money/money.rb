@@ -69,7 +69,7 @@ class Money
   def initialize(value = 0, currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
     @currency = Helpers.value_to_currency(currency)
-    @value = Helpers.value_to_decimal(value).round(2)
+    @value = Helpers.value_to_decimal(value).round(@currency.minor_units)
     @subunits = (@value * @currency.subunit_to_unit).to_i
     freeze
   end

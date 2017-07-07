@@ -343,6 +343,13 @@ RSpec.describe "Money" do
     end
   end
 
+  describe "value" do
+    it "rounds to the number of minor units provided by the currency" do
+      expect(Money.new(1.1111, 'USD').value).to eq(1.11)
+      expect(Money.new(1.1111, 'JPY').value).to eq(1)
+    end
+  end
+
   describe "with amount of $0" do
     before(:each) do
       @money = Money.new
