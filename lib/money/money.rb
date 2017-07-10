@@ -53,7 +53,12 @@ class Money
   end
 
   def init_with(coder)
-    initialize(coder.map['value'], coder.map['currency'])
+    initialize(coder['value'], coder['currency'])
+  end
+
+  def encode_with(coder)
+    coder['value'] = @value.to_s('F')
+    coder['currency'] = @currency.iso_code
   end
 
   def -@
