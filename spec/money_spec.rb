@@ -633,4 +633,47 @@ describe "Money" do
       Money.deprecate('ok')
     end
   end
+
+  describe '#use_currency' do
+    it "allows setting the implicit default currency for a block scope" do
+      money = nil
+      Money.with_currency('CAD') do
+        money = Money.new(1.00)
+      end
+
+      expect(money.currency.iso_code).to eq('CAD')
+    end
+
+    it "does not use the currency for a block scope when explicitly set" do
+      money = nil
+      Money.with_currency('CAD') do
+        money = Money.new(1.00, 'USD')
+      end
+
+      expect(money.currency.iso_code).to eq('USD')
+    end
+
+    context "with .default_currency set" do
+      before(:each) { Money.default_currency = Money::Currency.new('EUR') }
+      after(:each) { Money.default_currency = Money::NullCurrency }
+
+      it "can be nested and falls back to default_currency outside of the blocks" do
+        money2, money3 = nil
+
+        money1 = Money.new(1.00)
+        Money.with_currency('CAD') do
+          Money.with_currency('USD') do
+            money2 = Money.new(1.00)
+          end
+          money3 = Money.new(1.00)
+        end
+        money4 = Money.new(1.00)
+
+        expect(money1.currency.iso_code).to eq('EUR')
+        expect(money2.currency.iso_code).to eq('USD')
+        expect(money3.currency.iso_code).to eq('CAD')
+        expect(money4.currency.iso_code).to eq('EUR')
+      end
+    end
+  end
 end

@@ -3,6 +3,7 @@ require 'spec_helper'
 shared_examples_for "an object supporting to_money" do
   it "supports to_money" do
     expect(@value.to_money).to eq(@money)
+    expect(@value.to_money('CAD').currency).to eq(Money::Currency.find!('CAD'))
   end
 end
 
@@ -28,7 +29,6 @@ describe String do
   before(:each) do
     @value = "1.23"
     @money = Money.new(@value)
-    @currency = Money::Currency.new(:usd)
   end
 
   it_should_behave_like "an object supporting to_money"

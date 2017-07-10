@@ -7,7 +7,7 @@ class Money
     attr_accessor :parser, :default_currency
 
     def new(value = 0, currency = nil)
-      currency ||= default_currency
+      currency ||= current_currency || default_currency
 
       if value == 0
         @@zero_money ||= {}
@@ -23,8 +23,8 @@ class Money
     end
     alias_method :empty, :zero
 
-    def parse(input, _currency = nil)
-      parser.parse(input)
+    def parse(input, currency = nil)
+      parser.parse(input, currency)
     end
 
     def from_cents(cents, currency = nil)
@@ -35,6 +35,28 @@ class Money
       currency = Helpers.value_to_currency(currency_iso)
       value = Helpers.value_to_decimal(subunits) / currency.subunit_to_unit
       new(value, currency)
+    end
+
+    def current_currency
+      Thread.current[:money_currency]
+    end
+
+    def current_currency=(currency)
+      Thread.current[:money_currency] = currency
+    end
+
+    # Set Money.default_currency inside the supplied block, resets it to
+    # the previous value when done to prevent leaking state. Similar to
+    # I18n.with_locale and ActiveSupport's Time.use_zone. This won't affect
+    # instances being created with explicitly set currency.
+    def with_currency(new_currency)
+      begin
+        old_currency = Money.current_currency
+        Money.current_currency = new_currency
+        yield
+      ensure
+        Money.current_currency = old_currency
+      end
     end
 
     def default_settings
