@@ -13,6 +13,8 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'rspec'
+require 'pry-byebug'
+
 require 'rails'
 require 'active_record'
 require 'money'
