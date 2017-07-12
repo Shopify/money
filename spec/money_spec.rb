@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'yaml'
+require 'pry'
 
 describe "Money" do
 
@@ -595,6 +596,30 @@ describe "Money" do
     it "accepts values with currencies" do
       money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
       expect(money).to eq(Money.new(750, 'usd'))
+    end
+
+    it "accepts serialized NullCurrency objects" do
+      money = YAML.load(<<~EOS)
+        ---
+        !ruby/object:Money
+          currency: !ruby/object:Money::NullCurrency
+            symbol: >-
+              $
+            disambiguate_symbol:
+            iso_code: >-
+              XXX
+            iso_numeric: >-
+              999
+            name: >-
+              No Currency
+            smallest_denomination: 1
+            subunit_to_unit: 100
+            minor_units: 2
+          value: !ruby/object:BigDecimal 27:0.6935E2
+          cents: 6935
+      EOS
+      binding.pry
+      expect(money).to eq(Money.new(69.35))
     end
 
     it "accepts BigDecimal values" do
