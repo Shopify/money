@@ -527,9 +527,8 @@ RSpec.describe "Money" do
   end
 
   describe "parser dependency injection" do
-    before(:each) do
-      Money.parser = AccountingMoneyParser
-    end
+    before(:each) { Money.parser = AccountingMoneyParser }
+    after(:each) { Money.parser = MoneyParser }
 
     it "keeps AccountingMoneyParser class on new money objects" do
       expect(Money.new.class.parser).to eq(AccountingMoneyParser)
@@ -541,10 +540,6 @@ RSpec.describe "Money" do
 
     it "supports parenthesis from AccountingMoneyParser for .to_money" do
       expect("($5.00)".to_money).to eq(Money.new(-5))
-    end
-
-    after(:each) do
-      Money.parser = nil # reset
     end
   end
 
@@ -695,7 +690,7 @@ RSpec.describe "Money" do
 
     context "with .default_currency set" do
       before(:each) { Money.default_currency = Money::Currency.new('EUR') }
-      after(:each) { Money.default_currency = Money::NullCurrency }
+      after(:each) { Money.default_currency = Money::NullCurrency.new }
 
       it "can be nested and falls back to default_currency outside of the blocks" do
         money2, money3 = nil
