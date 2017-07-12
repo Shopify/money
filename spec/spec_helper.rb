@@ -16,6 +16,7 @@ require 'rspec'
 require 'rails'
 require 'active_record'
 require 'money'
+require 'pry'
 
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
 
