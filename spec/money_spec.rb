@@ -109,9 +109,19 @@ describe "Money" do
     expect(Money.new(10, 'USD') - Money.new(1, 'JPY')).to eq(Money.new(9, 'USD'))
   end
 
-  it "logs a deprecation warning when adding across currencies" do
+  it "keeps currency when doing a computation with a null currency" do
+    currency = Money.new(10, 'JPY')
+    no_currency = Money.new(1)
+    expect((no_currency + currency).currency).to eq(Money::Currency.find!('JPY'))
+    expect((currency - no_currency).currency).to eq(Money::Currency.find!('JPY'))
+  end
+
+  it "does not log a deprecation warning when adding with a null currency value" do
+    currency = Money.new(10, 'USD')
+    no_currency = Money.new(1)
     expect(Money).not_to receive(:deprecate)
-    expect((Money.new(10) - Money.new(1, 'JPY'))).to eq(Money.new(9, 'JPY'))
+    expect(no_currency + currency).to eq(Money.new(11, 'USD'))
+    expect(currency - no_currency).to eq(Money.new(9, 'USD'))
   end
 
   it "is substractable to a negative amount" do
@@ -595,6 +605,11 @@ describe "Money" do
     it "accepts values with currencies" do
       money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
       expect(money).to eq(Money.new(750, 'usd'))
+    end
+
+    it "accepts values with null currencies" do
+      money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: XXX\n")
+      expect(money).to eq(Money.new(750))
     end
 
     it "accepts BigDecimal values" do

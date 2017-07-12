@@ -95,13 +95,13 @@ class Money
 
   def +(other)
     arithmetic(other) do |money|
-      Money.new(value + money.value, currency)
+      Money.new(value + money.value, calculated_currency(money.currency))
     end
   end
 
   def -(other)
     arithmetic(other) do |money|
-      Money.new(value - money.value, currency)
+      Money.new(value - money.value, calculated_currency(money.currency))
     end
   end
 
@@ -353,5 +353,9 @@ class Money
       Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}.")
     end
     yield(other)
+  end
+
+  def calculated_currency(other)
+    currency.is_a?(NullCurrency) ? other : currency
   end
 end

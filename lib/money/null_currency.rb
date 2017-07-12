@@ -20,6 +20,11 @@ class Money
       other.is_a?(Currency) || other.is_a?(NullCurrency)
     end
 
+    def eql?(other)
+      self.class == other.class && iso_code == other.iso_code
+    end
+
+    alias_method :==, :eql?
     alias_method :to_s, :iso_code
   end
 end
