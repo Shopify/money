@@ -24,7 +24,9 @@ describe "Money" do
   end
 
   it "defaults to 0 when constructed with an invalid string" do
-    expect(Money.new('invalid')).to eq(Money.new(0.00))
+    Money.active_support_deprecator.silence do
+      expect(Money.new('invalid')).to eq(Money.new(0.00))
+    end
   end
 
   it "to_s as a float with 2 decimal places" do
@@ -111,14 +113,14 @@ describe "Money" do
 
   it "keeps currency when doing a computation with a null currency" do
     currency = Money.new(10, 'JPY')
-    no_currency = Money.new(1)
+    no_currency = Money.new(1, Money::NullCurrency.new)
     expect((no_currency + currency).currency).to eq(Money::Currency.find!('JPY'))
     expect((currency - no_currency).currency).to eq(Money::Currency.find!('JPY'))
   end
 
   it "does not log a deprecation warning when adding with a null currency value" do
     currency = Money.new(10, 'USD')
-    no_currency = Money.new(1)
+    no_currency = Money.new(1, Money::NullCurrency.new)
     expect(Money).not_to receive(:deprecate)
     expect(no_currency + currency).to eq(Money.new(11, 'USD'))
     expect(currency - no_currency).to eq(Money.new(9, 'USD'))
@@ -134,11 +136,11 @@ describe "Money" do
   end
 
   it "inspects to a presentable string" do
-    expect(@money.inspect).to eq("#<Money value:0.00 currency:XXX>")
+    expect(@money.inspect).to eq("#<Money value:0.00 currency:CAD>")
   end
 
   it "is inspectable within an array" do
-    expect([@money].inspect).to eq("[#<Money value:0.00 currency:XXX>]")
+    expect([@money].inspect).to eq("[#<Money value:0.00 currency:CAD>]")
   end
 
   it "correctly support eql? as a value object" do
@@ -275,7 +277,7 @@ describe "Money" do
   end
 
   it "is creatable from an integer value in dollars and currency with no cents" do
-    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950))
+    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950, 'JPY'))
   end
 
   it "raises when constructed with a NaN value" do
@@ -632,7 +634,7 @@ describe "Money" do
           value: !ruby/object:BigDecimal 27:0.6935E2
           cents: 6935
       EOS
-      expect(money).to eq(Money.new(69.35))
+      expect(money).to eq(Money.new(69.35, Money::NullCurrency.new))
     end
 
     it "accepts BigDecimal values" do

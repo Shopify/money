@@ -17,6 +17,9 @@ require 'rails'
 require 'active_record'
 require 'money'
 
+Money.active_support_deprecator.behavior = :raise
+Money.default_currency = Money::Currency.new('CAD')
+
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
 
 load File.join(File.dirname(__FILE__), "schema.rb")
