@@ -29,7 +29,15 @@ load File.join(File.dirname(__FILE__), "schema.rb")
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 RSpec.configure do |config|
+  config.disable_monkey_patching!
 
+  config.expect_with :rspec do |c|
+    c.syntax = :expect
+  end
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
 end
 
 RSpec::Matchers.define :quack_like do

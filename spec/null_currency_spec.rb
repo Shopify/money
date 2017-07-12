@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "NullCurrency" do
+RSpec.describe "NullCurrency" do
   let (:null_currency) {Money::NullCurrency.new}
 
   it 'exposes the same public interface as Currency' do

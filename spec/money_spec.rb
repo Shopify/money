@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'yaml'
 
-describe "Money" do
+RSpec.describe "Money" do
 
   before(:each) do
     @money = Money.new

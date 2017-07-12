@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Money::Currency::Loader do
+RSpec.describe Money::Currency::Loader do
 
   describe 'load_currencies' do
     it 'loads the iso currency file' do

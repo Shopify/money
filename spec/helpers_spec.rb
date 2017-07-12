@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Money::Helpers do
+RSpec.describe Money::Helpers do
 
   describe 'value_to_decimal' do
     let (:amount) { BigDecimal.new('1.23') }
