@@ -34,10 +34,6 @@ describe "Currency" do
     it "raises when the currency is nil" do
       expect { Money::Currency.new(nil) }.to raise_error(Money::Currency::UnknownCurrency)
     end
-
-    it "is constructable with NullCurrency iso" do
-      expect(Money::Currency.new(:xxx).iso_code).to eq('XXX')
-    end
   end
 
   describe ".find" do

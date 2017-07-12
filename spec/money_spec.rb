@@ -607,6 +607,11 @@ describe "Money" do
       expect(money).to eq(Money.new(750, 'usd'))
     end
 
+    it "accepts values with null currencies" do
+      money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: XXX\n")
+      expect(money).to eq(Money.new(750))
+    end
+
     it "accepts BigDecimal values" do
       money = YAML.load(<<~EOS)
         ---

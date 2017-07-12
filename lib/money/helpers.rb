@@ -37,12 +37,16 @@ class Money
       when Money::Currency, Money::NullCurrency
         currency
       else
-        if currency.nil? || currency.empty?
+        if currency.nil? || currency.empty? || null_currency?(currency)
           Money.default_currency
         else
           Currency.find!(currency)
         end
       end
+    end
+
+    def null_currency?(currency)
+      currency.to_s.downcase == 'xxx'
     end
   end
 end

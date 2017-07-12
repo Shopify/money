@@ -14,14 +14,7 @@ class Money
       def new(currency_iso)
         raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.empty?
         iso = currency_iso.to_s.downcase
-        @@loaded_currencies[iso] || @@mutex.synchronize do
-          @@loaded_currencies[iso] =
-            if iso == 'xxx'
-              NullCurrency.new
-            else
-              super(iso)
-            end
-        end
+        @@loaded_currencies[iso] || @@mutex.synchronize { @@loaded_currencies[iso] = super(iso) }
       end
       alias_method :find!, :new
 
