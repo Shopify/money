@@ -37,7 +37,7 @@ class Money
       when Money::Currency, Money::NullCurrency
         currency
       else
-        if currency.nil? || currency.empty? || null_currency?(currency)
+        if no_currency?(currency)
           Money.default_currency
         else
           begin
@@ -50,8 +50,8 @@ class Money
       end
     end
 
-    def null_currency?(currency)
-      currency.to_s.downcase == 'xxx'
+    def no_currency?(currency)
+      currency.nil? || currency.empty? || currency.to_s.downcase == 'xxx'
     end
   end
 end

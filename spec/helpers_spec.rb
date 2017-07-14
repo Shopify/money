@@ -75,14 +75,22 @@ describe Money::Helpers do
     end
   end
 
-  describe 'null_currency?' do
+  describe 'no_currency?' do
     it 'returns true when the currency matches a no currency iso code xxx' do
-      expect(subject.null_currency?('xxx')).to eq(true)
-      expect(subject.null_currency?('XXX')).to eq(true)
+      expect(subject.no_currency?('xxx')).to eq(true)
+      expect(subject.no_currency?('XXX')).to eq(true)
+    end
+
+    it 'returns true when the currency is nil' do
+      expect(subject.no_currency?(nil)).to eq(true)
+    end
+
+    it 'returns true when the currency is an empty string' do
+      expect(subject.no_currency?('')).to eq(true)
     end
 
     it 'returns true when the currency does not match a no currency iso code' do
-      expect(subject.null_currency?('usd')).to eq(false)
+      expect(subject.no_currency?('usd')).to eq(false)
     end
   end
 end
