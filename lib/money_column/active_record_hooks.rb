@@ -24,14 +24,10 @@ module MoneyColumn
               nil
             else
               money = value.to_money
+              currency = Money::Helpers.value_to_currency(read_attribute(currency_column))
 
-              begin
-                currency = Money::Helpers.value_to_currency(read_attribute(currency_column))
-                unless currency.compatible?(money.currency)
-                  Money.deprecate("[money_column] currency mismatch between #{currency} and #{money.currency}.")
-                end
-              rescue Money::Currency::UnknownCurrency => e
-                Money.deprecate("[money_column] #{e}")
+              unless currency.compatible?(money.currency)
+                Money.deprecate("[money_column] currency mismatch between #{currency} and #{money.currency}.")
               end
 
               write_attribute(name, money.value)

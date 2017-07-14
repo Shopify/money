@@ -40,7 +40,12 @@ class Money
         if currency.nil? || currency.empty? || null_currency?(currency)
           Money.default_currency
         else
-          Currency.find!(currency)
+          begin
+            Currency.find!(currency)
+          rescue Money::Currency::UnknownCurrency => error
+            Money.deprecate(error.message)
+            Money::NullCurrency.new
+          end
         end
       end
     end
