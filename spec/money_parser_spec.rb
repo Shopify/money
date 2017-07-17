@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe MoneyParser do
+RSpec.describe MoneyParser do
   describe "parsing of amounts with period decimal separator" do
     before(:each) do
       @parser = MoneyParser.new

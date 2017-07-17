@@ -13,9 +13,14 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'rspec'
+require 'pry-byebug'
+
 require 'rails'
 require 'active_record'
 require 'money'
+
+Money.active_support_deprecator.behavior = :raise
+Money.default_currency = Money::Currency.new('CAD')
 
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
 
@@ -26,7 +31,20 @@ load File.join(File.dirname(__FILE__), "schema.rb")
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 RSpec.configure do |config|
+  config.order = :random
+  
+  # Enable flags like --only-failures and --next-failure
+  config.example_status_persistence_file_path = ".rspec_status"
 
+  config.disable_monkey_patching!
+
+  config.expect_with :rspec do |c|
+    c.syntax = :expect
+  end
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
 end
 
 RSpec::Matchers.define :quack_like do

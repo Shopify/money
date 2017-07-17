@@ -13,7 +13,7 @@ class CustomCurrencyMoneyRecord < ActiveRecord::Base
   money_column :price, currency_column: 'custom_currency'
 end
 
-describe "MoneyColumn" do
+RSpec.describe "MoneyColumn" do
 
   it "typecasts string to money" do
     m = MoneyRecord.new(:price => '1.01')

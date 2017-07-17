@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Currency" do
+RSpec.describe "Currency" do
   CURRENCY_DATA = {
     "iso_code": "USD",
     "name": "United States Dollar",

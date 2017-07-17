@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'yaml'
 
-describe "Money" do
+RSpec.describe "Money" do
 
   before(:each) do
     @money = Money.new
@@ -24,7 +24,9 @@ describe "Money" do
   end
 
   it "defaults to 0 when constructed with an invalid string" do
-    expect(Money.new('invalid')).to eq(Money.new(0.00))
+    Money.active_support_deprecator.silence do
+      expect(Money.new('invalid')).to eq(Money.new(0.00))
+    end
   end
 
   it "to_s as a float with 2 decimal places" do
@@ -111,14 +113,14 @@ describe "Money" do
 
   it "keeps currency when doing a computation with a null currency" do
     currency = Money.new(10, 'JPY')
-    no_currency = Money.new(1)
+    no_currency = Money.new(1, Money::NullCurrency.new)
     expect((no_currency + currency).currency).to eq(Money::Currency.find!('JPY'))
     expect((currency - no_currency).currency).to eq(Money::Currency.find!('JPY'))
   end
 
   it "does not log a deprecation warning when adding with a null currency value" do
     currency = Money.new(10, 'USD')
-    no_currency = Money.new(1)
+    no_currency = Money.new(1, Money::NullCurrency.new)
     expect(Money).not_to receive(:deprecate)
     expect(no_currency + currency).to eq(Money.new(11, 'USD'))
     expect(currency - no_currency).to eq(Money.new(9, 'USD'))
@@ -134,11 +136,11 @@ describe "Money" do
   end
 
   it "inspects to a presentable string" do
-    expect(@money.inspect).to eq("#<Money value:0.00 currency:XXX>")
+    expect(@money.inspect).to eq("#<Money value:0.00 currency:CAD>")
   end
 
   it "is inspectable within an array" do
-    expect([@money].inspect).to eq("[#<Money value:0.00 currency:XXX>]")
+    expect([@money].inspect).to eq("[#<Money value:0.00 currency:CAD>]")
   end
 
   it "correctly support eql? as a value object" do
@@ -275,7 +277,7 @@ describe "Money" do
   end
 
   it "is creatable from an integer value in dollars and currency with no cents" do
-    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950))
+    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950, 'JPY'))
   end
 
   it "raises when constructed with a NaN value" do
@@ -525,9 +527,8 @@ describe "Money" do
   end
 
   describe "parser dependency injection" do
-    before(:each) do
-      Money.parser = AccountingMoneyParser
-    end
+    before(:each) { Money.parser = AccountingMoneyParser }
+    after(:each) { Money.parser = MoneyParser }
 
     it "keeps AccountingMoneyParser class on new money objects" do
       expect(Money.new.class.parser).to eq(AccountingMoneyParser)
@@ -539,10 +540,6 @@ describe "Money" do
 
     it "supports parenthesis from AccountingMoneyParser for .to_money" do
       expect("($5.00)".to_money).to eq(Money.new(-5))
-    end
-
-    after(:each) do
-      Money.parser = nil # reset
     end
   end
 
@@ -612,6 +609,29 @@ describe "Money" do
       expect(money).to eq(Money.new(750))
     end
 
+    it "accepts serialized NullCurrency objects" do
+      money = YAML.load(<<~EOS)
+        ---
+        !ruby/object:Money
+          currency: !ruby/object:Money::NullCurrency
+            symbol: >-
+              $
+            disambiguate_symbol:
+            iso_code: >-
+              XXX
+            iso_numeric: >-
+              999
+            name: >-
+              No Currency
+            smallest_denomination: 1
+            subunit_to_unit: 100
+            minor_units: 2
+          value: !ruby/object:BigDecimal 27:0.6935E2
+          cents: 6935
+      EOS
+      expect(money).to eq(Money.new(69.35, Money::NullCurrency.new))
+    end
+
     it "accepts BigDecimal values" do
       money = YAML.load(<<~EOS)
         ---
@@ -670,7 +690,7 @@ describe "Money" do
 
     context "with .default_currency set" do
       before(:each) { Money.default_currency = Money::Currency.new('EUR') }
-      after(:each) { Money.default_currency = Money::NullCurrency }
+      after(:each) { Money.default_currency = Money::NullCurrency.new }
 
       it "can be nested and falls back to default_currency outside of the blocks" do
         money2, money3 = nil

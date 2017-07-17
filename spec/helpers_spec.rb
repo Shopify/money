@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Money::Helpers do
+RSpec.describe Money::Helpers do
 
   describe 'value_to_decimal' do
     let (:amount) { BigDecimal.new('1.23') }
@@ -51,6 +51,7 @@ describe Money::Helpers do
   describe 'subject.value_to_currency' do
     it 'returns itself if it is already a currency' do
       expect(subject.value_to_currency(Money::Currency.new('usd'))).to eq(Money::Currency.new('usd'))
+      expect(subject.value_to_currency(Money::NullCurrency.new)).to be_a(Money::NullCurrency)
     end
 
     it 'returns the default currency when value is nil' do
@@ -61,8 +62,8 @@ describe Money::Helpers do
       expect(subject.value_to_currency('')).to eq(Money.default_currency)
     end
 
-    it 'returns the default currency when value is a null currency' do
-      expect(subject.value_to_currency(Money::NullCurrency.new)).to eq(Money.default_currency)
+    it 'returns the default currency when value is xxx' do
+      expect(subject.value_to_currency('xxx')).to eq(Money.default_currency)
     end
 
     it 'returns the matching currency' do

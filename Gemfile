@@ -13,6 +13,7 @@ group :development do
   gem "simplecov", ">= 0"
   gem "rails"
   gem "sqlite3"
+  gem "pry-byebug"
 end
 
 gem 'codecov', :require => false, :group => :test

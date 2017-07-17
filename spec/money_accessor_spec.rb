@@ -16,7 +16,7 @@ class StructObject < Struct.new(:price)
   money_accessor :price
 end
 
-shared_examples_for "an object with a money accessor" do
+RSpec.shared_examples_for "an object with a money accessor" do
   it "generates an attribute reader that returns a money object" do
     object = described_class.new(100)
 
@@ -71,11 +71,11 @@ shared_examples_for "an object with a money accessor" do
   end
 end
 
-describe NormalObject do
+RSpec.describe NormalObject do
   it_behaves_like "an object with a money accessor"
 end
 
-describe StructObject do
+RSpec.describe StructObject do
   it_behaves_like "an object with a money accessor"
 
   it 'does not generate an ivar to store the price value' do
