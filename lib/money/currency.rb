@@ -1,14 +1,11 @@
+require "money/currency/loader"
+
 class Money
   class Currency
-    class UnknownCurrency < ArgumentError; end
-
-    CURRENCY_DATA = "#{File.expand_path('../../../config', __FILE__)}/currency_iso.json".freeze
-
     @@mutex = Mutex.new
     @@loaded_currencies = {}
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination,
-                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol
+    class UnknownCurrency < ArgumentError; end
 
     class << self
       def new(currency_iso)
@@ -24,17 +21,16 @@ class Money
         nil
       end
 
-      def currencies_data
-        @@currencies_data ||= begin
-          json = File.read(CURRENCY_DATA)
-          json.force_encoding(::Encoding::UTF_8) if defined?(::Encoding)
-          JSON.parse(json)
-        end
+      def currencies
+        @@currencies ||= Loader.load_currencies
       end
     end
 
+    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination,
+                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol
+
     def initialize(currency_iso)
-      data = self.class.currencies_data[currency_iso]
+      data = self.class.currencies[currency_iso]
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
       @symbol                = data['symbol']
       @disambiguate_symbol   = data['disambiguate_symbol'] || data['symbol']
