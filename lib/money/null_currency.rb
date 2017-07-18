@@ -24,7 +24,10 @@ class Money
       self.class == other.class && iso_code == other.iso_code
     end
 
+    def to_s
+      ''
+    end
+    
     alias_method :==, :eql?
-    alias_method :to_s, :iso_code
   end
 end

@@ -23,6 +23,12 @@ RSpec.describe "NullCurrency" do
     end
   end
 
+  describe "#to_s" do
+    it 'is shown as an empty string' do
+      expect(null_currency.to_s).to eq('')
+    end
+  end
+
   describe "#compatible" do
     it "returns true for currency" do
       expect(null_currency.compatible?(Money::Currency.new('USD'))).to eq(true)
