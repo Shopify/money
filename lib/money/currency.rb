@@ -26,7 +26,7 @@ class Money
       end
     end
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination,
+    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_symbol,
                 :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol
 
     def initialize(currency_iso)
@@ -34,6 +34,7 @@ class Money
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
       @symbol                = data['symbol']
       @disambiguate_symbol   = data['disambiguate_symbol'] || data['symbol']
+      @subunit_symbol        = data['subunit_symbol']
       @iso_code              = data['iso_code']
       @iso_numeric           = data['iso_numeric']
       @name                  = data['name']
