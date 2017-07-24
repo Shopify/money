@@ -83,6 +83,10 @@ class Money
     coder['currency'] = @currency.iso_code
   end
 
+  def subunits
+    (value * currency.subunit_to_unit).to_i
+  end
+
   def -@
     Money.new(-value, currency)
   end
@@ -189,11 +193,7 @@ class Money
     case style
     when :legacy_dollars, nil
       sprintf("%.2f", value)
-    when :legacy_cents
-      (value * 100).round.to_i.to_s
-    when :minor_units
-      (value * currency.subunit_to_unit).round.to_i.to_s
-    when :major_units
+    when :amount
       sprintf("%.#{currency.minor_units}f", value)
     end
   end
