@@ -33,24 +33,14 @@ RSpec.describe "Money" do
     expect(@money.to_s).to eq("0.00")
   end
 
-  it "to_s with a legacy_cents style" do
-    expect(amount_money.to_s(:legacy_cents)).to eq("123")
-    expect(non_fractional_money.to_s(:legacy_cents)).to eq("100")
-  end
-
-  it "to_s with a minor_units style" do
-    expect(amount_money.to_s(:minor_units)).to eq("123")
-    expect(non_fractional_money.to_s(:minor_units)).to eq("1")
-  end
-
   it "to_s with a legacy_dollars style" do
     expect(amount_money.to_s(:legacy_dollars)).to eq("1.23")
     expect(non_fractional_money.to_s(:legacy_dollars)).to eq("1.00")
   end
 
-  it "to_s with a major_units style" do
-    expect(amount_money.to_s(:major_units)).to eq("1.23")
-    expect(non_fractional_money.to_s(:major_units)).to eq("1")
+  it "to_s with a amount style" do
+    expect(amount_money.to_s(:amount)).to eq("1.23")
+    expect(non_fractional_money.to_s(:amount)).to eq("1")
   end
 
   it "as_json as a float with 2 decimal places" do
@@ -340,6 +330,15 @@ RSpec.describe "Money" do
       expect(@money.hash).to eq(Money.new(1.00).hash)
     end
 
+  end
+
+  describe ".subunits" do
+    it 'multiplies by the number of decimal places for the currency' do
+      expect(Money.new(1, 'USD').subunits).to eq(100)
+      expect(Money.new(1, 'JPY').subunits).to eq(1)
+      expect(Money.new(1, 'IQD').subunits).to eq(1000)
+      expect(Money.new(1).subunits).to eq(100)
+    end
   end
 
   describe "with amount of $0" do
