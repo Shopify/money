@@ -109,7 +109,8 @@ Money::Currency.new("MGA").minor_units  # => 1
 ## Storing money
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column 
-for your database. The following examples are for ActiveRecord:
+(or `money` for PostgreSQL) for your database. The following examples are for 
+ActiveRecord:
 
 ```ruby
 create_table :orders do |t|
@@ -126,14 +127,14 @@ interactions and you get caching for free:
 class Order < ApplicationRecord
   composed_of :total_price, 
     class_name: 'Money', 
-    mapping: [%w(price value), %w(currency currency)]
+    mapping: [%w(total_price value), %w(currency currency)]
 end 
 ```
 
 It can be used as such:
 ```ruby
-Order.create(price: Money.new(3.50, 'USD'))
-Order.where(price: Money.new(9.99, 'CAD'))
+Order.create(total_price: Money.new(3.50, 'USD'))
+Order.where(total_price: Money.new(9.99, 'CAD'))
 ``` 
 
 ## Contributing to money
