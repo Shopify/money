@@ -106,6 +106,36 @@ Money::Currency.new("JPY").minor_units  # => 0
 Money::Currency.new("MGA").minor_units  # => 1
 ```
 
+## Storing money
+
+Since money internally uses BigDecimal it's logical to use a `decimal` column 
+(or `money` for PostgreSQL) for your database. The following examples are for 
+ActiveRecord:
+
+```ruby
+create_table :orders do |t|
+  t.string :currency, limit: 3
+  t.decimal :total_price, precision: 20, scale: 3, null: false, default: '0.000'
+end 
+``` 
+
+While `money_accessor` can build you some accessor getters and setters, we 
+recommend to use the right APIs instead as they enable more expressive
+interactions and you get caching for free:
+
+```ruby
+class Order < ApplicationRecord
+  composed_of :total_price, 
+    class_name: 'Money', 
+    mapping: [%w(total_price value), %w(currency currency)]
+end 
+```
+
+It can be used as such:
+```ruby
+Order.create(total_price: Money.new(3.50, 'USD'))
+Order.where(total_price: Money.new(9.99, 'CAD'))
+``` 
 
 ## Contributing to money
 

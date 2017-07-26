@@ -11,8 +11,7 @@ group :development do
   gem "bundler", "~> 1.5"
   gem "jeweler", "~> 1.6.0"
   gem "simplecov", ">= 0"
-  gem "rails"
-  gem "sqlite3"
+  gem "activesupport"
   gem "pry-byebug"
 end
 

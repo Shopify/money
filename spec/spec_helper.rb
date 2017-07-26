@@ -15,16 +15,13 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
 require 'pry-byebug'
 
-require 'rails'
-require 'active_record'
+require 'active_support/core_ext/enumerable'
+require 'active_support/core_ext/string'
+require 'active_support/deprecation'
 require 'money'
 
 Money.active_support_deprecator.behavior = :raise
 Money.default_currency = Money::Currency.new('CAD')
-
-ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
-
-load File.join(File.dirname(__FILE__), "schema.rb")
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
