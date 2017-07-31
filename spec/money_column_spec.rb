@@ -3,7 +3,7 @@ require 'spec_helper'
 class MoneyRecord < ActiveRecord::Base
   RATE = 1.17
   before_validation do
-    self.price_usd = Money.new(self[:price] * RATE, 'USD') if attribute_present?('price')
+    self.price_usd = Money.new(self[:price] * RATE, 'USD')
   end
 
   money_column :price
@@ -25,7 +25,7 @@ RSpec.describe 'MoneyColumn' do
   let(:subject) { MoneyRecord.new(price: money, prix: toonie) }
   let(:record) do
     subject.save
-    subject.class.find(subject.id)
+    subject.reload
   end
 
   it 'returns money with currency from the default column' do
