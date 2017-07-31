@@ -7,8 +7,8 @@ class MoneyRecord < ActiveRecord::Base
   end
 
   money_column :price
-  money_column :prix, currency: :devise
-  money_column :price_usd, currency: 'USD'
+  money_column :prix, currency_column: :devise
+  money_column :price_usd, currency_column: false, currency: 'USD'
 end
 
 class MoneyWithValidation < ActiveRecord::Base
@@ -69,6 +69,32 @@ RSpec.describe 'MoneyColumn' do
 
     it 'raises an UnknownCurrency error' do
       expect { subject }.to raise_error(ActiveSupport::DeprecationException)
+    end
+  end
+
+  describe 'wrong money_column currency arguments' do
+    let(:subject) do
+      class MoneyWithWrongCurrencyArguments < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price, currency_column: :currency, currency: 'USD'
+      end
+    end
+
+    it 'raises an ArgumentError' do
+      expect { subject }.to raise_error(ArgumentError, 'cannot set both currency_column and a fixed currency')
+    end
+  end
+
+  describe 'missing money_column currency arguments' do
+    let(:subject) do
+      class MoneyWithMissingCurrencyArguments < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price, currency_column: false, currency: false
+      end
+    end
+
+    it 'raises an ArgumentError' do
+      expect { subject }.to raise_error(ArgumentError, 'need to set either currency_column or currency')
     end
   end
 

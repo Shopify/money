@@ -132,11 +132,13 @@ Order.where(sub_total: Money.new(9.99, 'CAD'))
 ``` 
 
 `money_column` uses an attribute called 'currency' by default. This can be
-overridden by supplying a symbol for the column name, e.g.:
-`currency: :other_column`. If your currency is hardcoded and there is no
-column, supply the currency code as a string instead. You can use multiple
-`money_column` calls to achieve the desired effects with currency on the model
-or attribute level.
+overridden by supplying another column name, e.g.: `currency_column: :other`.
+If your currency is hardcoded and there is no column, set a falsey currency
+column and supply the currency code instead:
+`money_column :price_usd, currency_column: false, currency: 'USD'`
+
+You can use multiple `money_column` calls to achieve the desired effects with
+currency on the model or attribute level.
 
 There are no validations generated. You can add these for the specified money
 and currency attributes as you normally would for any other.
