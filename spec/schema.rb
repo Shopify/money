@@ -1,21 +1,9 @@
 ActiveRecord::Schema.define do
   create_table "money_records", :force => true do |t|
-    t.decimal  "price"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "currency_money_records", :force => true do |t|
-    t.decimal  "price"
-    t.string   "currency"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "custom_currency_money_records", :force => true do |t|
-    t.decimal  "price"
-    t.string   "custom_currency"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.decimal  "price", precision: 20, scale: 3, default: '0.000'
+    t.string   "currency", limit: 3
+    t.decimal  "prix", precision: 20, scale: 3, default: '0.000'
+    t.string   "devise", limit: 3
+    t.decimal  "price_usd"
   end
 end
