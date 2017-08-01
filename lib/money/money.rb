@@ -95,7 +95,7 @@ class Money
 
   def <=>(other)
     arithmetic(other) do |money|
-      cents <=> money.cents
+      subunits <=> money.subunits
     end
   end
 
@@ -232,9 +232,9 @@ class Money
   end
 
   # Allocates money between different parties without losing pennies.
-  # After the mathmatically split has been performed, left over pennies will
+  # After the mathematically split has been performed, left over pennies will
   # be distributed round-robin amongst the parties. This means that parties
-  # listed first will likely recieve more pennies than ones that are listed later
+  # listed first will likely receive more pennies than ones that are listed later
   #
   # @param [0.50, 0.25, 0.25] to give 50% of the cash to party1, 25% ot party2, and 25% to party3.
   #
@@ -258,7 +258,7 @@ class Money
 
     left_over.to_i.times { |i| amounts[i % amounts.length] += 1 }
 
-    amounts.collect { |cents| Money.from_cents(cents, currency) }
+    amounts.collect { |subunits| Money.from_subunits(subunits, currency) }
   end
 
   # Allocates money between different parties up to the maximum amounts specified.
@@ -281,29 +281,29 @@ class Money
   #   Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)])
   #     #=> [Money.new(5), Money.new(2)]
   def allocate_max_amounts(maximums)
-    cents_maximums = maximums.map { |max_amount| max_amount.to_money.cents }
-    cents_maximums_total = cents_maximums.sum
+    maximums = maximums.map { |max_amount| max_amount.to_money }
+    maximums_total = maximums.sum
 
-    splits = cents_maximums.map do |cents_max_amount|
-      next(Money.empty) if cents_maximums_total.zero?
-      BigDecimal.new(cents_max_amount.to_s) / cents_maximums_total
+    splits = maximums.map do |max_amount|
+      next(Money.empty) if maximums_total.zero?
+      max_amount.value / maximums_total.value
     end
 
-    total_allocatable = [cents, cents_maximums_total].min
+    total_allocatable = [subunits, maximums_total.subunits].min
 
-    cents_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
+    subunits_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
 
-    cents_amounts.each_with_index do |amount, index|
+    subunits_amounts.each_with_index do |amount, index|
       break unless left_over > 0
 
-      max_amount = cents_maximums[index]
+      max_amount = maximums[index].subunits
       next unless amount < max_amount
 
       left_over -= 1
-      cents_amounts[index] += 1
+      subunits_amounts[index] += 1
     end
 
-    cents_amounts.map { |cents| Money.from_cents(cents, currency) }
+    subunits_amounts.map { |cents| Money.from_subunits(cents, currency) }
   end
 
   # Split money amongst parties evenly without losing pennies.
@@ -316,10 +316,10 @@ class Money
   #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
     raise ArgumentError, "need at least one party" if num < 1
-    low = Money.from_cents(cents / num, currency)
-    high = Money.from_cents(low.cents + 1, currency)
+    low = Money.from_subunits(subunits / num, currency)
+    high = Money.from_subunits(low.subunits + 1, currency)
 
-    remainder = cents % num
+    remainder = subunits % num
     result = []
 
     num.times do |index|
@@ -335,11 +335,11 @@ class Money
     splits.all? { |split| split.is_a?(Rational) }
   end
 
-  def amounts_from_splits(allocations, splits, cents_to_split = cents)
-    left_over = cents_to_split
+  def amounts_from_splits(allocations, splits, subunits_to_split = subunits)
+    left_over = subunits_to_split
 
     amounts = splits.collect do |ratio|
-      frac = (Helpers.value_to_decimal(cents_to_split * ratio) / allocations).floor
+      frac = (Helpers.value_to_decimal(subunits_to_split * ratio) / allocations).floor
       left_over -= frac
       frac
     end
