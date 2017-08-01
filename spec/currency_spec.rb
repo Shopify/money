@@ -27,7 +27,11 @@ RSpec.describe "Currency" do
       expect(Money::Currency.new('usd').iso_code).to eq('USD')
     end
 
-    it "raises when the currency is invalid" do
+    it "normalizes known non-standard codes to standard codes" do
+      expect(Money::Currency.new('UKL').iso_code).to eq('GBP')
+    end
+
+    it "raises when the currency is invalid and cannot be mapped to a valid one" do
       expect { Money::Currency.new('yyy') }.to raise_error(Money::Currency::UnknownCurrency)
     end
 

@@ -12,6 +12,10 @@ class Money
         currencies.merge! parse_currency_file("currency_iso.json")
       end
 
+      def load_currency_normalization_map
+        parse_currency_file("currency_normalization_map.json")
+      end
+
       private
 
       def parse_currency_file(filename)
