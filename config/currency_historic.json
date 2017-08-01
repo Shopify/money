@@ -1,4 +1,19 @@
 {
+  "cyp": {
+    "priority": 100,
+    "iso_code": "CYP",
+    "name": "Cypriot pound",
+    "symbol": "£",
+    "alternate_symbols": [],
+    "subunit": "Cent",
+    "subunit_to_unit": 100,
+    "symbol_first": true,
+    "html_entity": "&#x00A3;",
+    "decimal_mark": ".",
+    "thousands_separator": ",",
+    "iso_numeric": "196",
+    "smallest_denomination": 1
+  },
   "eek": {
     "priority": 100,
     "iso_code": "EEK",
@@ -58,6 +73,21 @@
     "decimal_mark": ".",
     "thousands_separator": ",",
     "iso_numeric": "795",
+    "smallest_denomination": 1
+  },
+  "VEB": {
+    "priority": 100,
+    "iso_code": "VEB",
+    "name": "Venezuelan Bolívar",
+    "symbol": "Bs.",
+    "alternate_symbols": [],
+    "subunit": "Céntimo",
+    "subunit_to_unit": 100,
+    "symbol_first": true,
+    "html_entity": "",
+    "decimal_mark": ",",
+    "thousands_separator": ".",
+    "iso_numeric": "862",
     "smallest_denomination": 1
   },
   "zwd": {
