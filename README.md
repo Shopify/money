@@ -106,6 +106,42 @@ Money::Currency.new("JPY").minor_units  # => 0
 Money::Currency.new("MGA").minor_units  # => 1
 ```
 
+## Storing money
+
+Since money internally uses BigDecimal it's logical to use a `decimal` column
+(or `money` for PostgreSQL) for your database. The `money_column` method can
+generate methods for use with ActiveRecord:
+
+```ruby
+create_table :orders do |t|
+  t.decimal :sub_total, precision: 20, scale: 3
+  t.decimal :tax, precision: 20, scale: 3
+  t.string :currency, limit: 3
+end
+
+class Order < ApplicationRecord
+  money_column :sub_total, :tax
+end 
+``` 
+
+Because it called [`composed_of`](http://api.rubyonrails.org/classes/ActiveRecord/Aggregations/ClassMethods.html) 
+under the hood, you can use Money objects directly with the AR query interface :
+```ruby
+Order.create(sub_total: Money.new(3.50, 'USD'), tax: Money.new(0.35, 'USD'))
+Order.where(sub_total: Money.new(9.99, 'CAD'))
+``` 
+
+`money_column` uses an attribute called 'currency' by default. This can be
+overridden by supplying another column name, e.g.: `currency_column: :other`.
+If your currency is hardcoded and there is no column, set a falsey currency
+column and supply the currency code instead:
+`money_column :price_usd, currency_column: false, currency: 'USD'`
+
+You can use multiple `money_column` calls to achieve the desired effects with
+currency on the model or attribute level.
+
+There are no validations generated. You can add these for the specified money
+and currency attributes as you normally would for any other.
 
 ## Contributing to money
 

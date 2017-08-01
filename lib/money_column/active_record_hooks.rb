@@ -5,35 +5,29 @@ module MoneyColumn
     end
 
     module ClassMethods
-      def money_column(*columns, currency_column: 'currency')
-        Array(columns).flatten.each do |name|
-          define_method(name) do
-            value = read_attribute(name)
-            return nil if value.blank?
-            currency = read_attribute(currency_column)
-            Money.new(value, currency)
+      def money_column(*columns, currency_column: :currency, currency: false)
+        raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency_column && currency
+
+        columns = columns.flatten
+        if currency_column
+          columns.each do |column|
+            composed_of(
+              column.to_sym,
+              class_name: 'Money',
+              mapping: [[column.to_s, 'value'], [currency_column.to_s, 'currency']]
+            )
           end
-
-          define_method("#{name}_before_type_cast") do
-            send(name) && sprintf("%.2f", send(name))
+        elsif currency
+          columns.each do |column|
+            composed_of(
+              column.to_sym,
+              class_name: 'Money',
+              mapping: [column.to_s, 'value'],
+              constructor: proc { |value| Money.new(value, currency) }
+            )
           end
-
-          define_method("#{name}=") do |value|
-            if value.blank? || !value.respond_to?(:to_money)
-              write_attribute(name, nil)
-              nil
-            else
-              money = value.to_money
-              currency = Money::Helpers.value_to_currency(read_attribute(currency_column))
-
-              unless currency.compatible?(money.currency)
-                Money.deprecate("[money_column] currency mismatch between #{currency} and #{money.currency}.")
-              end
-
-              write_attribute(name, money.value)
-              money
-            end
-          end
+        else
+          raise ArgumentError, 'need to set either currency_column or currency'
         end
       end
     end
