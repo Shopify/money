@@ -60,6 +60,21 @@
     "iso_numeric": "795",
     "smallest_denomination": 1
   },
+  "VEB": {
+    "priority": 100,
+    "iso_code": "VEB",
+    "name": "Venezuelan Bolívar",
+    "symbol": "Bs.",
+    "alternate_symbols": [],
+    "subunit": "Céntimo",
+    "subunit_to_unit": 100,
+    "symbol_first": true,
+    "html_entity": "",
+    "decimal_mark": ",",
+    "thousands_separator": ".",
+    "iso_numeric": "862",
+    "smallest_denomination": 1
+  },
   "zwd": {
     "priority": 100,
     "iso_code": "ZWD",

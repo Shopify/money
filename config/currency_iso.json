@@ -2304,9 +2304,9 @@
   "vef": {
     "priority": 100,
     "iso_code": "VEF",
-    "name": "Venezuelan Bolívar",
-    "symbol": "Bs",
-    "alternate_symbols": ["Bs.F"],
+    "name": "Venezuelan Bolívar fuerte",
+    "symbol": "Bs.F.",
+    "alternate_symbols": [],
     "subunit": "Céntimo",
     "subunit_to_unit": 100,
     "symbol_first": true,
