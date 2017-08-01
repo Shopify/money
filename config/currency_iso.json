@@ -2200,7 +2200,7 @@
     "name": "New Taiwan Dollar",
     "symbol": "$",
     "disambiguate_symbol": "NT$",
-    "alternate_symbols": ["NT$"],
+    "alternate_symbols": ["NT$", "NTD"],
     "subunit": "Cent",
     "subunit_to_unit": 100,
     "symbol_first": true,
