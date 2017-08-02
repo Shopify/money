@@ -347,6 +347,7 @@ RSpec.describe "Money" do
     it "rounds to the number of minor units provided by the currency" do
       expect(Money.new(1.1111, 'USD').value).to eq(1.11)
       expect(Money.new(1.1111, 'JPY').value).to eq(1)
+      expect(Money.new(1.1111, 'IQD').value).to eq(1.111)
     end
   end
 
@@ -431,6 +432,12 @@ RSpec.describe "Money" do
       moneys = Money.new(5, 'JPY').allocate([0.3,0.7])
       expect(moneys[0]).to eq(Money.new(2, 'JPY'))
       expect(moneys[1]).to eq(Money.new(3, 'JPY'))
+    end
+
+    specify "#allocate does not lose dollars with three decimal currency" do
+      moneys = Money.new(0.005, 'JOD').allocate([0.3,0.7])
+      expect(moneys[0]).to eq(Money.new(0.002, 'JOD'))
+      expect(moneys[1]).to eq(Money.new(0.003, 'JOD'))
     end
 
     specify "#allocate does not lose pennies even when given a lossy split" do
