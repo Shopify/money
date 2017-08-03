@@ -5,16 +5,20 @@ class MoneyRecord < ActiveRecord::Base
   before_validation do
     self.price_usd = Money.new(self[:price] * RATE, 'USD')
   end
-
   money_column :price
   money_column :prix, currency_column: :devise
-  money_column :price_usd, currency_column: false, currency: 'USD'
+  money_column :price_usd, currency: 'USD'
 end
 
 class MoneyWithValidation < ActiveRecord::Base
   self.table_name = 'money_records'
   validates :price, :currency, presence: true
   money_column :price
+end
+
+class MoneyWithReadOnlyCurrency < ActiveRecord::Base
+  self.table_name = 'money_records'
+  money_column :price, currency_read_only: true
 end
 
 RSpec.describe 'MoneyColumn' do
@@ -85,19 +89,6 @@ RSpec.describe 'MoneyColumn' do
     end
   end
 
-  describe 'missing money_column currency arguments' do
-    let(:subject) do
-      class MoneyWithMissingCurrencyArguments < ActiveRecord::Base
-        self.table_name = 'money_records'
-        money_column :price, currency_column: false, currency: false
-      end
-    end
-
-    it 'raises an ArgumentError' do
-      expect { subject }.to raise_error(ArgumentError, 'need to set either currency_column or currency')
-    end
-  end
-
   describe 'null currency and validations' do
     let(:currency) { Money::NullCurrency.new }
     let(:subject) { MoneyWithValidation.new(price: money) }
@@ -105,6 +96,25 @@ RSpec.describe 'MoneyColumn' do
     it 'is not allowed to be saved because `to_s` returns a blank string' do
       subject.valid?
       expect(subject.errors[:currency]).to include("can't be blank")
+    end
+  end
+
+  describe 'read_only_currency true' do
+    it 'does not write the currency to the db' do
+      expect(Money).to receive(:deprecate).once
+      record = MoneyWithReadOnlyCurrency.create(currency: 'USD')
+      record.update_column(:price, 1)
+      record.price = Money.new(4, 'CAD')
+      record.save!
+      expect(record.price.value).to eq(4)
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+
+    it 'reads the currency that is already in the db' do
+      record = MoneyWithReadOnlyCurrency.create(currency: 'USD')
+      record.update_column(:price, 1)
+      expect(record.price.value).to eq(1)
+      expect(record.price.currency.to_s).to eq('USD')
     end
   end
 end
