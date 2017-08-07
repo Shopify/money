@@ -1,12 +1,13 @@
 class Money
   class NullCurrency
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination,
+    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_symbol,
                 :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol
 
     def initialize
       @symbol                = '$'
       @disambiguate_symbol   = nil
+      @subunit_symbol        = nil
       @iso_code              = 'XXX' # Valid ISO4217
       @iso_numeric           = '999'
       @name                  = 'No Currency'
