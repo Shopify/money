@@ -755,4 +755,27 @@ RSpec.describe "Money" do
       end
     end
   end
+
+  describe '.clamp' do
+    let(:max) { 9000 }
+    let(:min) { -max }
+
+    it 'returns the same value if the value is within the min..max range' do
+      money = Money.new(5000, 'EUR').clamp(min, max)
+      expect(money.value).to eq(5000)
+      expect(money.currency.iso_code).to eq('EUR')
+    end
+
+    it 'returns the max value if the original value is larger' do
+      money = Money.new(9001, 'EUR').clamp(min, max)
+      expect(money.clamp(min, max).value).to eq(9000)
+      expect(money.clamp(min, max).currency.iso_code).to eq('EUR')
+    end
+
+    it 'returns the min value if the original value is smaller' do
+      money = Money.new(-9001, 'EUR').clamp(min, max)
+      expect(money.value).to eq(-9000)
+      expect(money.currency.iso_code).to eq('EUR')
+    end
+  end
 end
