@@ -227,7 +227,9 @@ RSpec.describe "Money" do
   end
 
   it "returns cents in to_liquid" do
-    expect(Money.new(1.00).to_liquid).to eq(100)
+    Money.active_support_deprecator.silence do
+      expect(Money.new(1.00).to_liquid).to eq(100)
+    end
   end
 
   it "returns cents in to_json" do
@@ -332,12 +334,20 @@ RSpec.describe "Money" do
 
   end
 
-  describe ".subunits" do
+  describe "#subunits" do
     it 'multiplies by the number of decimal places for the currency' do
       expect(Money.new(1, 'USD').subunits).to eq(100)
       expect(Money.new(1, 'JPY').subunits).to eq(1)
       expect(Money.new(1, 'IQD').subunits).to eq(1000)
       expect(Money.new(1).subunits).to eq(100)
+    end
+  end
+
+  describe "value" do
+    it "rounds to the number of minor units provided by the currency" do
+      expect(Money.new(1.1111, 'USD').value).to eq(1.11)
+      expect(Money.new(1.1111, 'JPY').value).to eq(1)
+      expect(Money.new(1.1111, 'IQD').value).to eq(1.111)
     end
   end
 
@@ -381,11 +391,17 @@ RSpec.describe "Money" do
     end
 
     it "returns cents as 100 cents" do
-      expect(@money.cents).to eq(100)
+      Money.active_support_deprecator.silence do
+        expect(@money.cents).to eq(100)
+      end
+    end
+
+    it "returns cents as 100 cents" do
+      expect(@money.subunits).to eq(100)
     end
 
     it "returns cents as a Fixnum" do
-      expect(@money.cents).to be_an_instance_of(Fixnum)
+      expect(@money.subunits).to be_an_instance_of(Fixnum)
     end
 
     it "is greater than $0" do
@@ -412,11 +428,23 @@ RSpec.describe "Money" do
       expect(moneys[1]).to eq(Money.new(0.03))
     end
 
+    specify "#allocate does not lose dollars with non-decimal currency" do
+      moneys = Money.new(5, 'JPY').allocate([0.3,0.7])
+      expect(moneys[0]).to eq(Money.new(2, 'JPY'))
+      expect(moneys[1]).to eq(Money.new(3, 'JPY'))
+    end
+
+    specify "#allocate does not lose dollars with three decimal currency" do
+      moneys = Money.new(0.005, 'JOD').allocate([0.3,0.7])
+      expect(moneys[0]).to eq(Money.new(0.002, 'JOD'))
+      expect(moneys[1]).to eq(Money.new(0.003, 'JOD'))
+    end
+
     specify "#allocate does not lose pennies even when given a lossy split" do
       moneys = Money.new(1).allocate([0.333,0.333, 0.333])
-      expect(moneys[0].cents).to eq(34)
-      expect(moneys[1].cents).to eq(33)
-      expect(moneys[2].cents).to eq(33)
+      expect(moneys[0].subunits).to eq(34)
+      expect(moneys[1].subunits).to eq(33)
+      expect(moneys[2].subunits).to eq(33)
     end
 
     specify "#allocate requires total to be less than 1" do
@@ -444,6 +472,12 @@ RSpec.describe "Money" do
       expect(
         Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
       ).to eq([Money.new(26), Money.new(4.75)])
+    end
+
+    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder with currency" do
+      expect(
+        Money.new(3075, 'JPY').allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')]),
+      ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
     end
 
     specify "#allocate_max_amounts drops the remainder when returning the weighted allocation without exceeding the maxima when there is no room for the remainder" do
@@ -495,11 +529,22 @@ RSpec.describe "Money" do
       expect(Money.new(0.05).split(2)).to eq([Money.new(0.03), Money.new(0.02)])
     end
 
+    specify "#split does not lose dollars with non-decimal currencies" do
+      expect(Money.new(5, 'JPY').split(2)).to eq([Money.new(3, 'JPY'), Money.new(2, 'JPY')])
+    end
+
     specify "#split a dollar" do
       moneys = Money.new(1).split(3)
-      expect(moneys[0].cents).to eq(34)
-      expect(moneys[1].cents).to eq(33)
-      expect(moneys[2].cents).to eq(33)
+      expect(moneys[0].subunits).to eq(34)
+      expect(moneys[1].subunits).to eq(33)
+      expect(moneys[2].subunits).to eq(33)
+    end
+
+    specify "#split a 100 yen" do
+      moneys = Money.new(100, 'JPY').split(3)
+      expect(moneys[0].value).to eq(34)
+      expect(moneys[1].value).to eq(33)
+      expect(moneys[2].value).to eq(33)
     end
   end
 
