@@ -84,8 +84,7 @@ class Money
   end
 
   def cents
-    Money.deprecate('`money.cents` is deprecated and will be removed in the next major release.
-      Please use `money.subunits` instead. Keep in mind, subunits are currency aware.')
+    # Money.deprecate('`money.cents` is deprecated and will be removed in the next major release. Please use `money.subunits` instead. Keep in mind, subunits are currency aware.')
     (value * 100).to_i
   end
 
