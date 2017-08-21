@@ -117,4 +117,12 @@ RSpec.describe 'MoneyColumn' do
       expect(record.price.currency.to_s).to eq('USD')
     end
   end
+
+  describe 'saving null' do
+    it 'returns nil when money value have not been set' do
+      record = MoneyRecord.new(price: nil, price_usd: nil)
+      expect(record.price).to eq(nil)
+      expect(record.price_usd).to eq(nil)
+    end
+  end
 end
