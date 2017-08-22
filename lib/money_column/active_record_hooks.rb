@@ -18,10 +18,17 @@ module MoneyColumn
           if currency_read_only || currency
             define_method column do
               return instance_variable_get("@#{column}") if instance_variable_defined?("@#{column}")
-              instance_variable_set("@#{column}", Money.new(read_attribute(column), currency || read_attribute(currency_column)))
+              value = read_attribute(column)
+              iso = currency || read_attribute(currency_column)
+              instance_variable_set("@#{column}", value ? Money.new(value, iso) : nil)
             end
 
             define_method "#{column}=" do |money|
+              if money.nil?
+                write_attribute(column, nil)
+                return instance_variable_set("@#{column}",  nil)
+              end
+
               currency_db = currency || read_attribute(currency_column)
               if currency_db != money.currency.to_s
                 Money.deprecate("[money_column] currency mismatch between #{currency_db} and #{money.currency}.")
@@ -33,7 +40,8 @@ module MoneyColumn
             composed_of(
               column.to_sym,
               class_name: 'Money',
-              mapping: [[column.to_s, 'value'], [currency_column.to_s, 'currency']]
+              mapping: [[column.to_s, 'value'], [currency_column.to_s, 'currency']],
+              allow_nil: true
             )
           end
         end
