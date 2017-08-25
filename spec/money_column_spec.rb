@@ -5,7 +5,7 @@ class MoneyRecord < ActiveRecord::Base
   before_validation do
     self.price_usd = Money.new(self[:price] * RATE, 'USD')
   end
-  money_column :price
+  money_column :price, currency_column: 'currency'
   money_column :prix, currency_column: :devise
   money_column :price_usd, currency: 'USD'
 end
@@ -13,12 +13,12 @@ end
 class MoneyWithValidation < ActiveRecord::Base
   self.table_name = 'money_records'
   validates :price, :currency, presence: true
-  money_column :price
+  money_column :price, currency_column: 'currency'
 end
 
 class MoneyWithReadOnlyCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
-  money_column :price, currency_read_only: true
+  money_column :price, currency_column: 'currency', currency_read_only: true
 end
 
 RSpec.describe 'MoneyColumn' do

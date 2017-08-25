@@ -28,11 +28,11 @@ module MoneyColumn
     module ClassMethods
       def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false)
         raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency && currency_column
+        raise ArgumentError, 'must set one of :currency_column or :currency options' unless currency || currency_column
 
         if currency
           currency_object = Money::Currency.find!(currency).to_s
         else
-          currency_column ||= 'currency'
           define_method "#{currency_column}=" do |value|
             @money_column_cache.clear
             super(value)
