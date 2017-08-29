@@ -66,20 +66,22 @@ module MoneyColumn
         end
       end
 
-      def money_column_writer(column, currency_column, currency_object)
+      def money_column_writer(column, currency_column, currency_iso)
         define_method "#{column}=" do |money|
           if money.blank?
             write_attribute(column, nil)
             return @money_column_cache[column] = nil
           end
           money = money.to_money
-          currency_db = Money::Helpers.value_to_currency(currency_object || try(currency_column))
 
-          unless currency_db && currency_db.compatible?(money.currency)
-            Money.deprecate("[money_column] currency mismatch between #{currency_db} and #{money.currency}.")
+          currency_db = currency_iso || try(currency_column)
+          currency_object = Money::Helpers.value_to_currency(currency_db)
+
+          if currency_db && !currency_object.compatible?(money.currency)
+            Money.deprecate("[money_column] currency mismatch between #{currency_object} and #{money.currency}.")
           end
           write_attribute(column, money.value)
-          @money_column_cache[column] = Money.new(money.value, currency_db)
+          @money_column_cache[column] = Money.new(money.value, currency_object)
         end
       end
     end
