@@ -39,6 +39,7 @@ module MoneyColumn
 
         columns.flatten.each do |column|
           if currency_read_only || currency
+            attribute(column, MoneyColumn::Type.new)
             money_column_reader(column, currency_column, currency_object)
             money_column_writer(column, currency_column, currency_object)
           else
