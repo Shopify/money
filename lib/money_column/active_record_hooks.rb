@@ -26,7 +26,7 @@ module MoneyColumn
     end
 
     module ClassMethods
-      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false)
+      def money_column(*columns, currency_column: nil, currency: nil)
         raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency && currency_column
         raise ArgumentError, 'must set one of :currency_column or :currency options' unless currency || currency_column
 
@@ -40,18 +40,8 @@ module MoneyColumn
         end
 
         columns.flatten.each do |column|
-          if currency_read_only || currency
-            money_column_reader(column, currency_column, currency_object)
-            money_column_writer(column, currency_column, currency_object)
-          else
-            composed_of(
-              column.to_sym,
-              class_name: 'Money',
-              mapping: [[column.to_s, 'value'], [currency_column.to_s, 'currency']],
-              converter: Proc.new { |value| value.to_money },
-              allow_nil: true,
-            )
-          end
+          money_column_reader(column, currency_column, currency_object)
+          money_column_writer(column, currency_column, currency_object)
         end
       end
 
