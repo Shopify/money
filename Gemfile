@@ -14,6 +14,7 @@ group :development do
   gem "rails"
   gem "sqlite3"
   gem "pry-byebug"
+  gem "database_cleaner"
 end
 
 gem 'codecov', :require => false, :group => :test
