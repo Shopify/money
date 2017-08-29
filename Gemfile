@@ -5,7 +5,7 @@ source "https://rubygems.org"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
-group :development do
+group :test do
   gem 'rdoc'
   gem "rspec", "~> 3.2"
   gem "bundler", "~> 1.5"
@@ -14,6 +14,6 @@ group :development do
   gem "rails"
   gem "sqlite3"
   gem "pry-byebug"
+  gem "database_cleaner"
+  gem 'codecov', require: false
 end
-
-gem 'codecov', :require => false, :group => :test
