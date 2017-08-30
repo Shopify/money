@@ -10,18 +10,18 @@ class MoneyParser
 
   private
   def extract_money(input)
-    return Money.zero if input.to_s.empty?
+    return 0 if input.to_s.empty?
 
     amount = input.scan(/\-?[\d\.\,]+/).first
 
-    return Money.zero if amount.nil?
+    return 0 if amount.nil?
 
     # Convert 0.123 or 0,123 into what will be parsed as a decimal amount 0.12 or 0.13
     amount.gsub!(/^(-)?(0[,.]\d\d)\d+$/, '\1\2')
 
     segments = amount.scan(/^(.*?)(?:[\.\,](\d{1,2}))?$/).first
 
-    return Money.zero if segments.empty?
+    return 0 if segments.empty?
 
     amount   = segments[0].gsub(/[^-\d]/, '')
     decimals = segments[1].to_s.ljust(2, '0')
