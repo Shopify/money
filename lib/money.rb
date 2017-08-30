@@ -1,4 +1,5 @@
 require_relative 'money/money_parser'
+require_relative 'money/simple_money_parser'
 require_relative 'money/helpers'
 require_relative 'money/currency'
 require_relative 'money/null_currency'

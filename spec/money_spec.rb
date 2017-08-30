@@ -43,6 +43,12 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s(:legacy_dollars)).to eq("1.00")
   end
 
+  it "to_s with_currency style" do
+    expect(amount_money.to_s(:with_currency)).to eq("1.23 USD")
+    expect(non_fractional_money.to_s(:with_currency)).to eq("1.0 JPY")
+  end
+
+
   it "to_s with a amount style" do
     expect(amount_money.to_s(:amount)).to eq("1.23")
     expect(non_fractional_money.to_s(:amount)).to eq("1")
