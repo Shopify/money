@@ -43,6 +43,14 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s(:amount)).to eq("1")
   end
 
+  it "#currency_iso returns the currency iso code" do
+    expect(Money.new(1, 'USD').currency_iso).to eq('USD')
+  end
+
+  it "#currency_iso returns a blank string for no currency" do
+    expect(Money.new(1, Money::NullCurrency.new).currency_iso).to eq('')
+  end
+
   it "as_json as a float with 2 decimal places" do
     expect(@money.as_json).to eq("0.00")
   end
