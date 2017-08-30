@@ -51,7 +51,7 @@ class Money
     end
 
     def no_currency?(currency)
-      currency.nil? || currency.empty? || currency.to_s.downcase == 'xxx'
+      currency.nil? || currency.to_s.empty? || currency.to_s.downcase == 'xxx'
     end
   end
 end

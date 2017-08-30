@@ -60,15 +60,21 @@ RSpec.describe 'MoneyColumn' do
   it 'handles legacy support for saving floats' do
     record.update(price: 3.21, prix: 3.21)
     expect(record.price.value).to eq(3.21)
+    expect(record.price.currency_iso).to eq(currency)
     expect(record.price_usd.value).to eq(3.76)
+    expect(record.price_usd.currency_iso).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency_iso).to eq('CAD')
   end
 
   it 'handles legacy support for saving string' do
     record.update(price: '3.21', prix: '3.21')
     expect(record.price.value).to eq(3.21)
+    expect(record.price.currency_iso).to eq(currency)
     expect(record.price_usd.value).to eq(3.76)
+    expect(record.price_usd.currency_iso).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency_iso).to eq('CAD')
   end
 
   describe 'non-fractional-currencies' do
@@ -113,6 +119,19 @@ RSpec.describe 'MoneyColumn' do
 
     it 'raises an ArgumentError' do
       expect { subject }.to raise_error(ArgumentError, 'cannot set both currency_column and a fixed currency')
+    end
+  end
+
+  describe 'missing money_column currency arguments' do
+    let(:subject) do
+      class MoneyWithWrongCurrencyArguments < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price
+      end
+    end
+
+    it 'raises an ArgumentError' do
+      expect { subject }.to raise_error(ArgumentError, 'must set one of :currency_column or :currency options')
     end
   end
 
@@ -165,6 +184,22 @@ RSpec.describe 'MoneyColumn' do
       record = MoneyRecord.new(price: nil, price_usd: nil)
       expect(record.price).to eq(nil)
       expect(record.price_usd).to eq(nil)
+    end
+  end
+
+  describe 'active record queries' do
+    it 'searches for both value and currency when currency_read_only is false' do
+      record
+      MoneyRecord.create(price: Money.new(amount, 'USD'))
+      expect(MoneyRecord.find_by(price: money, currency: money.currency_iso)).to eq(record)
+      expect(MoneyRecord.find_by(price: 1.23)).to eq(record)
+      expect(MoneyRecord.where("price >= ?", money.value).first).to eq(record)
+    end
+
+    it 'searches for only value when currency_read_only is true' do
+      record = MoneyWithReadOnlyCurrency.create(price: Money.new(1, 'JPY'), currency: 'JPY')
+      expect(MoneyWithReadOnlyCurrency.where(price: Money.new(1, 'JPY')).first).to eq(record)
+      expect(MoneyWithReadOnlyCurrency.where(price: Money.new(1)).first).to eq(record)
     end
   end
 end

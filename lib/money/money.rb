@@ -1,7 +1,7 @@
 class Money
   include Comparable
 
-  attr_reader :value, :subunits, :currency
+  attr_reader :value, :subunits, :currency, :currency_iso
 
   class << self
     attr_accessor :parser, :default_currency
@@ -69,6 +69,7 @@ class Money
   def initialize(value = 0, currency = nil)
     raise ArgumentError if value.respond_to?(:nan?) && value.nan?
     @currency = Helpers.value_to_currency(currency)
+    @currency_iso = @currency.to_s
     @value = Helpers.value_to_decimal(value).round(@currency.minor_units)
     @subunits = (@value * @currency.subunit_to_unit).to_i
     freeze
@@ -80,7 +81,7 @@ class Money
 
   def encode_with(coder)
     coder['value'] = @value.to_s('F')
-    coder['currency'] = @currency.iso_code
+    coder['currency'] = @currency_iso
   end
 
   def cents
