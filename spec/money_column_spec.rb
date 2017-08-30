@@ -189,13 +189,14 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'active record queries' do
     it 'searches for both value and currency when currency_read_only is false' do
-      skip
+      record
       MoneyRecord.create(price: Money.new(amount, 'USD'))
-      expect(MoneyRecord.find_by(price: money)).to eq(record)
+      expect(MoneyRecord.find_by(price: money, currency: money.currency_iso)).to eq(record)
+      expect(MoneyRecord.find_by(price: 1.23)).to eq(record)
+      expect(MoneyRecord.where("price >= ?", money.value).first).to eq(record)
     end
 
     it 'searches for only value when currency_read_only is true' do
-      MoneyWithReadOnlyCurrency.delete_all
       record = MoneyWithReadOnlyCurrency.create(price: Money.new(1, 'JPY'), currency: 'JPY')
       expect(MoneyWithReadOnlyCurrency.where(price: Money.new(1, 'JPY')).first).to eq(record)
       expect(MoneyWithReadOnlyCurrency.where(price: Money.new(1)).first).to eq(record)
