@@ -36,6 +36,14 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price).to eq(Money.new(1.23, 'EUR'))
   end
 
+  it 'writes the currency to the db' do
+    expect(Money).to receive(:deprecate).once
+    record.update(price: Money.new(4, 'JPY'))
+    record.reload
+    expect(record.price.value).to eq(4)
+    expect(record.price.currency.to_s).to eq('JPY')
+  end
+
   it 'duplicating the record keeps the money values' do
     expect(MoneyRecord.new(price: money).clone.price).to eq(money)
     expect(MoneyRecord.new(price: money).dup.price).to eq(money)

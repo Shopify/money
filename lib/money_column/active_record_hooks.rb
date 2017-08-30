@@ -30,7 +30,8 @@ module MoneyColumn
         raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency && currency_column
 
         if currency
-          currency_object = Money::Currency.find!(currency).to_s
+          currency_iso = Money::Currency.find!(currency).to_s
+          currency_read_only = true
         elsif currency_column
           clear_cache_on_currency_change(currency_column)
         else
@@ -38,24 +39,13 @@ module MoneyColumn
         end
 
         columns.flatten.each do |column|
-          if currency_read_only || currency
-            money_column_reader(column, currency_column, currency_object)
-            money_column_writer(column, currency_column, currency_object)
-          else
-            composed_of(
-              column.to_sym,
-              class_name: 'Money',
-              mapping: [[column.to_s, 'value'], [currency_column.to_s, 'currency']],
-              converter: Proc.new { |value| value.to_money },
-              allow_nil: true,
-            )
-          end
+          money_column_reader(column, currency_column, currency_iso)
+          money_column_writer(column, currency_column, currency_iso, currency_read_only)
         end
       end
 
       private
 
-      def money_column_reader(column, currency_column, currency_object)
       def clear_cache_on_currency_change(currency_column)
         define_method "#{currency_column}=" do |value|
           @money_column_cache.clear
@@ -63,15 +53,16 @@ module MoneyColumn
         end
       end
 
+      def money_column_reader(column, currency_column, currency_iso)
         define_method column do
           return @money_column_cache[column] if @money_column_cache[column]
           return unless value = read_attribute(column)
-          iso = currency_object || try(currency_column)
+          iso = currency_iso || try(currency_column)
           @money_column_cache[column] = Money.new(value, iso)
         end
       end
 
-      def money_column_writer(column, currency_column, currency_object)
+      def money_column_writer(column, currency_column, currency_iso, currency_read_only)
         define_method "#{column}=" do |money|
           if money.blank?
             write_attribute(column, nil)
