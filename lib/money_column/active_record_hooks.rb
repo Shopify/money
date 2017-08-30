@@ -79,10 +79,14 @@ module MoneyColumn
             write_attribute(column, nil)
             return @money_column_cache[column] = nil
           end
-          money = money.to_money
 
           currency_db = currency_iso || try(currency_column)
           currency_object = Money::Helpers.value_to_currency(currency_db)
+
+          unless money.is_a?(Money)
+            write_attribute(column, money)
+            return @money_column_cache[column] = Money.new(money, currency_object)
+          end
 
           if currency_db && !currency_object.compatible?(money.currency)
             Money.deprecate("[money_column] currency mismatch between #{currency_object} and #{money.currency}.")

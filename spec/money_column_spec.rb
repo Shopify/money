@@ -60,15 +60,21 @@ RSpec.describe 'MoneyColumn' do
   it 'handles legacy support for saving floats' do
     record.update(price: 3.21, prix: 3.21)
     expect(record.price.value).to eq(3.21)
+    expect(record.price.currency_iso).to eq(currency)
     expect(record.price_usd.value).to eq(3.76)
+    expect(record.price_usd.currency_iso).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency_iso).to eq('CAD')
   end
 
   it 'handles legacy support for saving string' do
     record.update(price: '3.21', prix: '3.21')
     expect(record.price.value).to eq(3.21)
+    expect(record.price.currency_iso).to eq(currency)
     expect(record.price_usd.value).to eq(3.76)
+    expect(record.price_usd.currency_iso).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency_iso).to eq('CAD')
   end
 
   describe 'non-fractional-currencies' do
