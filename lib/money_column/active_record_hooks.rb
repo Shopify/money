@@ -28,15 +28,13 @@ module MoneyColumn
     module ClassMethods
       def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false)
         raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency && currency_column
-        raise ArgumentError, 'must set one of :currency_column or :currency options' unless currency || currency_column
 
         if currency
           currency_object = Money::Currency.find!(currency).to_s
+        elsif currency_column
+          clear_cache_on_currency_change(currency_column)
         else
-          define_method "#{currency_column}=" do |value|
-            @money_column_cache.clear
-            super(value)
-          end
+          raise ArgumentError, 'must set one of :currency_column or :currency options'
         end
 
         columns.flatten.each do |column|
@@ -58,6 +56,13 @@ module MoneyColumn
       private
 
       def money_column_reader(column, currency_column, currency_object)
+      def clear_cache_on_currency_change(currency_column)
+        define_method "#{currency_column}=" do |value|
+          @money_column_cache.clear
+          super(value)
+        end
+      end
+
         define_method column do
           return @money_column_cache[column] if @money_column_cache[column]
           return unless value = read_attribute(column)

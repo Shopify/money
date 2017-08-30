@@ -122,6 +122,19 @@ RSpec.describe 'MoneyColumn' do
     end
   end
 
+  describe 'missing money_column currency arguments' do
+    let(:subject) do
+      class MoneyWithWrongCurrencyArguments < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price
+      end
+    end
+
+    it 'raises an ArgumentError' do
+      expect { subject }.to raise_error(ArgumentError, 'must set one of :currency_column or :currency options')
+    end
+  end
+
   describe 'null currency and validations' do
     let(:currency) { Money::NullCurrency.new }
     let(:subject) { MoneyWithValidation.new(price: money) }
