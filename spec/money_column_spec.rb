@@ -36,6 +36,14 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price).to eq(Money.new(1.23, 'EUR'))
   end
 
+  it 'writes the currency to the db' do
+    expect(Money).to receive(:deprecate).once
+    record.update(price: Money.new(4, 'JPY'))
+    record.reload
+    expect(record.price.value).to eq(4)
+    expect(record.price.currency.to_s).to eq('JPY')
+  end
+
   it 'duplicating the record keeps the money values' do
     expect(MoneyRecord.new(price: money).clone.price).to eq(money)
     expect(MoneyRecord.new(price: money).dup.price).to eq(money)
@@ -60,15 +68,21 @@ RSpec.describe 'MoneyColumn' do
   it 'handles legacy support for saving floats' do
     record.update(price: 3.21, prix: 3.21)
     expect(record.price.value).to eq(3.21)
+    expect(record.price.currency.to_s).to eq(currency)
     expect(record.price_usd.value).to eq(3.76)
+    expect(record.price_usd.currency.to_s).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency.to_s).to eq('CAD')
   end
 
   it 'handles legacy support for saving string' do
     record.update(price: '3.21', prix: '3.21')
     expect(record.price.value).to eq(3.21)
+    expect(record.price.currency.to_s).to eq(currency)
     expect(record.price_usd.value).to eq(3.76)
+    expect(record.price_usd.currency.to_s).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency.to_s).to eq('CAD')
   end
 
   describe 'non-fractional-currencies' do
@@ -113,6 +127,19 @@ RSpec.describe 'MoneyColumn' do
 
     it 'raises an ArgumentError' do
       expect { subject }.to raise_error(ArgumentError, 'cannot set both currency_column and a fixed currency')
+    end
+  end
+
+  describe 'missing money_column currency arguments' do
+    let(:subject) do
+      class MoneyWithWrongCurrencyArguments < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price
+      end
+    end
+
+    it 'raises an ArgumentError' do
+      expect { subject }.to raise_error(ArgumentError, 'must set one of :currency_column or :currency options')
     end
   end
 
