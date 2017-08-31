@@ -1,7 +1,9 @@
 class Money
   include Comparable
+  extend Forwardable
 
   attr_reader :value, :subunits, :currency
+  def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
   class << self
     attr_accessor :parser, :default_currency
@@ -165,25 +167,8 @@ class Money
     [ReverseOperationProxy.new(other), self]
   end
 
-  def hash
-    value.hash
-  end
-
   def to_money(_currency = nil)
     self
-  end
-
-  def zero?
-    value.zero?
-  end
-
-  # dangerous, this *will* shave off all your cents
-  def to_i
-    value.to_i
-  end
-
-  def to_f
-    value.to_f
   end
 
   def to_d
