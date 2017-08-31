@@ -16,11 +16,6 @@ class MoneyWithValidation < ActiveRecord::Base
   money_column :price, currency_column: 'currency'
 end
 
-class MoneyWithReadOnlyCurrency < ActiveRecord::Base
-  self.table_name = 'money_records'
-  money_column :price, currency_column: 'currency', currency_read_only: true
-end
-
 RSpec.describe 'MoneyColumn' do
   let(:amount) { 1.23 }
   let(:currency) { 'EUR' }
@@ -33,12 +28,13 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'returns money with currency from the default column' do
+    record.update(currency: currency)
     expect(record.price).to eq(Money.new(1.23, 'EUR'))
   end
 
   it 'duplicating the record keeps the money values' do
-    expect(MoneyRecord.new(price: money).clone.price).to eq(money)
-    expect(MoneyRecord.new(price: money).dup.price).to eq(money)
+    expect(MoneyRecord.new(price: money, currency: currency).clone.price).to eq(money)
+    expect(MoneyRecord.new(price: money, currency: currency).dup.price).to eq(money)
   end
 
   it 'returns money with currency from the specified column' do
@@ -75,6 +71,7 @@ RSpec.describe 'MoneyColumn' do
     let(:money) { Money.new(1, 'JPY') }
 
     it 'returns money with currency from the default column' do
+      record.update(currency: 'JPY')
       expect(record.price).to eq(Money.new(1, 'JPY'))
     end
   end
@@ -83,6 +80,7 @@ RSpec.describe 'MoneyColumn' do
     let(:money) { Money.new(1.234, 'JOD') }
 
     it 'returns money with currency from the default column' do
+      record.currency = 'JOD'
       expect(record.price).to eq(Money.new(1.234, 'JOD'))
     end
   end
@@ -126,38 +124,36 @@ RSpec.describe 'MoneyColumn' do
     end
   end
 
-  describe 'read_only_currency true' do
-    it 'does not write the currency to the db' do
-      record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(price: 1, currency: 'USD')
-      expect(Money).to receive(:deprecate).once
-      record.update(price: Money.new(4, 'CAD'))
-      expect(record.price.value).to eq(4)
-      expect(record.price.currency.to_s).to eq('USD')
-    end
+  it 'gives a deprecation notice when updating a money object with a different currency than what is in the DB' do
+    record = MoneyRecord.create
+    record.update_columns(price: 1, currency: 'USD')
+    expect(Money).to receive(:deprecate).once
+    record.update(price: Money.new(4, 'CAD'))
+    expect(record.price.value).to eq(4)
+    expect(record.price.currency.to_s).to eq('USD')
+  end
 
-    it 'reads the currency that is already in the db' do
-      record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(currency: 'USD', price: 1)
-      record.reload
-      expect(record.price.value).to eq(1)
-      expect(record.price.currency.to_s).to eq('USD')
-    end
+  it 'reads the currency that is already in the db' do
+    record = MoneyRecord.create
+    record.update_columns(currency: 'USD', price: 1)
+    record.reload
+    expect(record.price.value).to eq(1)
+    expect(record.price.currency.to_s).to eq('USD')
+  end
 
-    it 'reads an invalid currency from the db and generates a no currency object' do
-      expect(Money).to receive(:deprecate).once
-      record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(currency: 'invalid', price: 1)
-      record.reload
-      expect(record.price.value).to eq(1)
-      expect(record.price.currency.to_s).to eq('')
-    end
+  it 'reads an invalid currency from the db and generates a no currency object' do
+    expect(Money).to receive(:deprecate).once
+    record = MoneyRecord.create
+    record.update_columns(currency: 'invalid', price: 1)
+    record.reload
+    expect(record.price.value).to eq(1)
+    expect(record.price.currency.to_s).to eq('')
+  end
 
-    it 'sets the currency correctly when the currency is changed' do
-      record = MoneyWithReadOnlyCurrency.create(currency: 'CAD', price: 1)
-      record.currency = 'USD'
-      expect(record.price.currency.to_s).to eq('USD')
-    end
+  it 'sets the currency correctly when the currency is changed' do
+    record = MoneyRecord.create(currency: 'CAD', price: 1)
+    record.currency = 'USD'
+    expect(record.price.currency.to_s).to eq('USD')
   end
 
   describe 'saving null' do
