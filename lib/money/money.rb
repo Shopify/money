@@ -4,6 +4,7 @@ class Money
 
   attr_reader :value, :subunits, :currency
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
+  def_delegators :currency, :no_currency?
 
   class << self
     attr_accessor :parser, :default_currency

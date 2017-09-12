@@ -52,6 +52,10 @@ class Money
       other.is_a?(NullCurrency) || eql?(other)
     end
 
+    def no_currency?
+      false
+    end
+
     alias_method :==, :eql?
     alias_method :to_s, :iso_code
   end

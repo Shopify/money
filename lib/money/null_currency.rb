@@ -28,7 +28,11 @@ class Money
     def to_s
       ''
     end
-    
+
+    def no_currency?
+      true
+    end
+
     alias_method :==, :eql?
   end
 end
