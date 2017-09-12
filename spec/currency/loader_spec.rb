@@ -18,4 +18,26 @@ RSpec.describe Money::Currency::Loader do
       expect(subject.load_currencies['eek']['iso_code']).to eq('EEK')
     end
   end
+
+  describe 'load_currency_normalization_map' do
+    let(:mapping_inputs) { subject.load_currency_normalization_map.keys }
+    let(:mapping_outputs) { subject.load_currency_normalization_map.values }
+    let(:known_currencies) { subject.load_currencies.keys.map(&:upcase) }
+
+    it 'loads the normalization mapping file' do
+      expect(subject.load_currency_normalization_map['NTD']).to eq('TWD')
+    end
+
+    it 'maps to known codes in the currency files' do
+      expect(known_currencies).to include(*mapping_outputs)
+    end
+
+    it 'does not map already known codes in the currency files' do
+      expect(known_currencies).to_not include(*mapping_inputs)
+    end
+
+    it 'does not map to another code that needs mapping' do
+      expect(mapping_inputs).to_not include(*mapping_outputs)
+    end
+  end
 end
