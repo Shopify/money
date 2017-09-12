@@ -4,7 +4,6 @@ class Money
 
   attr_reader :value, :subunits, :currency
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
-  def_delegators :currency, :no_currency?
 
   class << self
     attr_accessor :parser, :default_currency
@@ -89,6 +88,10 @@ class Money
   def cents
     # Money.deprecate('`money.cents` is deprecated and will be removed in the next major release. Please use `money.subunits` instead. Keep in mind, subunits are currency aware.')
     (value * 100).to_i
+  end
+
+  def no_currency?
+    currency.is_a?(NullCurrency)
   end
 
   def -@
@@ -362,6 +365,6 @@ class Money
   end
 
   def calculated_currency(other)
-    currency.is_a?(NullCurrency) ? other : currency
+    no_currency? ? other : currency
   end
 end
