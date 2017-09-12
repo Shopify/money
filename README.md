@@ -73,7 +73,7 @@ currency.disambiguate_symbol #=> 'US$'
 
 ### Default Currency
 
-By default `Money` defaults to Money::NullCurrency as its currency. This is a 
+By default `Money` defaults to Money::NullCurrency as its currency. This is a
 global variable that can be changed using:
 
 ``` ruby
@@ -106,7 +106,7 @@ Money::Currency.new("JPY").minor_units  # => 0
 Money::Currency.new("MGA").minor_units  # => 1
 ```
 
-## Storing money
+## Money column
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column
 (or `money` for PostgreSQL) for your database. The `money_column` method can
@@ -121,21 +121,17 @@ end
 
 class Order < ApplicationRecord
   money_column :sub_total, :tax
-end 
-``` 
+end
+```
 
-Because it called [`composed_of`](http://api.rubyonrails.org/classes/ActiveRecord/Aggregations/ClassMethods.html) 
-under the hood, you can use Money objects directly with the AR query interface :
-```ruby
-Order.create(sub_total: Money.new(3.50, 'USD'), tax: Money.new(0.35, 'USD'))
-Order.where(sub_total: Money.new(9.99, 'CAD'))
-``` 
+### Options
 
-`money_column` uses an attribute called 'currency' by default. This can be
-overridden by supplying another column name, e.g.: `currency_column: :other`.
-If your currency is hardcoded and there is no column, set a falsey currency
-column and supply the currency code instead:
-`money_column :price_usd, currency_column: false, currency: 'USD'`
+| option | type |  description |
+| --- | --- |  --- |
+| currency_column | method | column from which to read/write the currency  |
+| currency | string | hardcoded currency value  |
+| currency_read_only | boolean |  when true, `currency_column` won't write the currency back into the db. Must be set to true if `currency_column` is an attr_reader or delegate. Default: false |
+| coerce_null | boolean | when true, a nil value will be returned as Money.zero. Default: false |
 
 You can use multiple `money_column` calls to achieve the desired effects with
 currency on the model or attribute level.

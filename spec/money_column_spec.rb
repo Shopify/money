@@ -21,6 +21,12 @@ class MoneyWithReadOnlyCurrency < ActiveRecord::Base
   money_column :price, currency_column: 'currency', currency_read_only: true
 end
 
+class MoneyRecordCoerceNull < ActiveRecord::Base
+  self.table_name = 'money_records'
+  money_column :price, currency_column: 'currency', coerce_null: true
+  money_column :price_usd, currency: 'USD', coerce_null: true
+end
+
 RSpec.describe 'MoneyColumn' do
   let(:amount) { 1.23 }
   let(:currency) { 'EUR' }
@@ -187,11 +193,17 @@ RSpec.describe 'MoneyColumn' do
     end
   end
 
-  describe 'saving null' do
-    it 'returns nil when money value have not been set' do
-      record = MoneyRecord.new(price: nil, price_usd: nil)
+  describe 'coerce_null' do
+    it 'returns nil when money value have not been set and coerce_null is false' do
+      record = MoneyRecord.new(price: nil)
       expect(record.price).to eq(nil)
       expect(record.price_usd).to eq(nil)
+    end
+
+    it 'returns 0$ when money value have not been set and coerce_null is true' do
+      record = MoneyRecordCoerceNull.new(price: nil)
+      expect(record.price.value).to eq(0)
+       expect(record.price_usd.value).to eq(0)
     end
   end
 end

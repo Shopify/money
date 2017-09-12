@@ -26,7 +26,7 @@ module MoneyColumn
     end
 
     module ClassMethods
-      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false)
+      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false)
         raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency && currency_column
 
         if currency
@@ -39,7 +39,7 @@ module MoneyColumn
         end
 
         columns.flatten.each do |column|
-          money_column_reader(column, currency_column, currency_iso)
+          money_column_reader(column, currency_column, currency_iso, coerce_null)
           money_column_writer(column, currency_column, currency_iso, currency_read_only)
         end
       end
@@ -53,10 +53,11 @@ module MoneyColumn
         end
       end
 
-      def money_column_reader(column, currency_column, currency_iso)
+      def money_column_reader(column, currency_column, currency_iso, coerce_null)
         define_method column do
           return @money_column_cache[column] if @money_column_cache[column]
-          return unless value = read_attribute(column)
+          value = read_attribute(column)
+          return if value.nil? && !coerce_null
           iso = currency_iso || try(currency_column)
           @money_column_cache[column] = Money.new(value, iso)
         end
