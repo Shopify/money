@@ -3,17 +3,14 @@ require 'yaml'
 
 RSpec.describe "Money" do
 
-  before(:each) do
-    @money = Money.new
-  end
-
   let (:money) {Money.new(1)}
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
 
   it "is contructable with empty class method" do
-    expect(Money.empty).to eq(@money)
+    expect(Money.empty).to eq(Money.new)
+  end
 
   it ".zero has no currency" do
     expect(Money.zero.currency).to be_a(Money::NullCurrency)
@@ -24,11 +21,11 @@ RSpec.describe "Money" do
   end
 
   it "returns itself with to_money" do
-    expect(@money.to_money).to eq(@money)
+    expect(money.to_money).to eq(money)
   end
 
   it "defaults to 0 when constructed with no arguments" do
-    expect(@money).to eq(Money.new(0.00))
+    expect(Money.new).to eq(Money.new(0))
   end
 
   it "defaults to 0 when constructed with an invalid string" do
@@ -38,7 +35,7 @@ RSpec.describe "Money" do
   end
 
   it "to_s as a float with 2 decimal places" do
-    expect(@money.to_s).to eq("0.00")
+    expect(money.to_s).to eq("1.00")
   end
 
   it "to_s with a legacy_dollars style" do
@@ -52,7 +49,7 @@ RSpec.describe "Money" do
   end
 
   it "as_json as a float with 2 decimal places" do
-    expect(@money.as_json).to eq("0.00")
+    expect(money.as_json).to eq("1.00")
   end
 
   it "is constructable with a BigDecimal" do
@@ -137,16 +134,16 @@ RSpec.describe "Money" do
     expect((Money.new(0) * -1).to_s).to eq("0.00")
   end
 
-  it "inspects to a presentable string" do
-    expect(@money.inspect).to eq("#<Money value:0.00 currency:CAD>")
+  it "#inspects to a presentable string" do
+    expect(money.inspect).to eq("#<Money value:1.00 currency:CAD>")
   end
 
   it "is inspectable within an array" do
-    expect([@money].inspect).to eq("[#<Money value:0.00 currency:CAD>]")
+    expect([money].inspect).to eq("[#<Money value:1.00 currency:CAD>]")
   end
 
   it "correctly support eql? as a value object" do
-    expect(@money).to eq(Money.new)
+    expect(money).to eq(Money.new(1))
   end
 
   it "is addable with integer" do
@@ -289,7 +286,7 @@ RSpec.describe "Money" do
   end
 
   it "is comparable with non-money objects" do
-    expect(@money).not_to eq(nil)
+    expect(money).not_to eq(nil)
   end
 
   it "supports floor" do
@@ -299,37 +296,35 @@ RSpec.describe "Money" do
   end
 
   describe "frozen with amount of $1" do
-    before(:each) do
-      @money = Money.new(1.00).freeze
-    end
+    let (:money) { Money.new(1.00).freeze }
 
     it "is equals to $1" do
-      expect(@money).to eq(Money.new(1.00))
+      expect(money).to eq(Money.new(1.00))
     end
 
     it "is not equals to $2" do
-      expect(@money).not_to eq(Money.new(2.00))
+      expect(money).not_to eq(Money.new(2.00))
     end
 
     it "<=> $1 is 0" do
-      expect((@money <=> Money.new(1.00))).to eq(0)
+      expect((money <=> Money.new(1.00))).to eq(0)
     end
 
     it "<=> $2 is -1" do
-      expect((@money <=> Money.new(2.00))).to eq(-1)
+      expect((money <=> Money.new(2.00))).to eq(-1)
     end
 
     it "<=> $0.50 equals 1" do
-      expect((@money <=> Money.new(0.50))).to eq(1)
+      expect((money <=> Money.new(0.50))).to eq(1)
     end
 
     it "<=> works with non-money objects" do
-      expect((@money <=> 1)).to eq(0)
-      expect((@money <=> 2)).to eq(-1)
-      expect((@money <=> 0.5)).to eq(1)
-      expect((1 <=> @money)).to eq(0)
-      expect((2 <=> @money)).to eq(1)
-      expect((0.5 <=> @money)).to eq(-1)
+      expect((money <=> 1)).to eq(0)
+      expect((money <=> 2)).to eq(-1)
+      expect((money <=> 0.5)).to eq(1)
+      expect((1 <=> money)).to eq(0)
+      expect((2 <=> money)).to eq(1)
+      expect((0.5 <=> money)).to eq(-1)
     end
 
     it "raises error if compared other is not compatible" do
@@ -337,11 +332,11 @@ RSpec.describe "Money" do
     end
 
     it "have the same hash value as $1" do
-      expect(@money.hash).to eq(Money.new(1.00).hash)
+      expect(money.hash).to eq(Money.new(1.00).hash)
     end
 
     it "does not have the same hash value as $2" do
-      expect(@money.hash).to eq(Money.new(1.00).hash)
+      expect(money.hash).to eq(Money.new(1.00).hash)
     end
 
   end
@@ -364,68 +359,64 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $0" do
-    before(:each) do
-      @money = Money.new
-    end
+    let (:money) { Money.new(0) }
 
     it "is zero" do
-      expect(@money).to be_zero
+      expect(money).to be_zero
     end
 
     it "is greater than -$1" do
-      expect(@money).to be > Money.new("-1.00")
+      expect(money).to be > Money.new("-1.00")
     end
 
     it "is greater than or equal to $0" do
-      expect(@money).to be >= Money.new
+      expect(money).to be >= Money.new
     end
 
     it "is less than or equal to $0" do
-      expect(@money).to be <= Money.new
+      expect(money).to be <= Money.new
     end
 
     it "is less than $1" do
-      expect(@money).to be < Money.new(1.00)
+      expect(money).to be < Money.new(1.00)
     end
   end
 
   describe "with amount of $1" do
-    before(:each) do
-      @money = Money.new(1.00)
-    end
+    let (:money) { Money.new(1.00) }
 
     it "is not zero" do
-      expect(@money).not_to be_zero
+      expect(money).not_to be_zero
     end
 
     it "returns cents as a decimal value = 1.00" do
-      expect(@money.value).to eq(BigDecimal.new("1.00"))
+      expect(money.value).to eq(BigDecimal.new("1.00"))
     end
 
     it "returns cents as 100 cents" do
       Money.active_support_deprecator.silence do
-        expect(@money.cents).to eq(100)
+        expect(money.cents).to eq(100)
       end
     end
 
     it "returns cents as 100 cents" do
-      expect(@money.subunits).to eq(100)
+      expect(money.subunits).to eq(100)
     end
 
     it "returns cents as a Fixnum" do
-      expect(@money.subunits).to be_an_instance_of(Fixnum)
+      expect(money.subunits).to be_an_instance_of(Fixnum)
     end
 
     it "is greater than $0" do
-      expect(@money).to be > Money.new(0.00)
+      expect(money).to be > Money.new(0.00)
     end
 
     it "is less than $2" do
-      expect(@money).to be < Money.new(2.00)
+      expect(money).to be < Money.new(2.00)
     end
 
     it "is equal to $1" do
-      expect(@money).to eq(Money.new(1.00))
+      expect(money).to eq(Money.new(1.00))
     end
   end
 
@@ -573,12 +564,10 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $1 with created with 3 decimal places" do
-    before(:each) do
-      @money = Money.new(1.125)
-    end
+    let (:money) { Money.new(1.125) }
 
     it "rounds 3rd decimal place" do
-      expect(@money.value).to eq(BigDecimal.new("1.13"))
+      expect(money.value).to eq(BigDecimal.new("1.13"))
     end
   end
 
