@@ -36,7 +36,7 @@ class Money
       case currency
       when Money::Currency, Money::NullCurrency
         currency
-      else
+      when String, nil
         if no_currency?(currency)
           Money.default_currency
         else
@@ -47,6 +47,8 @@ class Money
             Money::NullCurrency.new
           end
         end
+      else
+        raise ArgumentError, "could not parse as currency #{currency.inspect}"
       end
     end
 

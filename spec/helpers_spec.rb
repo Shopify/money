@@ -82,6 +82,11 @@ RSpec.describe Money::Helpers do
       expect(subject.no_currency?('XXX')).to eq(true)
     end
 
+    it 'raises on invalid object' do
+      expect { subject.value_to_currency(OpenStruct.new(amount: 1)) }.to raise_error(ArgumentError)
+      expect { subject.value_to_currency(1) }.to raise_error(ArgumentError)
+    end
+
     it 'returns true when the currency is nil' do
       expect(subject.no_currency?(nil)).to eq(true)
     end
