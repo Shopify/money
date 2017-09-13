@@ -6,10 +6,9 @@ class Money
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
   class << self
-    attr_accessor :parser, :default_currency
+    attr_accessor :parser
 
     def new(value = 0, currency = nil)
-      currency ||= current_currency || default_currency
       return zero if value == 0 && currency.nil?
       super(value, currency)
     end
@@ -34,12 +33,12 @@ class Money
       new(value, currency)
     end
 
-    def current_currency
+    def default_currency
       Thread.current[:money_currency]
     end
 
-    def current_currency=(currency)
-      Thread.current[:money_currency] = currency
+    def default_currency=(currency)
+      Thread.current[:money_currency] = Helpers.value_to_currency(currency)
     end
 
     # Set Money.default_currency inside the supplied block, resets it to
@@ -48,11 +47,11 @@ class Money
     # instances being created with explicitly set currency.
     def with_currency(new_currency)
       begin
-        old_currency = Money.current_currency
-        Money.current_currency = new_currency
+        old_currency = Money.default_currency
+        Money.default_currency = new_currency
         yield
       ensure
-        Money.current_currency = old_currency
+        Money.default_currency = old_currency
       end
     end
 
