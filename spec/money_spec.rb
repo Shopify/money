@@ -7,12 +7,20 @@ RSpec.describe "Money" do
     @money = Money.new
   end
 
+  let (:money) {Money.new(1)}
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
 
   it "is contructable with empty class method" do
     expect(Money.empty).to eq(@money)
+
+  it ".zero has no currency" do
+    expect(Money.zero.currency).to be_a(Money::NullCurrency)
+  end
+
+  it ".zero is a 0$ value" do
+    expect(Money.zero).to eq(Money.new(0))
   end
 
   it "returns itself with to_money" do
@@ -69,6 +77,10 @@ RSpec.describe "Money" do
 
   it "is addable" do
     expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
+  end
+
+  it "keeps currency across calculations" do
+    expect(Money.new(1, 'USD') - Money.new(1, 'USD') + Money.new(1.23, Money::NullCurrency.new)).to eq(Money.new(1.23, 'USD'))
   end
 
   it "raises error if added other is not compatible" do
