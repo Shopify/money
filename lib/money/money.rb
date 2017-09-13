@@ -9,19 +9,13 @@ class Money
     attr_accessor :parser, :default_currency
 
     def new(value = 0, currency = nil)
-      currency ||= current_currency || default_currency
-
-      if value == 0
-        @@zero_money ||= {}
-        @@zero_money[currency] ||= super(0, currency)
-      else
-        super(value, currency)
-      end
+      return zero if value == 0 && currency.nil?
+      super(value, currency || current_currency || default_currency)
     end
     alias_method :from_amount, :new
 
     def zero
-      new(0, NullCurrency.new)
+      @zero ||= new(0, NullCurrency.new)
     end
     alias_method :empty, :zero
 
