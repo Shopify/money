@@ -3,7 +3,7 @@ require 'yaml'
 
 RSpec.describe "Money" do
 
-  let (:money) {Money.new(1)}
+  let (:money) { Money.new(1) }
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
