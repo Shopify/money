@@ -9,7 +9,7 @@ class Money
 
     class << self
       def new(currency_iso)
-        raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.empty?
+        raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
         iso = currency_iso.to_s.downcase
         @@loaded_currencies[iso] || @@mutex.synchronize { @@loaded_currencies[iso] = super(iso) }
       end
