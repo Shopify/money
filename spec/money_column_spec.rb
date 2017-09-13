@@ -27,6 +27,17 @@ class MoneyRecordCoerceNull < ActiveRecord::Base
   money_column :price_usd, currency: 'USD', coerce_null: true
 end
 
+class MoneyWithDelegatedCurrency < ActiveRecord::Base
+  self.table_name = 'money_records'
+  attr_accessor :delegated_record
+  delegate :currency, to: :delegated_record
+  money_column :price, currency_column: 'currency', currency_read_only: true
+  money_column :prix, currency_column: 'currency2', currency_read_only: true
+  def currency2
+    delegated_record.currency
+  end
+end
+
 RSpec.describe 'MoneyColumn' do
   let(:amount) { 1.23 }
   let(:currency) { 'EUR' }
@@ -43,7 +54,7 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'writes the currency to the db' do
-    expect(Money).to receive(:deprecate).once
+    record.update(currency: nil)
     record.update(price: Money.new(4, 'JPY'))
     record.reload
     expect(record.price.value).to eq(4)
@@ -89,6 +100,19 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price_usd.currency.to_s).to eq('USD')
     expect(record.prix.value).to eq(3.21)
     expect(record.prix.currency.to_s).to eq('CAD')
+  end
+
+  it 'does not overwrite a currency column with a default currency when saving zero' do
+    expect(record.currency.to_s).to eq('EUR')
+    record.update(price: Money.zero)
+    expect(record.currency.to_s).to eq('EUR')
+  end
+
+  it 'does overwrite a currency if changed but will show a deprecation notice' do
+    expect(record.currency.to_s).to eq('EUR')
+    expect(Money).to receive(:deprecate).once
+    record.update(price: Money.new(4, 'JPY'))
+    expect(record.currency.to_s).to eq('JPY')
   end
 
   describe 'non-fractional-currencies' do
@@ -191,6 +215,16 @@ RSpec.describe 'MoneyColumn' do
       record.currency = 'USD'
       expect(record.price.currency.to_s).to eq('USD')
     end
+
+    it 'handle cases where the delegate allow_nil is false' do
+      record = MoneyWithDelegatedCurrency.new(price: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+
+    it 'handle cases where a manual delegate does not allow nil' do
+      record = MoneyWithDelegatedCurrency.new(prix: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
+      expect(record.price.currency.to_s).to eq('USD')
+    end
   end
 
   describe 'coerce_null' do
@@ -204,6 +238,37 @@ RSpec.describe 'MoneyColumn' do
       record = MoneyRecordCoerceNull.new(price: nil)
       expect(record.price.value).to eq(0)
        expect(record.price_usd.value).to eq(0)
+    end
+  end
+
+  describe 'memoization' do
+    it 'correctly memoizes the read value' do
+      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(nil)
+      price = Money.new(1, 'USD')
+      record = MoneyRecord.new(price: price)
+      expect(record.price).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+    end
+
+    it 'memoizes values get reset when writing a new value' do
+      price = Money.new(1, 'USD')
+      record = MoneyRecord.new(price: price)
+      expect(record.price).to eq(price)
+      price = Money.new(2, 'USD')
+      record.update!(price: price)
+      expect(record.price).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+    end
+
+    it 'reload will clear memoizes money values' do
+      price = Money.new(1, 'USD')
+      record = MoneyRecord.create(price: price)
+      expect(record.price).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+      record.reload
+      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(nil)
+      record.price
+      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
     end
   end
 end

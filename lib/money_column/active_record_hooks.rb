@@ -58,37 +58,31 @@ module MoneyColumn
           return @money_column_cache[column] if @money_column_cache[column]
           value = read_attribute(column)
           return if value.nil? && !coerce_null
-          iso = currency_iso || try(currency_column)
+          iso = currency_iso || send(currency_column)
           @money_column_cache[column] = Money.new(value, iso)
         end
       end
 
       def money_column_writer(column, currency_column, currency_iso, currency_read_only)
         define_method "#{column}=" do |money|
+          @money_column_cache[column] = nil
+
           if money.blank?
             write_attribute(column, nil)
-            return @money_column_cache[column] = nil
+            return nil
+          elsif !money.is_a?(Money)
+            return write_attribute(column, money)
           end
 
-          currency_source = currency_iso || try(currency_column)
-          currency_object = Money::Helpers.value_to_currency(currency_source)
+          currency_raw_source = currency_iso || (send(currency_column) rescue nil)
 
-          unless money.is_a?(Money)
-            write_attribute(column, money)
-            return @money_column_cache[column] = Money.new(money, currency_object)
-          end
-
-          if currency_source && !currency_object.compatible?(money.currency)
-            Money.deprecate("[money_column] currency mismatch between #{currency_object} and #{money.currency}.")
+          currency_source = Money::Helpers.value_to_currency(currency_raw_source)
+          if currency_raw_source && !currency_source.compatible?(money.currency)
+            Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency}.")
           end
 
           write_attribute(column, money.value)
-          if currency_read_only
-            @money_column_cache[column] = Money.new(money.value, currency_object)
-          else
-            write_attribute(currency_column, money.currency.to_s)
-            @money_column_cache[column] = money
-          end
+          write_attribute(currency_column, money.currency.to_s) unless currency_read_only || money.no_currency?
         end
       end
     end

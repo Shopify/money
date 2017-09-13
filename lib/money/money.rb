@@ -90,6 +90,10 @@ class Money
     (value * 100).to_i
   end
 
+  def no_currency?
+    currency.is_a?(NullCurrency)
+  end
+
   def -@
     Money.new(-value, currency)
   end
@@ -361,6 +365,6 @@ class Money
   end
 
   def calculated_currency(other)
-    currency.is_a?(NullCurrency) ? other : currency
+    no_currency? ? other : currency
   end
 end

@@ -28,7 +28,7 @@ class Money
     def to_s
       ''
     end
-    
+
     alias_method :==, :eql?
   end
 end
