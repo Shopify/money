@@ -296,7 +296,7 @@ RSpec.describe "Money" do
   end
 
   describe "frozen with amount of $1" do
-    let (:money) { Money.new(1.00).freeze }
+    let (:money) { Money.new(1.00) }
 
     it "is equals to $1" do
       expect(money).to eq(Money.new(1.00))
@@ -339,6 +339,16 @@ RSpec.describe "Money" do
       expect(money.hash).to eq(Money.new(1.00).hash)
     end
 
+    it "<=> can compare with and without currency" do
+      expect(Money.new(1000, Money::NullCurrency.new) <=> Money.new(2000, 'JPY')).to eq(-1)
+      expect(Money.new(2000, 'JPY') <=> Money.new(1000, Money::NullCurrency.new)).to eq(1)
+    end
+
+    it "<=> issues deprecation warning when comparing incompatible currency" do
+      expect(Money).to receive(:deprecate).twice
+      expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(-1)
+      expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(1)
+    end
   end
 
   describe "#subunits" do
