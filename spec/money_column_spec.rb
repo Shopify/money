@@ -3,7 +3,7 @@ require 'spec_helper'
 class MoneyRecord < ActiveRecord::Base
   RATE = 1.17
   before_validation do
-    self.price_usd = Money.new(self[:price] * RATE, 'USD')
+    self.price_usd = Money.new(self[:price] * RATE, 'USD') if self[:price]
   end
   money_column :price, currency_column: 'currency'
   money_column :prix, currency_column: :devise
@@ -269,6 +269,19 @@ RSpec.describe 'MoneyColumn' do
       expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(nil)
       record.price
       expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+    end
+  end
+
+  describe 'ActiveRecord querying' do
+    it 'can be serialized for querying on the value' do
+      price = Money.new(1, 'USD')
+      record = MoneyRecord.create!(price: price)
+      expect(MoneyRecord.find_by(price: price)).to eq(record)
+    end
+
+    it 'nil value persist in the DB' do
+      record = MoneyRecord.create!(price: nil)
+      expect(MoneyRecord.find_by(price: nil)).to eq(record)
     end
   end
 end

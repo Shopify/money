@@ -39,6 +39,7 @@ module MoneyColumn
         end
 
         columns.flatten.each do |column|
+          attribute(column.to_s, MoneyColumn::ActiveRecordType.new)
           money_column_reader(column, currency_column, currency_iso, coerce_null)
           money_column_writer(column, currency_column, currency_iso, currency_read_only)
         end
