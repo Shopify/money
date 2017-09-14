@@ -100,7 +100,7 @@ class Money
 
   def <=>(other)
     arithmetic(other) do |money|
-      subunits <=> money.subunits
+      value <=> money.value
     end
   end
 
