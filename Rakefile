@@ -12,20 +12,6 @@ rescue Bundler::BundlerError => e
 end
 require 'rake'
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "money"
-  gem.homepage = "http://github.com/ssoroka/money"
-  gem.license = "MIT"
-  gem.summary = %Q{Shopify's money gem}
-  gem.description = %Q{Manage money in shopify with a class that wont lose pennies during division!}
-  gem.email = "ssoroka78@gmail.com"
-  gem.authors = ["Steven Soroka"]
-  # dependencies defined in Gemfile
-end
-Jeweler::RubygemsDotOrgTasks.new
-
 require 'rspec/core'
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
