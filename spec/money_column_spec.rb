@@ -45,6 +45,7 @@ RSpec.describe 'MoneyColumn' do
   let(:toonie) { Money.new(2.00, 'CAD') }
   let(:subject) { MoneyRecord.new(price: money, prix: toonie) }
   let(:record) do
+    subject.devise = 'CAD'
     subject.save
     subject.reload
   end
@@ -89,6 +90,16 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price_usd.value).to eq(3.76)
     expect(record.price_usd.currency.to_s).to eq('USD')
     expect(record.prix.value).to eq(3.21)
+    expect(record.prix.currency.to_s).to eq('CAD')
+  end
+
+  it 'handles legacy support for saving floats with correct currency rounding' do
+    record.update(price: 3.2112, prix: 3.2156)
+    expect(record.attributes['price']).to eq(3.21)
+    expect(record.price.value).to eq(3.21)
+    expect(record.price.currency.to_s).to eq(currency)
+    expect(record.attributes['prix']).to eq(3.22)
+    expect(record.prix.value).to eq(3.22)
     expect(record.prix.currency.to_s).to eq('CAD')
   end
 
