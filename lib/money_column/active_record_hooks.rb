@@ -71,13 +71,15 @@ module MoneyColumn
           if money.blank?
             write_attribute(column, nil)
             return nil
-          elsif !money.is_a?(Money)
-            return write_attribute(column, money)
           end
 
           currency_raw_source = currency_iso || (send(currency_column) rescue nil)
-
           currency_source = Money::Helpers.value_to_currency(currency_raw_source)
+
+          if !money.is_a?(Money)
+            return write_attribute(column, Money.new(money, currency_source).value)
+          end
+
           if currency_raw_source && !currency_source.compatible?(money.currency)
             Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency}.")
           end
