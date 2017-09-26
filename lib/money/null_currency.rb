@@ -29,6 +29,10 @@ class Money
       ''
     end
 
+    def fractional?
+      true
+    end
+
     alias_method :==, :eql?
   end
 end
