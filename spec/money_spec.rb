@@ -77,7 +77,7 @@ RSpec.describe "Money" do
   end
 
   it "keeps currency across calculations" do
-    expect(Money.new(1, 'USD') - Money.new(1, 'USD') + Money.new(1.23, Money::NullCurrency.new)).to eq(Money.new(1.23, 'USD'))
+    expect(Money.new(1, 'USD') - Money.new(1, 'USD') + Money.new(1.23, Money::NULL_CURRENCY)).to eq(Money.new(1.23, 'USD'))
   end
 
   it "raises error if added other is not compatible" do
@@ -112,14 +112,14 @@ RSpec.describe "Money" do
 
   it "keeps currency when doing a computation with a null currency" do
     currency = Money.new(10, 'JPY')
-    no_currency = Money.new(1, Money::NullCurrency.new)
+    no_currency = Money.new(1, Money::NULL_CURRENCY)
     expect((no_currency + currency).currency).to eq(Money::Currency.find!('JPY'))
     expect((currency - no_currency).currency).to eq(Money::Currency.find!('JPY'))
   end
 
   it "does not log a deprecation warning when adding with a null currency value" do
     currency = Money.new(10, 'USD')
-    no_currency = Money.new(1, Money::NullCurrency.new)
+    no_currency = Money.new(1, Money::NULL_CURRENCY)
     expect(Money).not_to receive(:deprecate)
     expect(no_currency + currency).to eq(Money.new(11, 'USD'))
     expect(currency - no_currency).to eq(Money.new(9, 'USD'))
@@ -346,8 +346,8 @@ RSpec.describe "Money" do
     end
 
     it "<=> can compare with and without currency" do
-      expect(Money.new(1000, Money::NullCurrency.new) <=> Money.new(2000, 'JPY')).to eq(-1)
-      expect(Money.new(2000, 'JPY') <=> Money.new(1000, Money::NullCurrency.new)).to eq(1)
+      expect(Money.new(1000, Money::NULL_CURRENCY) <=> Money.new(2000, 'JPY')).to eq(-1)
+      expect(Money.new(2000, 'JPY') <=> Money.new(1000, Money::NULL_CURRENCY)).to eq(1)
     end
 
     it "<=> issues deprecation warning when comparing incompatible currency" do
@@ -505,7 +505,7 @@ RSpec.describe "Money" do
       ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
 
       expect(
-        Money.new(3075, Money::NullCurrency.new).allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')]),
+        Money.new(3075, Money::NULL_CURRENCY).allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')]),
       ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
     end
 
@@ -706,7 +706,7 @@ RSpec.describe "Money" do
           value: !ruby/object:BigDecimal 27:0.6935E2
           cents: 6935
       EOS
-      expect(money).to eq(Money.new(69.35, Money::NullCurrency.new))
+      expect(money).to eq(Money.new(69.35, Money::NULL_CURRENCY))
     end
 
     it "accepts BigDecimal values" do
@@ -767,7 +767,7 @@ RSpec.describe "Money" do
 
     context "with .default_currency set" do
       before(:each) { Money.default_currency = Money::Currency.new('EUR') }
-      after(:each) { Money.default_currency = Money::NullCurrency.new }
+      after(:each) { Money.default_currency = Money::NULL_CURRENCY }
 
       it "can be nested and falls back to default_currency outside of the blocks" do
         money2, money3 = nil

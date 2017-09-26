@@ -2,6 +2,8 @@ class Money
   include Comparable
   extend Forwardable
 
+  NULL_CURRENCY = NullCurrency.new.freeze
+
   attr_reader :value, :subunits, :currency
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
@@ -21,7 +23,7 @@ class Money
     alias_method :from_amount, :new
 
     def zero
-      new(0, NullCurrency.new)
+      new(0, NULL_CURRENCY)
     end
     alias_method :empty, :zero
 
@@ -70,7 +72,7 @@ class Money
 
     def default_settings
       self.parser = MoneyParser
-      self.default_currency = Money::NullCurrency.new
+      self.default_currency = Money::NULL_CURRENCY
     end
   end
   default_settings
@@ -384,6 +386,6 @@ class Money
     if currencies.size > 1
       raise ArgumentError, "operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
     end
-    currencies.first || NullCurrency.new
+    currencies.first || NULL_CURRENCY
   end
 end

@@ -44,7 +44,7 @@ class Money
             Currency.find!(currency)
           rescue Money::Currency::UnknownCurrency => error
             Money.deprecate(error.message)
-            Money::NullCurrency.new
+            Money::NULL_CURRENCY
           end
         end
       else

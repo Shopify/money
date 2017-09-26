@@ -98,7 +98,7 @@ RSpec.describe "Currency" do
     end
 
     it "returns true for null_currency" do
-      expect(currency.compatible?(Money::NullCurrency.new)).to eq(true)
+      expect(currency.compatible?(Money::NULL_CURRENCY)).to eq(true)
     end
 
     it "returns false for nil" do

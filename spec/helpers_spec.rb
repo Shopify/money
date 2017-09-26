@@ -51,7 +51,7 @@ RSpec.describe Money::Helpers do
   describe 'subject.value_to_currency' do
     it 'returns itself if it is already a currency' do
       expect(subject.value_to_currency(Money::Currency.new('usd'))).to eq(Money::Currency.new('usd'))
-      expect(subject.value_to_currency(Money::NullCurrency.new)).to be_a(Money::NullCurrency)
+      expect(subject.value_to_currency(Money::NULL_CURRENCY)).to be_a(Money::NullCurrency)
     end
 
     it 'returns the default currency when value is nil' do
@@ -72,7 +72,7 @@ RSpec.describe Money::Helpers do
 
     it 'returns the null currency when invalid iso is passed' do
       expect(Money).to receive(:deprecate).once
-      expect(subject.value_to_currency('invalid')).to eq(Money::NullCurrency.new)
+      expect(subject.value_to_currency('invalid')).to eq(Money::NULL_CURRENCY)
     end
   end
 
