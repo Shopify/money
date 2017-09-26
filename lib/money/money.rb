@@ -276,29 +276,33 @@ class Money
   #   Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)])
   #     #=> [Money.new(5), Money.new(2)]
   def allocate_max_amounts(maximums)
-    maximums = maximums.map { |max_amount| max_amount.to_money }
-    maximums_total = maximums.sum
+    allocation_currency = extract_currency(maximums + [self])
+    maximums = maximums.map { |max| max.to_money(allocation_currency) }
+    maximums_total = maximums.reduce(Money.new(0, allocation_currency), :+)
 
     splits = maximums.map do |max_amount|
-      next(Money.empty) if maximums_total.zero?
-      max_amount.value / maximums_total.value
+      next(0) if maximums_total.zero?
+      Money.rational(max_amount, maximums_total)
     end
 
-    total_allocatable = [subunits, maximums_total.subunits].min
+    total_allocatable = [
+      value * allocation_currency.subunit_to_unit,
+      maximums_total.value * allocation_currency.subunit_to_unit
+    ].min
 
     subunits_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
 
     subunits_amounts.each_with_index do |amount, index|
       break unless left_over > 0
 
-      max_amount = maximums[index].subunits
+      max_amount = maximums[index].value * allocation_currency.subunit_to_unit
       next unless amount < max_amount
 
       left_over -= 1
       subunits_amounts[index] += 1
     end
 
-    subunits_amounts.map { |cents| Money.from_subunits(cents, currency) }
+    subunits_amounts.map { |cents| Money.from_subunits(cents, allocation_currency) }
   end
 
   # Split money amongst parties evenly without losing pennies.
@@ -373,5 +377,13 @@ class Money
 
   def calculated_currency(other)
     no_currency? ? other : currency
+  end
+
+  def extract_currency(money_array)
+    currencies = money_array.lazy.select { |money| money.is_a?(Money) }.reject(&:no_currency?).map(&:currency).to_a.uniq
+    if currencies.size > 1
+      raise ArgumentError, "operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
+    end
+    currencies.first || NullCurrency.new
   end
 end

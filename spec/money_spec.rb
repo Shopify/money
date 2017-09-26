@@ -499,6 +499,22 @@ RSpec.describe "Money" do
       ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
     end
 
+    specify "#allocate_max_amounts legal computation with no currency objects" do
+      expect(
+        Money.new(3075, 'JPY').allocate_max_amounts([2600, 475]),
+      ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
+
+      expect(
+        Money.new(3075, Money::NullCurrency.new).allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')]),
+      ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
+    end
+
+    specify "#allocate_max_amounts illegal computation across currencies" do
+      expect {
+        Money.new(3075, 'USD').allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
+      }.to raise_error(ArgumentError)
+    end
+
     specify "#allocate_max_amounts drops the remainder when returning the weighted allocation without exceeding the maxima when there is no room for the remainder" do
       expect(
         Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.74)]),
