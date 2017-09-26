@@ -295,6 +295,12 @@ RSpec.describe "Money" do
     expect(Money.new(21).floor).to eq(Money.new(21))
   end
 
+  it "generates a true rational" do
+    expect(Money.rational(Money.new(10.0), Money.new(15.0))).to eq(Rational(2,3))
+    expect(Money).to receive(:deprecate).once
+    expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY'))).to eq(Rational(2,3))
+  end
+
   describe "frozen with amount of $1" do
     let (:money) { Money.new(1.00) }
 

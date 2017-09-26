@@ -39,6 +39,13 @@ class Money
       new(value, currency)
     end
 
+    def rational(money1, money2)
+      money1.send(:arithmetic, money2) do
+        factor = money1.currency.subunit_to_unit * money2.currency.subunit_to_unit
+        Rational((money1.value * factor).to_i, (money2.value * factor).to_i)
+      end
+    end
+
     def current_currency
       Thread.current[:money_currency]
     end
