@@ -185,7 +185,7 @@ RSpec.describe 'MoneyColumn' do
   end
 
   describe 'null currency and validations' do
-    let(:currency) { Money::NullCurrency.new }
+    let(:currency) { Money::NULL_CURRENCY }
     let(:subject) { MoneyWithValidation.new(price: money) }
 
     it 'is not allowed to be saved because `to_s` returns a blank string' do
