@@ -136,6 +136,8 @@ RSpec.describe "Money" do
 
   it "#inspects to a presentable string" do
     expect(money.inspect).to eq("#<Money value:1.00 currency:CAD>")
+    expect(Money.new(1, 'JPY').inspect).to eq("#<Money value:1 currency:JPY>")
+    expect(Money.new(1, 'JOD').inspect).to eq("#<Money value:1.000 currency:JOD>")
   end
 
   it "is inspectable within an array" do

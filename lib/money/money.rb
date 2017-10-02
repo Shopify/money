@@ -137,7 +137,7 @@ class Money
   end
 
   def inspect
-    "#<#{self.class} value:#{self.to_s} currency:#{self.currency}>"
+    "#<#{self.class} value:#{self.to_s(:amount)} currency:#{self.currency}>"
   end
 
   def ==(other)
