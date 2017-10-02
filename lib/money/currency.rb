@@ -58,5 +58,9 @@ class Money
     def fractional?
       @subunit_to_unit != 1
     end
+
+    def non_fractional?
+      !fractional?
+    end
   end
 end

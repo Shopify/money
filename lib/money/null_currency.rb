@@ -33,6 +33,10 @@ class Money
       true
     end
 
+    def non_fractional?
+      false
+    end
+
     alias_method :==, :eql?
   end
 end

@@ -45,8 +45,14 @@ RSpec.describe "NullCurrency" do
   end
 
   describe "#fractional?" do
-    it "returns false when currency does not use cents" do
+    it "returns true when currency does not use cents" do
       expect(null_currency.fractional?).to eq(true)
+    end
+  end
+
+  describe "#non_fractional?" do
+    it "returns false when currency does not use cents" do
+      expect(null_currency.non_fractional?).to eq(false)
     end
   end
 end
