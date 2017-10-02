@@ -109,4 +109,24 @@ RSpec.describe "Currency" do
       expect(currency.compatible?(Money::Currency.new('JPY'))).to eq(false)
     end
   end
+
+  describe "#fractional?" do
+    it "returns true when currency does use cents" do
+      expect(Money::Currency.new('USD').fractional?).to eq(true)
+    end
+
+    it "returns false when currency does not use cents" do
+      expect(Money::Currency.new('JPY').fractional?).to eq(false)
+    end
+  end
+
+  describe "#non_fractional?" do
+    it "returns false when currency does use cents" do
+      expect(Money::Currency.new('USD').non_fractional?).to eq(false)
+    end
+
+    it "returns true when currency does not use cents" do
+      expect(Money::Currency.new('JPY').non_fractional?).to eq(true)
+    end
+  end
 end

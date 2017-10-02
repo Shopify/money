@@ -54,5 +54,13 @@ class Money
 
     alias_method :==, :eql?
     alias_method :to_s, :iso_code
+
+    def fractional?
+      @subunit_to_unit != 1
+    end
+
+    def non_fractional?
+      !fractional?
+    end
   end
 end
