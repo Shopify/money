@@ -137,7 +137,7 @@ class Money
   end
 
   def inspect
-    "#<#{self.class} value:#{self.to_s(:amount)} currency:#{self.currency}>"
+    "#<#{self.class} value:#{self} currency:#{self.currency}>"
   end
 
   def ==(other)
@@ -190,9 +190,9 @@ class Money
 
   def to_s(style = nil)
     case style
-    when :legacy_dollars, nil
+    when :legacy_dollars
       sprintf("%.2f", value)
-    when :amount
+    when :amount, nil
       sprintf("%.#{currency.minor_units}f", value)
     end
   end
