@@ -803,14 +803,20 @@ RSpec.describe "Money" do
 
     it 'returns the max value if the original value is larger' do
       money = Money.new(9001, 'EUR').clamp(min, max)
-      expect(money.clamp(min, max).value).to eq(9000)
-      expect(money.clamp(min, max).currency.iso_code).to eq('EUR')
+      expect(money.value).to eq(9000)
+      expect(money.currency.iso_code).to eq('EUR')
     end
 
     it 'returns the min value if the original value is smaller' do
       money = Money.new(-9001, 'EUR').clamp(min, max)
       expect(money.value).to eq(-9000)
       expect(money.currency.iso_code).to eq('EUR')
+    end
+
+    it 'works the same if min max values are inverted' do
+      expect(Money.new(5000, 'EUR').clamp(max, min)).to eq(Money.new(5000, 'EUR'))
+      expect(Money.new(-9001, 'EUR').clamp(max, min)).to eq(Money.new(-9000, 'EUR'))
+      expect(Money.new(9001, 'EUR').clamp(max, min)).to eq(Money.new(9000, 'EUR'))
     end
   end
 end
