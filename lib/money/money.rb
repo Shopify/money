@@ -335,7 +335,7 @@ class Money
   # closest min or max value.
   #
   # @example
-  #   Money.new(50, "CAD").clamp(1, 100) #=> Money.new(10, "CAD")
+  #   Money.new(50, "CAD").clamp(1, 100) #=> Money.new(50, "CAD")
   #
   #   Money.new(120, "CAD").clamp(0, 100) #=> Money.new(100, "CAD")
   def clamp(min, max)
