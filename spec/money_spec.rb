@@ -747,6 +747,14 @@ RSpec.describe "Money" do
       expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).once
       Money.deprecate('ok')
     end
+
+    it "only sends a callstack of events outside of the money gem" do
+      expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).with(
+        -> (message) { message == "[Shopify/Money] message\n" },
+        -> (callstack) { !callstack.first.to_s.include?('gems/money') && callstack.size > 0 }
+      )
+      Money.deprecate('message')
+    end
   end
 
   describe '#use_currency' do
