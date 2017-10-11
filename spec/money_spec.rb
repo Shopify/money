@@ -29,9 +29,8 @@ RSpec.describe "Money" do
   end
 
   it "defaults to 0 when constructed with an invalid string" do
-    Money.active_support_deprecator.silence do
-      expect(Money.new('invalid')).to eq(Money.new(0.00))
-    end
+    expect(Money).to receive(:deprecate).once
+    expect(Money.new('invalid')).to eq(Money.new(0.00))
   end
 
   it "to_s correctly displays the right number of decimal places" do
@@ -239,9 +238,7 @@ RSpec.describe "Money" do
   end
 
   it "returns cents in to_liquid" do
-    Money.active_support_deprecator.silence do
-      expect(Money.new(1.00).to_liquid).to eq(100)
-    end
+    expect(Money.new(1.00).to_liquid).to eq(100)
   end
 
   it "returns cents in to_json" do
@@ -413,9 +410,7 @@ RSpec.describe "Money" do
     end
 
     it "returns cents as 100 cents" do
-      Money.active_support_deprecator.silence do
-        expect(money.cents).to eq(100)
-      end
+      expect(money.cents).to eq(100)
     end
 
     it "returns cents as 100 cents" do
