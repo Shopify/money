@@ -4,7 +4,7 @@ class Money
   module Helpers
     extend self
 
-    NUMERIC_REGEX = /\A-?\d*\.?\d*\z/.freeze
+    NUMERIC_REGEX = /\A\s*-?\d*\.?\d*\s*\z/
     DECIMAL_ZERO = BigDecimal.new(0).freeze
 
     def value_to_decimal(num)
