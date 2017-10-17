@@ -146,6 +146,16 @@ RSpec.describe "Money" do
 
   it "correctly support eql? as a value object" do
     expect(money).to eq(Money.new(1))
+    expect(money).to eq(Money.new(1, 'CAD'))
+  end
+
+  it "does not eql? with a non money object" do
+    expect(money).to_not eq(1)
+    expect(money).to_not eq(OpenStruct.new(value: 1))
+  end
+
+  it "does not eql? when currency missmatch" do
+    expect(money).to_not eq(Money.new(1, 'JPY'))
   end
 
   it "is addable with integer" do
