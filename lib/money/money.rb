@@ -146,9 +146,8 @@ class Money
 
   def eql?(other)
     return false unless other.is_a?(Money)
-    arithmetic(other) do |money|
-      value == money.value
-    end
+    return false unless currency.compatible?(other.currency)
+    value == other.value
   end
 
   class ReverseOperationProxy
