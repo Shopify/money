@@ -12,6 +12,15 @@ RSpec.describe "Money" do
     expect(Money.empty).to eq(Money.new)
   end
 
+  context "default currency not set" do
+    before(:each) { Money.default_currency = nil }
+    after(:each) { Money.default_currency = Money::NULL_CURRENCY }
+
+    it "raises an error" do
+      expect { money }.to raise_error(ArgumentError)
+    end
+  end
+
   it ".zero has no currency" do
     expect(Money.zero.currency).to be_a(Money::NullCurrency)
   end

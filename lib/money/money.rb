@@ -11,7 +11,7 @@ class Money
     attr_accessor :parser, :default_currency
 
     def new(value = 0, currency = nil)
-      currency ||= current_currency || default_currency
+      currency ||= resolve_currency
 
       if value == 0
         @@zero_money ||= {}
@@ -73,6 +73,12 @@ class Money
     def default_settings
       self.parser = MoneyParser
       self.default_currency = Money::NULL_CURRENCY
+    end
+
+    private
+
+    def resolve_currency
+      current_currency || default_currency || raise(ArgumentError, 'missing currency')
     end
   end
   default_settings
