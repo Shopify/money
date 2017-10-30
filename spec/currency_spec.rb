@@ -10,7 +10,8 @@ RSpec.describe "Currency" do
     "minor_units": 2,
     "symbol": '$',
     "disambiguate_symbol": "US$",
-    "subunit_symbol": "¢"
+    "subunit_symbol": "¢",
+    "decimal_mark": ".",
   }
 
   let(:currency) { Money::Currency.new('usd') }
