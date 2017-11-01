@@ -13,9 +13,10 @@ class Money
     def new(value = 0, currency = nil)
       currency ||= resolve_currency
 
-      if value == 0
+      value = Helpers.value_to_decimal(value)
+      if value.zero?
         @@zero_money ||= {}
-        @@zero_money[currency] ||= super(0, currency)
+        @@zero_money[currency] ||= super(Helpers::DECIMAL_ZERO, currency)
       else
         super(value, currency)
       end
@@ -83,16 +84,16 @@ class Money
   end
   default_settings
 
-  def initialize(value = 0, currency = nil)
-    raise ArgumentError if value.respond_to?(:nan?) && value.nan?
+  def initialize(value, currency)
+    raise ArgumentError if value.nan?
     @currency = Helpers.value_to_currency(currency)
-    @value = Helpers.value_to_decimal(value).round(@currency.minor_units)
+    @value = value.round(@currency.minor_units)
     @subunits = (@value * @currency.subunit_to_unit).to_i
     freeze
   end
 
   def init_with(coder)
-    initialize(coder['value'], coder['currency'])
+    initialize(Helpers.value_to_decimal(coder['value']), coder['currency'])
   end
 
   def encode_with(coder)
