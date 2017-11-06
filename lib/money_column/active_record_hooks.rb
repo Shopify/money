@@ -37,11 +37,13 @@ module MoneyColumn
         else
           raise ArgumentError, 'must set one of :currency_column or :currency options'
         end
+        currency_column = currency_column.to_s.freeze
 
         columns.flatten.each do |column|
-          attribute(column.to_s, MoneyColumn::ActiveRecordType.new)
-          money_column_reader(column, currency_column, currency_iso, coerce_null)
-          money_column_writer(column, currency_column, currency_iso, currency_read_only)
+          column_string = column.to_s.freeze
+          attribute(column_string, MoneyColumn::ActiveRecordType.new)
+          money_column_reader(column_string, currency_column, currency_iso, coerce_null)
+          money_column_writer(column_string, currency_column, currency_iso, currency_read_only)
         end
       end
 
