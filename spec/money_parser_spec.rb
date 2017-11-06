@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe MoneyParser do
   before(:each) do
-    @parser = MoneyParser.new
+    @parser = MoneyParser
   end
 
   describe "parsing of amounts with period decimal separator" do
@@ -12,6 +12,10 @@ RSpec.describe MoneyParser do
 
     it "parses an invalid string to $0" do
       expect(@parser.parse("no money")).to eq(Money.zero)
+    end
+
+    it "parses raise with an invalid string and strict option" do
+      expect { @parser.parse("no money", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
     end
 
     it "parses a single digit integer string" do
@@ -102,6 +106,18 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("--0.123--")).to eq(Money.new(-0.12))
     end
 
+    it "parses a positive amount with a thousands separator with no decimal" do
+      expect(@parser.parse("1.000")).to eq(Money.new(1_000))
+    end
+
+    it "parses a positive amount with a thousands dot separator currency and no decimal" do
+      expect(@parser.parse("1.000", 'EUR')).to eq(Money.new(1_000, 'EUR'))
+    end
+
+    it "parses a three digit currency" do
+      expect(@parser.parse("1.000", 'JOD')).to eq(Money.new(1, 'JOD'))
+    end
+
     it "parses no currency amount" do
       expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1.00))
     end
@@ -112,6 +128,14 @@ RSpec.describe MoneyParser do
 
     it "parses amount with multiple consistent thousands delimiters" do
       expect(@parser.parse("1.111.111")).to eq(Money.new(1_111_111))
+    end
+
+    it "parses amount with multiple inconsistent thousands delimiters" do
+      expect(@parser.parse("1.1.11.111")).to eq(Money.new(1_111_111))
+    end
+
+    it "parses raises with multiple inconsistent thousands delimiters and strict option" do
+      expect { @parser.parse("1.1.11.111", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
     end
   end
 
@@ -148,24 +172,32 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("-100.000,00")).to eq(Money.new(-100_000.00))
     end
 
-    it "parses a positive amount with a thousands separator with no decimal" do
-      expect(@parser.parse("1.000")).to eq(Money.new(1_000))
-    end
-
-    it "parses a positive amount with a thousands dot separator currency and no decimal" do
-      expect(@parser.parse("1.000", 'EUR')).to eq(Money.new(1_000, 'EUR'))
-    end
-
-    it "parses a three digit currency" do
-      expect(@parser.parse("1.000", 'JOD')).to eq(Money.new(1, 'JOD'))
-    end
-
     it "parses amount with 3 decimals and 0 dollar amount" do
       expect(@parser.parse("0,123")).to eq(Money.new(0.12))
     end
 
     it "parses negative amount with 3 decimals and 0 dollar amount" do
       expect(@parser.parse("-0,123")).to eq(Money.new(-0.12))
+    end
+
+    it "parses amount with more than 3 decimals correctly" do
+      expect(@parser.parse("1,11111111")).to eq(Money.new(1.11))
+    end
+
+    it "parses amount with more than 3 decimals correctly and a currency" do
+      expect(@parser.parse("1,11111111", 'CAD')).to eq(Money.new(111_111_111))
+    end
+
+    it "parses amount with multiple consistent thousands delimiters" do
+      expect(@parser.parse("1,111,111")).to eq(Money.new(1_111_111))
+    end
+
+    it "parses amount with multiple inconsistent thousands delimiters" do
+      expect(@parser.parse("1,1,11,111")).to eq(Money.new(1_111_111))
+    end
+
+    it "parses raises with multiple inconsistent thousands delimiters and strict option" do
+      expect { @parser.parse("1,1,11,111", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
     end
   end
 
@@ -240,13 +272,11 @@ RSpec.describe MoneyParser do
       '1,234,567.89',
       '1 234 567.89',
       '1 234 567,89',
-      '1,234,567·89',
       '1.234.567,89',
       '1˙234˙567,89',
       '12,34,567.89',
       "1'234'567.89",
       "1'234'567,89",
-      '1.234.567’89',
       '123,4567.89',
       ].each do |number|
         it "parses #{number}" do

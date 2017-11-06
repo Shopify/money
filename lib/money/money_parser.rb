@@ -1,42 +1,123 @@
+# frozen_string_literal: true
+
 # Parse an amount from a string
 class MoneyParser
-  MARKS = "\.,·’"
-  EXTRA_MARKS = "\s˙'"
+  class MoneyFormatError < ArgumentError; end
 
-  def self.parse(input, currency = nil)
-    new.parse(input, currency)
+  MARKS = %w[. , · ’ ˙ '] + [' ']
+
+  ESCAPED_MARKS = Regexp.escape(MARKS.join)
+  ESCAPED_NON_SPACE_MARKS = Regexp.escape((MARKS - [' ']).join)
+  ESCAPED_NON_DOT_MARKS = Regexp.escape((MARKS - ['.']).join)
+  ESCAPED_NON_COMMA_MARKS = Regexp.escape((MARKS - [',']).join)
+
+  NUMERIC_REGEX = /(
+    [\+\-]?
+    [\d#{ESCAPED_NON_SPACE_MARKS}][\d#{ESCAPED_MARKS}]*
+  )/ix
+
+  # 1,234,567.89
+  DOT_DECIMAL_REGEX = /\A
+    [\+\-]?
+    (?:
+      (?:\d+)
+      (?:[#{ESCAPED_NON_DOT_MARKS}]\d{3})+
+      (?:\.\d+)?
+    )
+  \z/ix
+
+  # 1.234.567,89
+  COMMA_DECIMAL_REGEX = /\A
+    [\+\-]?
+    (?:
+      (?:\d+)
+      (?:[#{ESCAPED_NON_COMMA_MARKS}]\d{3})+
+      (?:,\d+)?
+    )
+  \z/ix
+
+  # 12,34,567.89
+  INDIAN_NUMERIC_REGEX = /\A
+    [+\-]?
+    (?:
+      (?:\d+)
+      (?:\,\d{2})+
+      (?:\,\d{3})
+      (?:.\d+)?
+    )
+  \z/ix
+
+  # 1,1123,4567.89
+  CHINESE_NUMERIC_REGEX = /\A
+    [+\-]?
+    (?:
+      (?:\d+)
+      (?:\,\d{4})+
+      (?:.\d+)?
+    )
+  \z/ix
+
+  def self.parse(input, currency = nil, **options)
+    new.parse(input, currency, **options)
   end
 
-  def parse(input, currency = nil)
-    amount = extract_money(input.to_s, currency)
+  def parse(input, currency = nil, strict: false)
+    amount = extract_money(input.to_s, currency, strict)
     Money.new(amount, currency)
   end
 
   private
 
-  def extract_money(input, currency)
-    return '0' if input.empty?
+  def extract_money(input, currency, strict)
+    if input.empty?
+      return '0'
+    end
 
-    amount = input.scan(/(-?[\d#{MARKS}][\d#{MARKS}#{EXTRA_MARKS}]*)/).first
-    return '0' unless amount
-    amount = amount.first.tr(EXTRA_MARKS, '')
+    number = input.scan(NUMERIC_REGEX).flatten.first.try!(:strip)
 
-    *other_marks, last_mark = amount.scan(/[#{MARKS}]/)
-    return amount unless last_mark
+    unless number
+      raise MoneyFormatError, "invalid money string: #{input}" if strict
+      return '0'
+    end
 
-    *dollars, cents = amount.split(last_mark)
-    dollars = dollars.join.tr(MARKS, '')
+    marks = number.scan(/[#{ESCAPED_MARKS}]/).flatten
 
-    if last_digits_decimals?(dollars, cents, last_mark, other_marks, currency)
-      "#{dollars}.#{cents}"
+    if marks.empty?
+      return number
+    end
+
+    if marks.size == 1
+      return normalize_number(number, marks, currency)
+    end
+
+    if amount = number[DOT_DECIMAL_REGEX] || number[INDIAN_NUMERIC_REGEX] || number[CHINESE_NUMERIC_REGEX]
+      return amount.tr(ESCAPED_NON_DOT_MARKS, '')
+    end
+
+    if amount = number[COMMA_DECIMAL_REGEX]
+      return amount.tr(ESCAPED_NON_COMMA_MARKS, '').sub(',', '.')
+    end
+
+    raise MoneyFormatError, "invalid money string: #{input}" if strict
+
+    normalize_number(number, marks, currency)
+  end
+
+  def normalize_number(number, marks, currency)
+    digits = number.rpartition(marks.last)
+    digits.first.tr!(ESCAPED_MARKS, '')
+
+    if last_digits_decimals?(digits, marks, currency)
+      "#{digits.first}.#{digits.last}"
     else
-      "#{dollars}#{cents}"
+      "#{digits.first}#{digits.last}"
     end
   end
 
-  def last_digits_decimals?(first_digits, last_digits, last_mark, other_marks, currency)
+  def last_digits_decimals?(digits, marks, currency)
     # Thousands marks are always different from decimal marks
     # Example: 1,234,456
+    *other_marks, last_mark = marks
     other_marks.uniq!
     if other_marks.size == 1
       return other_marks.first != last_mark
@@ -44,13 +125,13 @@ class MoneyParser
 
     # Thousands always have more than 2 digits
     # Example: 1,23 must be 1 dollar and 23 cents
-    if last_digits.size < 3
+    if digits.last.size < 3
       return true
     end
 
     # 0 before the final mark indicates last digits are decimals
     # Example: 0,23
-    if first_digits.to_i.zero?
+    if digits.first.to_i.zero?
       return true
     end
 
@@ -60,6 +141,6 @@ class MoneyParser
     end
 
     # legacy support for 1.000
-    last_digits.size != 3
+    digits.last.size != 3
   end
 end
