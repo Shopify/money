@@ -11,6 +11,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses an invalid string to $0" do
+      expect(Money).to receive(:deprecate).once
       expect(@parser.parse("no money")).to eq(Money.zero)
     end
 
@@ -131,6 +132,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses amount with multiple inconsistent thousands delimiters" do
+      expect(Money).to receive(:deprecate).once
       expect(@parser.parse("1.1.11.111")).to eq(Money.new(1_111_111))
     end
 
@@ -193,6 +195,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses amount with multiple inconsistent thousands delimiters" do
+      expect(Money).to receive(:deprecate).once
       expect(@parser.parse("1,1,11,111")).to eq(Money.new(1_111_111))
     end
 

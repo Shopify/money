@@ -28,8 +28,8 @@ class Money
     end
     alias_method :empty, :zero
 
-    def parse(input, currency = nil)
-      parser.parse(input, currency)
+    def parse(*args)
+      parser.parse(*args)
     end
 
     def from_cents(cents, currency = nil)

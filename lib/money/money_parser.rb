@@ -77,6 +77,8 @@ class MoneyParser
 
     unless number
       raise MoneyFormatError, "invalid money string: #{input}" if strict
+
+      Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
       return '0'
     end
 
@@ -100,6 +102,7 @@ class MoneyParser
 
     raise MoneyFormatError, "invalid money string: #{input}" if strict
 
+    Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
     normalize_number(number, marks, currency)
   end
 
