@@ -27,7 +27,7 @@ class Money
     end
 
     attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_symbol,
-                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol
+                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol, :decimal_mark
 
     def initialize(currency_iso)
       data = self.class.currencies[currency_iso]
@@ -40,6 +40,7 @@ class Money
       @name                  = data['name']
       @smallest_denomination = data['smallest_denomination']
       @subunit_to_unit       = data['subunit_to_unit']
+      @decimal_mark          = data['decimal_mark']
       @minor_units           = subunit_to_unit == 0 ? 0 : Math.log(subunit_to_unit, 10).round.to_i
       freeze
     end
