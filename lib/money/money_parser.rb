@@ -73,7 +73,7 @@ class MoneyParser
       return '0'
     end
 
-    number = input.scan(NUMERIC_REGEX).flatten.first.try!(:strip)
+    number = input.scan(NUMERIC_REGEX).flatten.first
 
     unless number
       raise MoneyFormatError, "invalid money string: #{input}" if strict
@@ -82,8 +82,9 @@ class MoneyParser
       return '0'
     end
 
-    marks = number.scan(/[#{ESCAPED_MARKS}]/).flatten
+    number.sub!(/[#{ESCAPED_MARKS}]\z/, '')
 
+    marks = number.scan(/[#{ESCAPED_MARKS}]/).flatten
     if marks.empty?
       return number
     end
