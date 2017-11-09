@@ -3,9 +3,9 @@ require 'bigdecimal'
 
 class Money
   module Helpers
-    extend self
+    module_function
 
-    NUMERIC_REGEX = /\A\s*-?\d*\.?\d*\s*\z/
+    NUMERIC_REGEX = /\A\s*[\+\-]?\d*(\.\d*)?\s*\z/
     DECIMAL_ZERO = BigDecimal.new(0).freeze
 
     def value_to_decimal(num)
@@ -22,10 +22,7 @@ class Money
         when Float, Rational
           BigDecimal.new(num, Float::DIG)
         when String
-          if num !~ NUMERIC_REGEX
-            Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
-          end
-          BigDecimal.new(num)
+          string_to_decimal(num)
         else
           raise ArgumentError, "could not parse as decimal #{num.inspect}"
         end
@@ -55,6 +52,19 @@ class Money
 
     def no_currency?(currency)
       currency.nil? || currency.to_s.empty? || (currency.to_s.casecmp('xxx') == 0)
+    end
+
+    def string_to_decimal(num)
+      if num =~ NUMERIC_REGEX
+        return BigDecimal.new(num)
+      end
+
+      Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
+      begin
+        BigDecimal.new(num)
+      rescue ArgumentError
+        DECIMAL_ZERO
+      end
     end
   end
 end

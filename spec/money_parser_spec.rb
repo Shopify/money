@@ -63,6 +63,11 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("410")).to eq(Money.new(410.00))
     end
 
+    it "parses an amount ending with a ." do
+      expect(@parser.parse("1.")).to eq(Money.new(1))
+      expect(@parser.parse("100,000.")).to eq(Money.new(100_000))
+    end
+
     it "parses a positive amount with a thousands separator" do
       expect(@parser.parse("100,000.00")).to eq(Money.new(100_000.00))
     end
@@ -172,6 +177,11 @@ RSpec.describe MoneyParser do
 
     it "parses a negative amount with a thousands separator" do
       expect(@parser.parse("-100.000,00")).to eq(Money.new(-100_000.00))
+    end
+
+    it "parses amount ending with a comma" do
+      expect(@parser.parse("1,")).to eq(Money.new(1))
+      expect(@parser.parse("100.000,")).to eq(Money.new(100_000))
     end
 
     it "parses amount with 3 decimals and 0 dollar amount" do
