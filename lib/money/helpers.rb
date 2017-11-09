@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'bigdecimal'
 
 class Money
@@ -53,7 +54,7 @@ class Money
     end
 
     def no_currency?(currency)
-      currency.nil? || currency.to_s.empty? || currency.to_s.downcase == 'xxx'
+      currency.nil? || currency.to_s.empty? || (currency.to_s.casecmp('xxx') == 0)
     end
   end
 end

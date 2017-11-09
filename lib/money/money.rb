@@ -351,8 +351,10 @@ class Money
   def clamp(min, max)
     raise ArgumentError, 'min cannot be greater than max' if min > max
 
-    clamped_value = [min, self.value, max].sort[1]
-    if self.value == clamped_value
+    clamped_value = min if self.value < min
+    clamped_value = max if self.value > max
+
+    if clamped_value.nil?
       self
     else
       Money.new(clamped_value, self.currency)
