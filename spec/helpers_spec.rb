@@ -18,6 +18,10 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_decimal(nil)).to eq(0)
     end
 
+    it 'returns zero when empty' do
+      expect(subject.value_to_decimal('')).to eq(0)
+    end
+
     it 'returns the bigdecimal version of a integer' do
       expect(subject.value_to_decimal(1)).to eq(BigDecimal.new('1'))
     end
