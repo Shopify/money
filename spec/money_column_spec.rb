@@ -3,7 +3,7 @@ require 'spec_helper'
 class MoneyRecord < ActiveRecord::Base
   RATE = 1.17
   before_validation do
-    self.price_usd = Money.new(self[:price] * RATE, 'USD') if self[:price]
+    self.price_usd = Money.new(self["price"] * RATE, 'USD') if self["price"]
   end
   money_column :price, currency_column: 'currency'
   money_column :prix, currency_column: :devise
@@ -254,11 +254,11 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'memoization' do
     it 'correctly memoizes the read value' do
-      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(nil)
+      expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(nil)
       price = Money.new(1, 'USD')
       record = MoneyRecord.new(price: price)
       expect(record.price).to eq(price)
-      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(price)
     end
 
     it 'memoizes values get reset when writing a new value' do
@@ -268,18 +268,18 @@ RSpec.describe 'MoneyColumn' do
       price = Money.new(2, 'USD')
       record.update!(price: price)
       expect(record.price).to eq(price)
-      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(price)
     end
 
     it 'reload will clear memoizes money values' do
       price = Money.new(1, 'USD')
       record = MoneyRecord.create(price: price)
       expect(record.price).to eq(price)
-      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(price)
       record.reload
-      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(nil)
+      expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(nil)
       record.price
-      expect(record.instance_variable_get(:@money_column_cache)[:price]).to eq(price)
+      expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(price)
     end
   end
 
