@@ -37,6 +37,10 @@ RSpec.describe "Money" do
     expect(Money.new).to eq(Money.new(0))
   end
 
+  it "defaults to 0 when constructed with an empty string" do
+    expect(Money.new('')).to eq(Money.new(0))
+  end
+
   it "defaults to 0 when constructed with an invalid string" do
     expect(Money).to receive(:deprecate).once
     expect(Money.new('invalid')).to eq(Money.new(0.00))
