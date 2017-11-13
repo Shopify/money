@@ -11,8 +11,9 @@ RSpec.describe MoneyParser do
     end
 
     it "parses an invalid string to $0" do
-      expect(Money).to receive(:deprecate).once
+      expect(Money).to receive(:deprecate).twice
       expect(@parser.parse("no money")).to eq(Money.zero)
+      expect(@parser.parse("1..")).to eq(Money.zero)
     end
 
     it "parses raise with an invalid string and strict option" do
@@ -66,6 +67,10 @@ RSpec.describe MoneyParser do
     it "parses an amount ending with a ." do
       expect(@parser.parse("1.")).to eq(Money.new(1))
       expect(@parser.parse("100,000.")).to eq(Money.new(100_000))
+    end
+
+    it "parses an amount starting with a ." do
+      expect(@parser.parse(".12")).to eq(Money.new(0.12))
     end
 
     it "parses a positive amount with a thousands separator" do
