@@ -80,7 +80,7 @@ RSpec.describe "Money" do
   end
 
   it "as_json as a json containing the value and currency" do
-    expect(money.as_json).to eq('{"value":"1.0","currency":"CAD"}')
+    expect(money.as_json).to eq(value: "1.00", currency: "CAD")
   end
 
   it "is constructable with a BigDecimal" do
@@ -283,7 +283,7 @@ RSpec.describe "Money" do
   end
 
   it "returns in to_json" do
-    expect(Money.new(1.00).to_json).to eq('{"value":"1.0","currency":"CAD"}')
+    expect(Money.new(1.00).to_json).to eq('{"value":"1.00","currency":"CAD"}')
   end
 
   it "supports absolute value" do
@@ -300,6 +300,10 @@ RSpec.describe "Money" do
 
   it "supports to_f" do
     expect(Money.new(1.50).to_f.to_s).to eq("1.5")
+  end
+
+  it "is creatable from a json string" do
+    expect(Money.from_json('{"value":"1.0","currency":"CAD"}')).to eq(Money.new(1, 'CAD'))
   end
 
   it "is creatable from an integer value in cents" do

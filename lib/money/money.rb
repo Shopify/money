@@ -32,6 +32,11 @@ class Money
       parser.parse(*args)
     end
 
+    def from_json(json)
+      data = JSON.parse(json)
+      Money.new(data['value'], data['currency'])
+    end
+
     def from_cents(cents, currency = nil)
       new(cents.round.to_f / 100, currency)
     end
@@ -213,12 +218,8 @@ class Money
     cents
   end
 
-  def to_json(options = {})
-    JSON.dump({value: value, currency: currency})
-  end
-
-  def as_json(*args)
-    to_json
+  def as_json(*_args)
+    { value: to_s(:amount), currency: currency.to_s }
   end
 
   def abs
