@@ -79,8 +79,8 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s(:amount)).to eq("1")
   end
 
-  it "as_json as a float with 2 decimal places" do
-    expect(money.as_json).to eq("1.00")
+  it "as_json as a json containing the value and currency" do
+    expect(money.as_json).to eq('{"value":"1.0","currency":"CAD"}')
   end
 
   it "is constructable with a BigDecimal" do
@@ -282,8 +282,8 @@ RSpec.describe "Money" do
     expect(Money.new(1.00).to_liquid).to eq(100)
   end
 
-  it "returns cents in to_json" do
-    expect(Money.new(1.00).to_json).to eq("1.00")
+  it "returns in to_json" do
+    expect(Money.new(1.00).to_json).to eq('{"value":"1.0","currency":"CAD"}')
   end
 
   it "supports absolute value" do

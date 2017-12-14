@@ -214,11 +214,11 @@ class Money
   end
 
   def to_json(options = {})
-    to_s
+    JSON.dump({value: value, currency: currency})
   end
 
   def as_json(*args)
-    to_s
+    to_json
   end
 
   def abs
