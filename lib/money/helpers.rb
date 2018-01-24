@@ -52,10 +52,6 @@ class Money
       end
     end
 
-    def no_currency?(currency)
-      currency.nil? || currency.to_s.empty? || (currency.to_s.casecmp('xxx') == 0)
-    end
-
     def string_to_decimal(num)
       if num =~ NUMERIC_REGEX
         return BigDecimal.new(num)
