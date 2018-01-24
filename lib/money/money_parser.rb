@@ -62,6 +62,7 @@ class MoneyParser
   end
 
   def parse(input, currency = nil, strict: false)
+    currency = Money::Helpers.value_to_currency(currency)
     amount = extract_money(input.to_s, currency, strict)
     Money.new(amount, currency)
   end
@@ -139,8 +140,6 @@ class MoneyParser
       return true
     end
 
-    # The last mark matches the one used by the provided currency to delimiter decimals
-    if currency
       return Money::Helpers.value_to_currency(currency).decimal_mark == last_mark
     end
 

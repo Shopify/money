@@ -129,6 +129,10 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("1.000", 'JOD')).to eq(Money.new(1, 'JOD'))
     end
 
+    it "parses uses currency when passed as block to with_currency" do
+      expect(Money.with_currency('JOD') { @parser.parse("1.000") }).to eq(Money.new(1, 'JOD'))
+    end
+
     it "parses no currency amount" do
       expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1.00))
     end

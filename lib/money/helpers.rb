@@ -34,16 +34,18 @@ class Money
       case currency
       when Money::Currency, Money::NullCurrency
         currency
-      when String, nil
-        if no_currency?(currency)
-          Money.default_currency
-        else
-          begin
-            Currency.find!(currency)
-          rescue Money::Currency::UnknownCurrency => error
-            Money.deprecate(error.message)
-            Money::NULL_CURRENCY
-          end
+      when nil, ''
+        default = Money.current_currency || Money.default_currency
+        raise(ArgumentError, 'missing currency') if default.nil? || default == ''
+        value_to_currency(default)
+      when 'xxx', 'XXX'
+        Money::NULL_CURRENCY
+      when String
+        begin
+          Currency.find!(currency)
+        rescue Money::Currency::UnknownCurrency => error
+          Money.deprecate(error.message)
+          Money::NULL_CURRENCY
         end
       else
         raise ArgumentError, "could not parse as currency #{currency.inspect}"

@@ -79,7 +79,11 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns the default currency when value is xxx' do
-      expect(subject.value_to_currency('xxx')).to eq(Money.default_currency)
+      expect(subject.value_to_currency('xxx')).to eq(Money::NULL_CURRENCY)
+    end
+
+    it 'returns the current currency when value is set' do
+      expect(Money.with_currency('USD') { subject.value_to_currency(nil) }).to eq(Money::Currency.find!('usd'))
     end
 
     it 'returns the matching currency' do
