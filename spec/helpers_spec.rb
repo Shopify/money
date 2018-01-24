@@ -66,7 +66,7 @@ RSpec.describe Money::Helpers do
 
   describe 'subject.value_to_currency' do
     it 'returns itself if it is already a currency' do
-      expect(subject.value_to_currency(Money::Currency.new('usd'))).to eq(Money::Currency.new('usd'))
+      expect(subject.value_to_currency(Money::Currency.new('usd'))).to eq(Money::Currency.find!('usd'))
       expect(subject.value_to_currency(Money::NULL_CURRENCY)).to be_a(Money::NullCurrency)
     end
 

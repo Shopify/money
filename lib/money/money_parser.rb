@@ -22,7 +22,7 @@ class MoneyParser
     (?:
       (?:\d+)
       (?:[#{ESCAPED_NON_DOT_MARKS}]\d{3})+
-      (?:\.\d+)?
+      (?:\.\d{2,})?
     )
   \z/ix
 
@@ -32,28 +32,28 @@ class MoneyParser
     (?:
       (?:\d+)
       (?:[#{ESCAPED_NON_COMMA_MARKS}]\d{3})+
-      (?:,\d+)?
+      (?:\,\d{2,})?
     )
   \z/ix
 
   # 12,34,567.89
   INDIAN_NUMERIC_REGEX = /\A
-    [+\-]?
+    [\+\-]?
     (?:
       (?:\d+)
       (?:\,\d{2})+
       (?:\,\d{3})
-      (?:.\d+)?
+      (?:\.\d{2})?
     )
   \z/ix
 
   # 1,1123,4567.89
   CHINESE_NUMERIC_REGEX = /\A
-    [+\-]?
+    [\+\-]?
     (?:
       (?:\d+)
       (?:\,\d{4})+
-      (?:.\d+)?
+      (?:\.\d{2})?
     )
   \z/ix
 
@@ -75,15 +75,13 @@ class MoneyParser
     end
 
     number = input.scan(NUMERIC_REGEX).flatten.first
+    number = number.to_s.strip
 
-    unless number
+    if number.empty?
       raise MoneyFormatError, "invalid money string: #{input}" if strict
-
       Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
       return '0'
     end
-
-    number.sub!(/[#{ESCAPED_MARKS}]\z/, '')
 
     marks = number.scan(/[#{ESCAPED_MARKS}]/).flatten
     if marks.empty?
@@ -94,6 +92,9 @@ class MoneyParser
       return normalize_number(number, marks, currency)
     end
 
+    # remove end of string mark
+    number.sub!(/[#{ESCAPED_MARKS}]\z/, '')
+
     if amount = number[DOT_DECIMAL_REGEX] || number[INDIAN_NUMERIC_REGEX] || number[CHINESE_NUMERIC_REGEX]
       return amount.tr(ESCAPED_NON_DOT_MARKS, '')
     end
@@ -103,8 +104,8 @@ class MoneyParser
     end
 
     raise MoneyFormatError, "invalid money string: #{input}" if strict
-
     Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
+
     normalize_number(number, marks, currency)
   end
 
@@ -131,7 +132,7 @@ class MoneyParser
     # Thousands always have more than 2 digits
     # Example: 1,23 must be 1 dollar and 23 cents
     if digits.last.size < 3
-      return true
+      return !digits.last.empty?
     end
 
     # 0 before the final mark indicates last digits are decimals
@@ -140,10 +141,12 @@ class MoneyParser
       return true
     end
 
-      return Money::Helpers.value_to_currency(currency).decimal_mark == last_mark
+    # legacy support for 1.000
+    if currency.to_s.empty? && digits.last.size == 3
+      return false
     end
 
-    # legacy support for 1.000
-    digits.last.size != 3
+    # The last mark matches the one used by the provided currency to delimiter decimals
+    currency.decimal_mark == last_mark
   end
 end

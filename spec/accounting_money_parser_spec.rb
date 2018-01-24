@@ -122,7 +122,9 @@ RSpec.describe AccountingMoneyParser do
     end
 
     it "parses thousands amount" do
-      expect(@parser.parse("1.000")).to eq(Money.new(1000.00))
+      Money.with_currency(Money::NULL_CURRENCY) do
+        expect(@parser.parse("1.000")).to eq(Money.new(1000.00))
+      end
     end
 
     it "parses negative hundreds amount" do
