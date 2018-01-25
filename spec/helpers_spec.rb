@@ -66,7 +66,7 @@ RSpec.describe Money::Helpers do
 
   describe 'subject.value_to_currency' do
     it 'returns itself if it is already a currency' do
-      expect(subject.value_to_currency(Money::Currency.new('usd'))).to eq(Money::Currency.new('usd'))
+      expect(subject.value_to_currency(Money::Currency.new('usd'))).to eq(Money::Currency.find!('usd'))
       expect(subject.value_to_currency(Money::NULL_CURRENCY)).to be_a(Money::NullCurrency)
     end
 
@@ -79,7 +79,11 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns the default currency when value is xxx' do
-      expect(subject.value_to_currency('xxx')).to eq(Money.default_currency)
+      expect(subject.value_to_currency('xxx')).to eq(Money::NULL_CURRENCY)
+    end
+
+    it 'returns the current currency when value is set' do
+      expect(Money.with_currency('USD') { subject.value_to_currency(nil) }).to eq(Money::Currency.find!('usd'))
     end
 
     it 'returns the matching currency' do
@@ -90,29 +94,10 @@ RSpec.describe Money::Helpers do
       expect(Money).to receive(:deprecate).once
       expect(subject.value_to_currency('invalid')).to eq(Money::NULL_CURRENCY)
     end
-  end
-
-  describe 'no_currency?' do
-    it 'returns true when the currency matches a no currency iso code xxx' do
-      expect(subject.no_currency?('xxx')).to eq(true)
-      expect(subject.no_currency?('XXX')).to eq(true)
-    end
 
     it 'raises on invalid object' do
       expect { subject.value_to_currency(OpenStruct.new(amount: 1)) }.to raise_error(ArgumentError)
       expect { subject.value_to_currency(1) }.to raise_error(ArgumentError)
-    end
-
-    it 'returns true when the currency is nil' do
-      expect(subject.no_currency?(nil)).to eq(true)
-    end
-
-    it 'returns true when the currency is an empty string' do
-      expect(subject.no_currency?('')).to eq(true)
-    end
-
-    it 'returns true when the currency does not match a no currency iso code' do
-      expect(subject.no_currency?('usd')).to eq(false)
     end
   end
 end

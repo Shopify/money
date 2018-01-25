@@ -11,12 +11,12 @@ class Money
     attr_accessor :parser, :default_currency
 
     def new(value = 0, currency = nil)
-      currency ||= resolve_currency
-
       value = Helpers.value_to_decimal(value)
+      currency = Helpers.value_to_currency(currency)
+
       if value.zero?
         @@zero_money ||= {}
-        @@zero_money[currency] ||= super(Helpers::DECIMAL_ZERO, currency)
+        @@zero_money[currency.iso_code] ||= super(Helpers::DECIMAL_ZERO, currency)
       else
         super(value, currency)
       end
@@ -74,12 +74,6 @@ class Money
     def default_settings
       self.parser = MoneyParser
       self.default_currency = Money::NULL_CURRENCY
-    end
-
-    private
-
-    def resolve_currency
-      current_currency || default_currency || raise(ArgumentError, 'missing currency')
     end
   end
   default_settings

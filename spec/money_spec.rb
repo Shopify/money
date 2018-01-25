@@ -13,8 +13,13 @@ RSpec.describe "Money" do
   end
 
   context "default currency not set" do
-    before(:each) { Money.default_currency = nil }
-    after(:each) { Money.default_currency = Money::NULL_CURRENCY }
+    before(:each) do
+      @default_currency = Money.default_currency
+      Money.default_currency = nil
+    end
+    after(:each) do
+      Money.default_currency = @default_currency
+    end
 
     it "raises an error" do
       expect { money }.to raise_error(ArgumentError)

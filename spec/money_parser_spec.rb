@@ -10,14 +10,15 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("")).to eq(Money.zero)
     end
 
-    it "parses an invalid string to $0" do
+    it "parses an invalid string when not strict" do
       expect(Money).to receive(:deprecate).twice
       expect(@parser.parse("no money")).to eq(Money.zero)
-      expect(@parser.parse("1..")).to eq(Money.zero)
+      expect(@parser.parse("1..")).to eq(Money.new(1))
     end
 
     it "parses raise with an invalid string and strict option" do
       expect { @parser.parse("no money", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
+      expect { @parser.parse("1..1", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
     end
 
     it "parses a single digit integer string" do
@@ -117,10 +118,6 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("--0.123--")).to eq(Money.new(-0.12))
     end
 
-    it "parses a positive amount with a thousands separator with no decimal" do
-      expect(@parser.parse("1.000")).to eq(Money.new(1_000))
-    end
-
     it "parses a positive amount with a thousands dot separator currency and no decimal" do
       expect(@parser.parse("1.000", 'EUR')).to eq(Money.new(1_000, 'EUR'))
     end
@@ -129,8 +126,12 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("1.000", 'JOD')).to eq(Money.new(1, 'JOD'))
     end
 
+    it "parses uses currency when passed as block to with_currency" do
+      expect(Money.with_currency('JOD') { @parser.parse("1.000") }).to eq(Money.new(1, 'JOD'))
+    end
+
     it "parses no currency amount" do
-      expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1.00))
+      expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1000, Money::NULL_CURRENCY))
     end
 
     it "parses amount with more than 3 decimals correctly" do
@@ -197,8 +198,12 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("-0,123")).to eq(Money.new(-0.12))
     end
 
+    it "parses amount 2 decimals correctly" do
+      expect(@parser.parse("1,11", Money::NULL_CURRENCY)).to eq(Money.new(1.11, Money::NULL_CURRENCY))
+    end
+
     it "parses amount with more than 3 decimals correctly" do
-      expect(@parser.parse("1,11111111")).to eq(Money.new(1.11))
+      expect(@parser.parse("1,11111111", Money::NULL_CURRENCY)).to eq(Money.new(111_111_111, Money::NULL_CURRENCY))
     end
 
     it "parses amount with more than 3 decimals correctly and a currency" do
