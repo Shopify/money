@@ -2,7 +2,7 @@
 require_relative "lib/money/version"
 
 Gem::Specification.new do |s|
-  s.name = "money"
+  s.name = "shopify-money"
   s.version = Money::VERSION
   s.platform = Gem::Platform::RUBY
   s.authors = ["Shopify Inc"]
