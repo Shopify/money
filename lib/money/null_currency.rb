@@ -1,8 +1,19 @@
 class Money
   class NullCurrency
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_symbol,
-                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol, :decimal_mark
+    attr_reader(
+      :iso_code,
+      :iso_numeric,
+      :name,
+      :smallest_denomination,
+      :subunit_symbol,
+      :subunit_to_unit,
+      :minor_units,
+      :symbol,
+      :disambiguate_symbol,
+      :decimal_mark,
+      :thousands_separator
+    )
 
     def initialize
       @symbol                = '$'
@@ -15,6 +26,7 @@ class Money
       @subunit_to_unit       = 100
       @minor_units           = 2
       @decimal_mark          = '.'
+      @thousands_separator   = ','
       freeze
     end
 
