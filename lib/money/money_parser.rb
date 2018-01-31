@@ -141,8 +141,7 @@ class MoneyParser
       return true
     end
 
-    # legacy support for 1.000
-    if currency.to_s.empty? && digits.last.size == 3
+    if currency.minor_units < 3 && digits.last.size == 3
       return false
     end
 

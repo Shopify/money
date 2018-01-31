@@ -224,6 +224,45 @@ RSpec.describe MoneyParser do
     end
   end
 
+  describe "3 digit decimal currency" do
+    it "parses thousands correctly" do
+      expect(@parser.parse("1,111", "JOD")).to eq(Money.new(1_111, 'JOD'))
+      expect(@parser.parse("1.111.111", "JOD")).to eq(Money.new(1_111_111, 'JOD'))
+      expect(@parser.parse("1 111", "JOD")).to eq(Money.new(1_111, 'JOD'))
+    end
+
+    it "parses decimals correctly" do
+      expect(@parser.parse("1.111", "JOD")).to eq(Money.new(1.111, 'JOD'))
+      expect(@parser.parse("1,11", "JOD")).to eq(Money.new(1.11, 'JOD'))
+    end
+  end
+
+  describe "no decimal currency" do
+    it "parses thousands correctly" do
+      expect(@parser.parse("1,111", "JPY")).to eq(Money.new(1_111, 'JPY'))
+      expect(@parser.parse("1.111", "JPY")).to eq(Money.new(1_111, 'JPY'))
+      expect(@parser.parse("1 111", "JPY")).to eq(Money.new(1_111, 'JPY'))
+    end
+
+    it "parses decimals correctly" do
+      expect(@parser.parse("1,11", "JPY")).to eq(Money.new(1, 'JPY'))
+      expect(@parser.parse("1.11", "JPY")).to eq(Money.new(1, 'JPY'))
+    end
+  end
+
+  describe "two decimal currency" do
+    it "parses thousands correctly" do
+      expect(@parser.parse("1,111", "USD")).to eq(Money.new(1_111, 'USD'))
+      expect(@parser.parse("1.111", "USD")).to eq(Money.new(1_111, 'USD'))
+      expect(@parser.parse("1 111", "USD")).to eq(Money.new(1_111, 'USD'))
+    end
+
+    it "parses decimals correctly" do
+      expect(@parser.parse("1,11", "USD")).to eq(Money.new(1.11, 'USD'))
+      expect(@parser.parse("1.11", "USD")).to eq(Money.new(1.11, 'USD'))
+    end
+  end
+
   describe "parsing of decimal cents amounts from 0 to 10" do
     it "parses 50.0" do
       expect(@parser.parse("50.0")).to eq(Money.new(50.00))
