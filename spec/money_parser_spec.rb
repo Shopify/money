@@ -229,11 +229,13 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("1,111", "JOD")).to eq(Money.new(1_111, 'JOD'))
       expect(@parser.parse("1.111.111", "JOD")).to eq(Money.new(1_111_111, 'JOD'))
       expect(@parser.parse("1 111", "JOD")).to eq(Money.new(1_111, 'JOD'))
+      expect(@parser.parse("1111,111", "JOD")).to eq(Money.new(1_111_111, 'JOD'))
     end
 
     it "parses decimals correctly" do
       expect(@parser.parse("1.111", "JOD")).to eq(Money.new(1.111, 'JOD'))
-      expect(@parser.parse("1,11", "JOD")).to eq(Money.new(1.11, 'JOD'))
+      expect(@parser.parse("1,11", "JOD")).to eq(Money.new(1.110, 'JOD'))
+      expect(@parser.parse("1111.111", "JOD")).to eq(Money.new(1_111.111, 'JOD'))
     end
   end
 
@@ -242,11 +244,13 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("1,111", "JPY")).to eq(Money.new(1_111, 'JPY'))
       expect(@parser.parse("1.111", "JPY")).to eq(Money.new(1_111, 'JPY'))
       expect(@parser.parse("1 111", "JPY")).to eq(Money.new(1_111, 'JPY'))
+      expect(@parser.parse("1111,111", "JPY")).to eq(Money.new(1_111_111, 'JPY'))
     end
 
     it "parses decimals correctly" do
       expect(@parser.parse("1,11", "JPY")).to eq(Money.new(1, 'JPY'))
       expect(@parser.parse("1.11", "JPY")).to eq(Money.new(1, 'JPY'))
+      expect(@parser.parse("1111.111", "JPY")).to eq(Money.new(1111, 'JPY'))
     end
   end
 
@@ -255,11 +259,13 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("1,111", "USD")).to eq(Money.new(1_111, 'USD'))
       expect(@parser.parse("1.111", "USD")).to eq(Money.new(1_111, 'USD'))
       expect(@parser.parse("1 111", "USD")).to eq(Money.new(1_111, 'USD'))
+      expect(@parser.parse("1111,111", "USD")).to eq(Money.new(1_111_111, 'USD'))
     end
 
     it "parses decimals correctly" do
       expect(@parser.parse("1,11", "USD")).to eq(Money.new(1.11, 'USD'))
       expect(@parser.parse("1.11", "USD")).to eq(Money.new(1.11, 'USD'))
+      expect(@parser.parse("1111.111", "USD")).to eq(Money.new(1111.11, 'USD'))
     end
   end
 
