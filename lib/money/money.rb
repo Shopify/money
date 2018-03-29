@@ -236,13 +236,24 @@ class Money
   # be distributed round-robin amongst the parties. This means that parties
   # listed first will likely receive more pennies than ones that are listed later
   #
-  # @param [0.50, 0.25, 0.25] to give 50% of the cash to party1, 25% ot party2, and 25% to party3.
-  #
-  # @return [Array<Money, Money, Money>]
+  # @param splits [Array<Numeric>]
+  # @return [Array<Money>]
   #
   # @example
-  #   Money.new(5, "USD").allocate([0.3,0.7)) #=> [Money.new(2), Money.new(3)]
-  #   Money.new(100, "USD").allocate([0.33,0.33,0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
+  #   Money.new(5, "USD").allocate([0.50, 0.25, 0.25])
+  #     #=> [#<Money value:2.50 currency:USD>, #<Money value:1.25 currency:USD>, #<Money value:1.25 currency:USD>]
+  #   Money.new(5, "USD").allocate([0.3, 0.7])
+  #     #=> [#<Money value:1.50 currency:USD>, #<Money value:3.50 currency:USD>]
+  #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33])
+  #     #=> [#<Money value:33.34 currency:USD>, #<Money value:33.33 currency:USD>, #<Money value:33.33 currency:USD>]
+
+  # @example left over cents distributed to first party due to rounding, and two solutions for a more natural distribution
+  #   Money.new(30, "USD").allocate([0.667, 0.333])
+  #     #=> [#<Money value:20.01 currency:USD>, #<Money value:9.99 currency:USD>]
+  #   Money.new(30, "USD").allocate([0.333, 0.667])
+  #     #=> [#<Money value:20.00 currency:USD>, #<Money value:10.00 currency:USD>]
+  #   Money.new(30, "USD").allocate([Rational(2, 3), Rational(1, 3)])
+  #     #=> [#<Money value:20.00 currency:USD>, #<Money value:10.00 currency:USD>]
   def allocate(splits)
     if all_rational?(splits)
       allocations = splits.inject(0) { |sum, n| sum + n }
