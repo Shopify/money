@@ -1,3 +1,5 @@
+require 'json'
+
 class Money
   class Currency
     module Loader
