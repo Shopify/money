@@ -18,7 +18,7 @@ money_column expects a decimal 8,3 database field.
 
 ## Installation
 
-    gem 'money', github: 'shopify/money'
+    gem 'shopify-money', require: 'money'
 
 ## Usage
 
