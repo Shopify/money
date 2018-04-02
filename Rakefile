@@ -1,5 +1,11 @@
 # encoding: utf-8
 
+begin
+  require 'bundler/gem_tasks'
+rescue LoadError
+  nil
+end
+
 require 'rubygems'
 require 'bundler'
 require 'rdoc/task'
