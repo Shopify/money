@@ -7,6 +7,7 @@ class Money
 
     NUMERIC_REGEX = /\A\s*[\+\-]?\d*(\.\d+)?\s*\z/
     DECIMAL_ZERO = BigDecimal.new(0).freeze
+    MAX_DECIMAL = 21
 
     def value_to_decimal(num)
       value =
@@ -19,8 +20,10 @@ class Money
           DECIMAL_ZERO
         when Integer
           BigDecimal.new(num)
-        when Float, Rational
+        when Float
           BigDecimal.new(num, Float::DIG)
+        when Rational
+          BigDecimal.new(num, MAX_DECIMAL)
         when String
           string_to_decimal(num)
         else
