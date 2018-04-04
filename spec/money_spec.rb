@@ -688,6 +688,11 @@ RSpec.describe "Money" do
       expect { Money.from_amount(1, "CAD") }.to_not raise_error
     end
 
+    it "accepts Rationla number" do
+      expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal.new("1000000000000000000", Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal.new("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
+    end
+
     it "raises ArgumentError with unsupported argument" do
       expect { Money.from_amount(Object.new) }.to raise_error(ArgumentError)
     end
