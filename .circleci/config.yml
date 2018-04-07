@@ -23,6 +23,7 @@ jobs:
   build-ruby25:
     docker:
        - image: circleci/ruby:2.5
+    steps: *steps
   build-ruby24:
     docker:
        - image: circleci/ruby:2.4
