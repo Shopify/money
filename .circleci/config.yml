@@ -1,0 +1,42 @@
+version: 2
+
+references:
+  steps: &steps
+    - checkout
+
+    - run:
+        name: Update Bundler
+        command: gem install bundler
+
+    - run:
+        name: Install dependencies
+        command: bundle install --jobs=4 --retry=3 --path vendor/bundle
+
+    - run:
+        name: Run tests
+        command: bundle exec rake
+    - run:
+        name: Send results to Codecov
+        command: bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  build-ruby25:
+    docker:
+       - image: circleci/ruby:2.5
+    steps: *steps
+  build-ruby24:
+    docker:
+       - image: circleci/ruby:2.4
+    steps: *steps
+  build-ruby23:
+    docker:
+       - image: circleci/ruby:2.3
+    steps: *steps
+
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - build-ruby25
+      - build-ruby24
+      - build-ruby23
