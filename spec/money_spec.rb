@@ -74,7 +74,7 @@ RSpec.describe "Money" do
     expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))
   end
 
-  it "is constructable with a Fixnum" do
+  it "is constructable with an Integer" do
     expect(Money.new(3)).to eq(Money.new(3.00))
   end
 
@@ -443,10 +443,6 @@ RSpec.describe "Money" do
 
     it "returns cents as 100 cents" do
       expect(money.subunits).to eq(100)
-    end
-
-    it "returns cents as a Fixnum" do
-      expect(money.subunits).to be_an_instance_of(Fixnum)
     end
 
     it "is greater than $0" do

@@ -315,7 +315,7 @@ RSpec.describe MoneyParser do
     end
   end
 
-  describe "parsing of fixnum" do
+  describe "parsing of integer" do
     it "parses 1" do
       expect(@parser.parse(1)).to eq(Money.new(1))
     end
