@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Money::Helpers do
 
   describe 'value_to_decimal' do
-    let (:amount) { BigDecimal.new('1.23') }
+    let (:amount) { BigDecimal('1.23') }
     let (:money) { Money.new(amount) }
 
     it 'returns the value of a money object' do
@@ -11,7 +11,7 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns itself if it is already a big decimal' do
-      expect(subject.value_to_decimal(BigDecimal.new('1.23'))).to eq(amount)
+      expect(subject.value_to_decimal(BigDecimal('1.23'))).to eq(amount)
     end
 
     it 'returns zero when nil' do
@@ -23,7 +23,7 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns the bigdecimal version of a integer' do
-      expect(subject.value_to_decimal(1)).to eq(BigDecimal.new('1'))
+      expect(subject.value_to_decimal(1)).to eq(BigDecimal('1'))
     end
 
     it 'returns the bigdecimal version of a float' do
@@ -60,7 +60,7 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns regular zero for a negative zero value' do
-      expect(subject.value_to_decimal(-BigDecimal.new(0))).to eq(BigDecimal.new(0))
+      expect(subject.value_to_decimal(-BigDecimal(0))).to eq(BigDecimal(0))
     end
   end
 
