@@ -6,7 +6,7 @@ class Money
     module_function
 
     NUMERIC_REGEX = /\A\s*[\+\-]?\d*(\.\d+)?\s*\z/
-    DECIMAL_ZERO = BigDecimal.new(0).freeze
+    DECIMAL_ZERO = BigDecimal(0).freeze
     MAX_DECIMAL = 21
 
     def value_to_decimal(num)
@@ -19,11 +19,11 @@ class Money
         when nil, 0, ''
           DECIMAL_ZERO
         when Integer
-          BigDecimal.new(num)
+          BigDecimal(num)
         when Float
-          BigDecimal.new(num, Float::DIG)
+          BigDecimal(num, Float::DIG)
         when Rational
-          BigDecimal.new(num, MAX_DECIMAL)
+          BigDecimal(num, MAX_DECIMAL)
         when String
           string_to_decimal(num)
         else
@@ -57,12 +57,12 @@ class Money
 
     def string_to_decimal(num)
       if num =~ NUMERIC_REGEX
-        return BigDecimal.new(num)
+        return BigDecimal(num)
       end
 
       Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
       begin
-        BigDecimal.new(num)
+        BigDecimal(num)
       rescue ArgumentError
         DECIMAL_ZERO
       end

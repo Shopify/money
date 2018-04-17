@@ -36,7 +36,7 @@ end
 
 RSpec.describe BigDecimal do
   before(:each) do
-    @value = BigDecimal.new("1.23")
+    @value = BigDecimal("1.23")
     @money = Money.new("1.23")
   end
 

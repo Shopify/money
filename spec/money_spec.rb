@@ -71,15 +71,15 @@ RSpec.describe "Money" do
   end
 
   it "is constructable with a BigDecimal" do
-    expect(Money.new(BigDecimal.new("1.23"))).to eq(Money.new(1.23))
+    expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))
   end
 
-  it "is constructable with a Fixnum" do
+  it "is constructable with an Integer" do
     expect(Money.new(3)).to eq(Money.new(3.00))
   end
 
   it "is construcatable with a Float" do
-    expect(Money.new(3.00)).to eq(Money.new(BigDecimal.new('3.00')))
+    expect(Money.new(3.00)).to eq(Money.new(BigDecimal('3.00')))
   end
 
   it "is construcatable with a String" do
@@ -282,7 +282,7 @@ RSpec.describe "Money" do
   end
 
   it "supports to_d" do
-    expect(Money.new(1.29).to_d).to eq(BigDecimal.new('1.29'))
+    expect(Money.new(1.29).to_d).to eq(BigDecimal('1.29'))
   end
 
   it "supports to_f" do
@@ -434,7 +434,7 @@ RSpec.describe "Money" do
     end
 
     it "returns cents as a decimal value = 1.00" do
-      expect(money.value).to eq(BigDecimal.new("1.00"))
+      expect(money.value).to eq(BigDecimal("1.00"))
     end
 
     it "returns cents as 100 cents" do
@@ -443,10 +443,6 @@ RSpec.describe "Money" do
 
     it "returns cents as 100 cents" do
       expect(money.subunits).to eq(100)
-    end
-
-    it "returns cents as a Fixnum" do
-      expect(money.subunits).to be_an_instance_of(Fixnum)
     end
 
     it "is greater than $0" do
@@ -625,7 +621,7 @@ RSpec.describe "Money" do
     let (:money) { Money.new(1.125) }
 
     it "rounds 3rd decimal place" do
-      expect(money.value).to eq(BigDecimal.new("1.13"))
+      expect(money.value).to eq(BigDecimal("1.13"))
     end
   end
 
@@ -673,7 +669,7 @@ RSpec.describe "Money" do
     it "accepts numeric values" do
       expect(Money.from_amount(1)).to eq Money.from_cents(1_00)
       expect(Money.from_amount(1.0)).to eq Money.from_cents(1_00)
-      expect(Money.from_amount(BigDecimal.new("1"))).to eq Money.from_cents(1_00)
+      expect(Money.from_amount(BigDecimal("1"))).to eq Money.from_cents(1_00)
     end
 
     it "accepts string values" do
