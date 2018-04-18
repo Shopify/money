@@ -5,7 +5,7 @@ module MoneyColumn
     end
 
     def reload(*)
-      clear_money_column_cache
+      clear_money_column_cache if persisted?
       super
     end
 
@@ -17,7 +17,7 @@ module MoneyColumn
     private
 
     def clear_money_column_cache
-      @money_column_cache.clear if persisted?
+      @money_column_cache.clear
     end
 
     def init_internals
@@ -25,8 +25,50 @@ module MoneyColumn
       super
     end
 
+    def read_money_attribute(column)
+      column = column.to_s
+      options = self.class.money_column_options[column]
+
+      return @money_column_cache[column] if @money_column_cache[column]
+
+      value = self[column]
+
+      return if value.nil? && !options[:coerce_null]
+
+      @money_column_cache[column] = Money.new(value, options[:currency] || send(options[:currency_column]))
+    end
+
+    def write_money_attribute(column, money)
+      column = column.to_s
+      options = self.class.money_column_options[column]
+
+      @money_column_cache[column] = nil
+
+      if money.blank?
+        return self[column] = nil
+      end
+
+      currency_raw_source = options[:currency] || (send(options[:currency_column]) rescue nil)
+      currency_source = Money::Helpers.value_to_currency(currency_raw_source)
+
+      if !money.is_a?(Money)
+        return self[column] = Money.new(money, currency_source).value
+      end
+
+      if currency_raw_source && !currency_source.compatible?(money.currency)
+        Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency}.")
+      end
+
+      self[column] = money.value
+      self[options[:currency_column]] = money.currency.to_s unless options[:currency_read_only] || money.no_currency?
+    end
+
     module ClassMethods
+      attr_reader :money_column_options
+
       def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false)
+        @money_column_options ||= {}
+
         options = normalize_money_column_options(
           currency_column: currency_column,
           currency: currency,
@@ -34,11 +76,24 @@ module MoneyColumn
           coerce_null: coerce_null
         )
 
-        args.flatten.each do |column|
+        if options[:currency_column]
+          clear_cache_on_currency_change(options[:currency_column])
+        end
+
+        columns.flatten.each do |column|
           column_string = column.to_s.freeze
+
+          @money_column_options[column_string] = options
+
           attribute(column_string, MoneyColumn::ActiveRecordType.new)
-          money_column_reader(column_string, options[:currency_column], options[:currency], options[:coerce_null])
-          money_column_writer(column_string, options[:currency_column], options[:currency], options[:currency_read_only])
+
+          define_method column do
+            read_money_attribute(column_string)
+          end
+
+          define_method "#{column}=" do |money|
+            write_money_attribute(column_string, money)
+          end
         end
       end
 
@@ -60,44 +115,11 @@ module MoneyColumn
       end
 
       def clear_cache_on_currency_change(currency_column)
+        return if money_column_options.any? { |_, opt| opt[:currency_column] == currency_column }
+
         define_method "#{currency_column}=" do |value|
-          @money_column_cache.clear
+          clear_money_column_cache
           super(value)
-        end
-      end
-
-      def money_column_reader(column, currency_column, currency_iso, coerce_null)
-        define_method column do
-          return @money_column_cache[column] if @money_column_cache[column]
-          value = read_attribute(column)
-          return if value.nil? && !coerce_null
-          iso = currency_iso || send(currency_column)
-          @money_column_cache[column] = Money.new(value, iso)
-        end
-      end
-
-      def money_column_writer(column, currency_column, currency_iso, currency_read_only)
-        define_method "#{column}=" do |money|
-          @money_column_cache[column] = nil
-
-          if money.blank?
-            write_attribute(column, nil)
-            return nil
-          end
-
-          currency_raw_source = currency_iso || (send(currency_column) rescue nil)
-          currency_source = Money::Helpers.value_to_currency(currency_raw_source)
-
-          if !money.is_a?(Money)
-            return write_attribute(column, Money.new(money, currency_source).value)
-          end
-
-          if currency_raw_source && !currency_source.compatible?(money.currency)
-            Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency}.")
-          end
-
-          write_attribute(column, money.value)
-          write_attribute(currency_column, money.currency.to_s) unless currency_read_only || money.no_currency?
         end
       end
     end
