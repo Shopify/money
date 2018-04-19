@@ -27,27 +27,37 @@ module MoneyColumn
 
     module ClassMethods
       def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false)
-        raise ArgumentError, 'cannot set both currency_column and a fixed currency' if currency && currency_column
+        options = normalize_money_column_options(
+          currency_column: currency_column,
+          currency: currency,
+          currency_read_only: currency_read_only,
+          coerce_null: coerce_null
+        )
 
-        if currency
-          currency_iso = Money::Currency.find!(currency).to_s
-          currency_read_only = true
-        elsif currency_column
-          clear_cache_on_currency_change(currency_column)
-        else
-          raise ArgumentError, 'must set one of :currency_column or :currency options'
-        end
-        currency_column = currency_column.to_s.freeze
-
-        columns.flatten.each do |column|
+        args.flatten.each do |column|
           column_string = column.to_s.freeze
           attribute(column_string, MoneyColumn::ActiveRecordType.new)
-          money_column_reader(column_string, currency_column, currency_iso, coerce_null)
-          money_column_writer(column_string, currency_column, currency_iso, currency_read_only)
+          money_column_reader(column_string, options[:currency_column], options[:currency], options[:coerce_null])
+          money_column_writer(column_string, options[:currency_column], options[:currency], options[:currency_read_only])
         end
       end
 
       private
+
+      def normalize_money_column_options(options)
+        raise ArgumentError, 'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
+        raise ArgumentError, 'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
+
+        if options[:currency]
+          options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze
+          options[:currency_read_only] = true
+        end
+
+        if options[:currency_column]
+          options[:currency_column] = options[:currency_column].to_s.freeze
+        end
+        options
+      end
 
       def clear_cache_on_currency_change(currency_column)
         define_method "#{currency_column}=" do |value|

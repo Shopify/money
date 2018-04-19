@@ -167,7 +167,7 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'raises an ArgumentError' do
-      expect { subject }.to raise_error(ArgumentError, 'cannot set both currency_column and a fixed currency')
+      expect { subject }.to raise_error(ArgumentError, 'cannot set both :currency_column and :currency options')
     end
   end
 
