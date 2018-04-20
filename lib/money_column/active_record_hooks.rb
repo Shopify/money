@@ -122,6 +122,11 @@ module MoneyColumn
           super(value)
         end
       end
+
+      def inherited(subclass)
+        subclass.instance_variable_set('@money_column_options', money_column_options.dup) if money_column_options
+        super
+      end
     end
   end
 end
