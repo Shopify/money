@@ -38,6 +38,17 @@ class MoneyWithDelegatedCurrency < ActiveRecord::Base
   end
 end
 
+class MoneyWithCustomAccessors < ActiveRecord::Base
+  self.table_name = 'money_records'
+  money_column :price, currency_column: 'currency'
+  def price
+    read_money_attribute(:price)
+  end
+  def price=(value)
+    write_money_attribute(:price, value + 1)
+  end
+end
+
 RSpec.describe 'MoneyColumn' do
   let(:amount) { 1.23 }
   let(:currency) { 'EUR' }
@@ -167,7 +178,7 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'raises an ArgumentError' do
-      expect { subject }.to raise_error(ArgumentError, 'cannot set both currency_column and a fixed currency')
+      expect { subject }.to raise_error(ArgumentError, 'cannot set both :currency_column and :currency options')
     end
   end
 
@@ -293,6 +304,21 @@ RSpec.describe 'MoneyColumn' do
     it 'nil value persist in the DB' do
       record = MoneyRecord.create!(price: nil)
       expect(MoneyRecord.find_by(price: nil)).to eq(record)
+    end
+  end
+
+  describe 'money column attribute accessors' do
+    it 'allows to overwrite the setter' do
+      amount = Money.new(1, 'USD')
+      expect(MoneyWithCustomAccessors.new(price: amount).price).to eq(MoneyRecord.new(price: amount).price + 1)
+    end
+
+    it 'correctly assigns the money_column_cache' do
+      amount = Money.new(1, 'USD')
+      object = MoneyWithCustomAccessors.new(price: amount)
+      expect(object.instance_variable_get(:@money_column_cache)['price']).to eql(nil)
+      expect(object.price).to eql(amount + 1)
+      expect(object.instance_variable_get(:@money_column_cache)['price']).to eql(amount + 1)
     end
   end
 end
