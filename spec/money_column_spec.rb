@@ -49,6 +49,15 @@ class MoneyWithCustomAccessors < ActiveRecord::Base
   end
 end
 
+class MoneyClassInheritance < MoneyWithCustomAccessors
+  money_column :prix, currency_column: 'currency'
+end
+
+class MoneyClassInheritance2 < MoneyWithCustomAccessors
+  money_column :price, currency: 'CAD'
+  money_column :price_usd, currency: 'USD'
+end
+
 RSpec.describe 'MoneyColumn' do
   let(:amount) { 1.23 }
   let(:currency) { 'EUR' }
@@ -319,6 +328,26 @@ RSpec.describe 'MoneyColumn' do
       expect(object.instance_variable_get(:@money_column_cache)['price']).to eql(nil)
       expect(object.price).to eql(amount + 1)
       expect(object.instance_variable_get(:@money_column_cache)['price']).to eql(amount + 1)
+    end
+  end
+
+  describe 'class inheritance' do
+    it 'shares money columns declared on the parent class' do
+      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq('currency')
+      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency)).to eq(nil)
+      expect(MoneyClassInheritance.new(price: Money.new(1, 'USD')).price).to eq(Money.new(2, 'USD'))
+    end
+
+    it 'subclass can define extra money columns' do
+      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).keys).to include('prix')
+      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).keys).to_not include('price_usd')
+      expect(MoneyClassInheritance.new(prix: Money.new(1, 'USD')).prix).to eq(Money.new(1, 'USD'))
+    end
+
+    it 'subclass can redefine money columns from parent' do
+      expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', :currency)).to eq('CAD')
+      expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq(nil)
+      expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).keys).to_not include('prix')
     end
   end
 end
