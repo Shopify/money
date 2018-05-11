@@ -169,12 +169,17 @@ RSpec.describe MoneyParser do
       expect(@parser.parse("Rubbish$1,00Rubbish")).to eq(Money.new(1.00))
     end
 
+    it "parses without a currency [DEPRECATED]" do
+      expect(Money).to receive(:deprecate).once
+      expect(@parser.parse("100,00")).to eq(Money.new(100.00))
+    end
+
     it "parses negative hundreds amount" do
-      expect(@parser.parse("-100,00")).to eq(Money.new(-100.00))
+      expect(@parser.parse("-100,00", 'CAD')).to eq(Money.new(-100.00, 'CAD'))
     end
 
     it "parses positive hundreds amount" do
-      expect(@parser.parse("410,00")).to eq(Money.new(410.00))
+      expect(@parser.parse("410,00", 'CAD')).to eq(Money.new(410.00, 'CAD'))
     end
 
     it "parses a positive amount with a thousands separator" do

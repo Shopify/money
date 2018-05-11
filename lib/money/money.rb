@@ -10,9 +10,13 @@ class Money
   class << self
     attr_accessor :parser, :default_currency
 
-    def new(value = 0, currency = nil)
-      value = Helpers.value_to_decimal(value)
-      currency = Helpers.value_to_currency(currency)
+    def new(raw_value = 0, raw_currency = nil)
+      value = Helpers.value_to_decimal(raw_value)
+      currency = Helpers.value_to_currency(raw_currency)
+
+      Money.deprecate(
+        "using Money.new(amount) without a currency is deprecated and will raise an ArgumentError in the next major release"
+      ) if raw_currency.nil? && currency == NULL_CURRENCY
 
       if value.zero?
         @@zero_money ||= {}

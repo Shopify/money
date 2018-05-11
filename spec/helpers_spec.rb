@@ -4,7 +4,7 @@ RSpec.describe Money::Helpers do
 
   describe 'value_to_decimal' do
     let (:amount) { BigDecimal('1.23') }
-    let (:money) { Money.new(amount) }
+    let (:money) { Money.new(amount, 'USD') }
 
     it 'returns the value of a money object' do
       expect(subject.value_to_decimal(money)).to eq(amount)

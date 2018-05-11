@@ -618,7 +618,7 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $1 with created with 3 decimal places" do
-    let (:money) { Money.new(1.125) }
+    let (:money) { Money.new(1.125, 'USD') }
 
     it "rounds 3rd decimal place" do
       expect(money.value).to eq(BigDecimal("1.13"))

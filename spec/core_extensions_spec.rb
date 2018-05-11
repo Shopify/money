@@ -2,8 +2,12 @@ require 'spec_helper'
 
 RSpec.shared_examples_for "an object supporting to_money" do
   it "supports to_money" do
+    expect(@value.to_money('CAD')).to eq(Money.new(@value, 'CAD'))
+  end
+
+  it "supports to_money without a currency [DEPRECATED]" do
+    expect(Money).to receive(:deprecate).once
     expect(@value.to_money).to eq(@money)
-    expect(@value.to_money('CAD').currency).to eq(Money::Currency.find!('CAD'))
   end
 end
 
