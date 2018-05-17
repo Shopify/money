@@ -183,7 +183,16 @@ class Money
     [ReverseOperationProxy.new(other), self]
   end
 
-  def to_money(_currency = nil)
+  def to_money(curr = nil)
+    if !curr.nil? && no_currency?
+      return Money.new(value, curr)
+    end
+
+    curr = Helpers.value_to_currency(curr)
+    unless currency.compatible?(curr)
+      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}.")
+    end
+
     self
   end
 
@@ -388,9 +397,6 @@ class Money
     raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
     other = money_or_numeric.to_money(currency)
 
-    unless currency.compatible?(other.currency)
-      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}.")
-    end
     yield(other)
   end
 

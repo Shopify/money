@@ -38,6 +38,15 @@ RSpec.describe "Money" do
     expect(money.to_money).to eq(money)
   end
 
+  it "#to_money uses the provided currency when it doesn't already have one" do
+    expect(Money.new(1).to_money('CAD')).to eq(Money.new(1, 'CAD'))
+  end
+
+  it "#to_money doesn't overwrite the money object's currency" do
+    expect(Money).to receive(:deprecate).once
+    expect(Money.new(1, 'USD').to_money('CAD')).to eq(Money.new(1, 'USD'))
+  end
+
   it "defaults to 0 when constructed with no arguments" do
     expect(Money.new).to eq(Money.new(0))
   end
