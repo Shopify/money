@@ -34,6 +34,10 @@ RSpec.describe "Money" do
     expect(Money.zero).to eq(Money.new(0))
   end
 
+  it ".zero accepts an optional currency" do
+    expect(Money.zero('USD')).to eq(Money.new(0, 'USD'))
+  end
+
   it "returns itself with to_money" do
     expect(money.to_money).to eq(money)
   end
