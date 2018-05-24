@@ -23,8 +23,8 @@ class Money
     end
     alias_method :from_amount, :new
 
-    def zero(currency = NULL_CURRENCY)
-      new(0, currency)
+    def zero
+      new(0, NULL_CURRENCY)
     end
     alias_method :empty, :zero
 
