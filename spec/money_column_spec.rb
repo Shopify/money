@@ -291,7 +291,7 @@ RSpec.describe 'MoneyColumn' do
       expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(price)
     end
 
-    it 'reload will clear memoizes money values' do
+    it 'reload will clear memoized money values' do
       price = Money.new(1, 'USD')
       record = MoneyRecord.create(price: price)
       expect(record.price).to eq(price)
@@ -300,6 +300,23 @@ RSpec.describe 'MoneyColumn' do
       expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(nil)
       record.price
       expect(record.instance_variable_get(:@money_column_cache)["price"]).to eq(price)
+    end
+
+    it 'reload will clear record cache' do
+      price = Money.new(1, 'USD')
+      price2 = Money.new(2, 'USD')
+
+      record = MoneyRecord.create(price: price)
+      expect(record.price).to eq(price)
+      expect(record[:price]).to eq(price)
+
+      ActiveRecord::Base.connection.execute("UPDATE money_records SET price=#{price2.value} WHERE id=#{record.id}")
+      expect(record[:price]).to_not eq(price2)
+      expect(record.price).to_not eq(price2)
+
+      record.reload
+      expect(record[:price]).to eq(price2)
+      expect(record.price).to eq(price2)
     end
   end
 
