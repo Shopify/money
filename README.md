@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/Shopify/money.svg?branch=master)](https://travis-ci.org/Shopify/money) [![codecov](https://codecov.io/gh/Shopify/money/branch/master/graph/badge.svg)](https://codecov.io/gh/Shopify/money)
 
 
-money_column expects a DECIMAL(20,3) database field.
+money_column expects a DECIMAL(21,3) database field.
 
 ### Features
 
