@@ -14,6 +14,10 @@ RSpec.describe Integer do
   end
 
   it_should_behave_like "an object supporting to_money"
+
+  it "parses 0 to Money.zero" do
+    expect(0.to_money).to eq(Money.zero)
+  end
 end
 
 RSpec.describe Float do
@@ -23,6 +27,10 @@ RSpec.describe Float do
   end
 
   it_should_behave_like "an object supporting to_money"
+
+  it "parses 0.0 to Money.zero" do
+    expect(0.0.to_money).to eq(Money.zero)
+  end
 end
 
 RSpec.describe String do
@@ -32,6 +40,11 @@ RSpec.describe String do
   end
 
   it_should_behave_like "an object supporting to_money"
+
+  it "parses an empty string to Money.zero" do
+    expect(''.to_money).to eq(Money.zero)
+    expect(' '.to_money).to eq(Money.zero)
+  end
 end
 
 RSpec.describe BigDecimal do
@@ -41,4 +54,8 @@ RSpec.describe BigDecimal do
   end
 
   it_should_behave_like "an object supporting to_money"
+
+  it "parses a zero BigDecimal to Money.zero" do
+    expect(BigDecimal.new("-0.000").to_money).to eq(Money.zero)
+  end
 end

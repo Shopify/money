@@ -5,7 +5,7 @@ class Money
   module Helpers
     module_function
 
-    NUMERIC_REGEX = /\A\s*[\+\-]?\d*(\.\d+)?\s*\z/
+    NUMERIC_REGEX = /\A\s*[\+\-]?(\d+|\d*\.\d+)\s*\z/
     DECIMAL_ZERO = BigDecimal(0).freeze
     MAX_DECIMAL = 21
 

@@ -74,7 +74,7 @@ class MoneyParser
       return input
     end
 
-    if input.empty?
+    if input.strip.empty?
       return '0'
     end
 
