@@ -190,7 +190,8 @@ class Money
 
     curr = Helpers.value_to_currency(curr)
     unless currency.compatible?(curr)
-      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}.")
+      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}. " \
+        "A Money::IncompatibleCurrencyError will raise in the next major release")
     end
 
     self
