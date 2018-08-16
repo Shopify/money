@@ -333,6 +333,10 @@ RSpec.describe MoneyParser do
     it "parses 1.32" do
       expect(@parser.parse(1.32)).to eq(Money.new(1.32))
     end
+
+    it "parses 1.234" do
+      expect(@parser.parse(1.234)).to eq(Money.new(1.234))
+    end
   end
 
   describe "parsing with thousands separators" do

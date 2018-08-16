@@ -63,13 +63,17 @@ class MoneyParser
 
   def parse(input, currency = nil, strict: false)
     currency = Money::Helpers.value_to_currency(currency)
-    amount = extract_money(input.to_s, currency, strict)
+    amount = extract_amount_from_string(input, currency, strict)
     Money.new(amount, currency)
   end
 
   private
 
-  def extract_money(input, currency, strict)
+  def extract_amount_from_string(input, currency, strict)
+    unless input.is_a?(String)
+      return input
+    end
+
     if input.empty?
       return '0'
     end
