@@ -80,8 +80,13 @@ RSpec.describe "Money" do
   end
 
   it "as_json as a float with 2 decimal places" do
-    expect(money.as_json).to eq("1.00")
+    expect(money.as_json).to eq(1.0)
   end
+
+  it "has a consistent json encoding" do
+    expect(ActiveSupport::JSON.encode(money)).to eq(::JSON.dump(money))
+  end
+
 
   it "is constructable with a BigDecimal" do
     expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))

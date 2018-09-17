@@ -219,7 +219,7 @@ class Money
   end
 
   def as_json(*args)
-    to_s
+    to_f
   end
 
   def abs
