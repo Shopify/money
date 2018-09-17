@@ -215,7 +215,7 @@ class Money
   end
 
   def to_json(options = {})
-    to_s
+    "\"#{to_s}\""
   end
 
   def as_json(*args)

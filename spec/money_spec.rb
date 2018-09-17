@@ -83,6 +83,10 @@ RSpec.describe "Money" do
     expect(money.as_json).to eq("1.00")
   end
 
+  it "has a consistent json encoding" do
+    expect(ActiveSupport::JSON.encode(money)).to eq(::JSON.dump(money))
+  end
+
   it "is constructable with a BigDecimal" do
     expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))
   end
@@ -283,7 +287,7 @@ RSpec.describe "Money" do
   end
 
   it "returns cents in to_json" do
-    expect(Money.new(1.00).to_json).to eq("1.00")
+    expect(Money.new(1.00).to_json).to eq('"1.00"')
   end
 
   it "supports absolute value" do
