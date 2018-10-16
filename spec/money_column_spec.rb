@@ -367,4 +367,28 @@ RSpec.describe 'MoneyColumn' do
       expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).keys).to_not include('prix')
     end
   end
+
+  describe 'default_currency = nil' do
+    around do |example|
+      default_currency = Money.default_currency
+      Money.default_currency = nil
+      example.run
+      Money.default_currency = default_currency
+    end
+
+    it 'writes currency from input value to the db' do
+      record.update(currency: nil)
+      record.update(price: Money.new(7, 'GBP'))
+      record.reload
+      expect(record.price.value).to eq(7)
+      expect(record.price.currency.to_s).to eq('GBP')
+    end
+
+    it 'raises missing currency error when input is not a money object' do
+      record.update(currency: nil)
+
+      expect { record.update(price: 3) }
+        .to raise_error(ArgumentError, 'missing currency')
+    end
+  end
 end
