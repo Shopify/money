@@ -48,7 +48,12 @@ module MoneyColumn
         return self[column] = nil
       end
 
-      currency_raw_source = options[:currency] || (send(options[:currency_column]) rescue nil)
+      currency_raw_source = begin
+        options[:currency] || send(options[:currency_column]) || money.currency
+      rescue
+        nil
+      end
+
       currency_source = Money::Helpers.value_to_currency(currency_raw_source)
 
       if !money.is_a?(Money)
