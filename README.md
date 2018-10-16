@@ -126,18 +126,36 @@ end
 
 ### Options
 
-| option | type |  description |
-| --- | --- |  --- |
-| currency_column | method | column from which to read/write the currency  |
-| currency | string | hardcoded currency value  |
-| currency_read_only | boolean |  when true, `currency_column` won't write the currency back into the db. Must be set to true if `currency_column` is an attr_reader or delegate. Default: false |
-| coerce_null | boolean | when true, a nil value will be returned as Money.zero. Default: false |
+`money_column` accepts a number of options
 
 You can use multiple `money_column` calls to achieve the desired effects with
 currency on the model or attribute level.
 
 There are no validations generated. You can add these for the specified money
 and currency attributes as you normally would for any other.
+
+#### currency
+```ruby
+class Order < ApplicationRecord
+  money_column :price, currency: { column: 'currency' }
+  money_column :price_usd, currency: 'USD'
+end
+```
+
+| option | type |  description |
+| --- | --- |  --- |
+| column | method | column from which to read/write the currency. Required  |
+| read_only | boolean |  when true, `column` won't write the currency back into the db. Must be set to true if `column` is an attr_reader or delegate. Default: false |
+
+#### coerce_null
+```ruby
+class Order < ApplicationRecord
+  money_column :price, coerce_null: true
+end
+order.price = nil
+order.price == Money.zero #=> true
+```
+when true, a nil value will be returned as Money.zero. Default: false
 
 ## Contributing to money
 

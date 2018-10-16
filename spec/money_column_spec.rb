@@ -5,8 +5,8 @@ class MoneyRecord < ActiveRecord::Base
   before_validation do
     self.price_usd = Money.new(self["price"] * RATE, 'USD') if self["price"]
   end
-  money_column :price, currency_column: 'currency'
-  money_column :prix, currency_column: :devise
+  money_column :price, currency: { column: 'currency' }
+  money_column :prix, currency: { column: :devise }
   money_column :price_usd, currency: 'USD'
 end
 
@@ -31,7 +31,7 @@ class MoneyWithDelegatedCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
   attr_accessor :delegated_record
   delegate :currency, to: :delegated_record
-  money_column :price, currency_column: 'currency', currency_read_only: true
+  money_column :price, currency: { column: 'currency', read_only: true }
   money_column :prix, currency_column: 'currency2', currency_read_only: true
   def currency2
     delegated_record.currency

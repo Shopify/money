@@ -70,10 +70,10 @@ module MoneyColumn
         @money_column_options ||= {}
 
         options = normalize_money_column_options(
-          currency_column: currency_column,
+          coerce_null: coerce_null,
           currency: currency,
+          currency_column: currency_column,
           currency_read_only: currency_read_only,
-          coerce_null: coerce_null
         )
 
         if options[:currency_column]
@@ -101,15 +101,20 @@ module MoneyColumn
 
       def normalize_money_column_options(options)
         raise ArgumentError, 'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
-        raise ArgumentError, 'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
 
-        if options[:currency]
+        case options[:currency]
+        when Hash
+          currency_options = options.delete(:currency)
+          raise ArgumentError, 'currency missing key :column' unless currency_options[:column]
+          options[:currency_column] = currency_options[:column].to_s.freeze
+          options[:currency_read_only] = currency_options[:read_only]
+        when String
           options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze
           options[:currency_read_only] = true
-        end
-
-        if options[:currency_column]
+        else
+          raise ArgumentError, 'must set one of :currency_column or :currency options' unless options[:currency_column]
           options[:currency_column] = options[:currency_column].to_s.freeze
+          options[:currency_read_only] = options[:currency_read_only]
         end
         options
       end
