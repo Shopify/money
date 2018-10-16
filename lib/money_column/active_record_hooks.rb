@@ -48,19 +48,14 @@ module MoneyColumn
         return self[column] = nil
       end
 
-      currency_raw_source = begin
-        options[:currency] || send(options[:currency_column]) || money.currency
-      rescue
-        nil
-      end
-
-      currency_source = Money::Helpers.value_to_currency(currency_raw_source)
+      currency_raw_source = options[:currency] || (send(options[:currency_column]) rescue nil)
 
       if !money.is_a?(Money)
-        return self[column] = Money.new(money, currency_source).value
+        return self[column] = Money.new(money, currency_raw_source).value
       end
 
-      if currency_raw_source && !currency_source.compatible?(money.currency)
+      currency_source = currency_raw_source ? Money::Helpers.value_to_currency(currency_raw_source) : Money::NULL_CURRENCY
+      unless currency_source.compatible?(money.currency)
         Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency}.")
       end
 
