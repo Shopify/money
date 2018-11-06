@@ -83,7 +83,12 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'writes the currency to the db using update_column' do
-    record.update_columns(price: Money.new(4, 'JPY'), devise: 'ok')
+    record.price
+    record.currency
+    record.devise
+
+    record.update_columns(price: 4, currency: 'JPY', devise: 'ok')
+
     expect(record.devise).to eq('ok')
     expect(record.price.value).to eq(4)
     expect(record.price.currency.to_s).to eq('JPY')
