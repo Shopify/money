@@ -139,9 +139,8 @@ RSpec.describe 'MoneyColumn' do
     expect(record.currency.to_s).to eq('EUR')
   end
 
-  it 'does overwrite a currency if changed but will show a deprecation notice' do
+  it 'does overwrite a currency' do
     expect(record.currency.to_s).to eq('EUR')
-    expect(Money).to receive(:deprecate).once
     record.update(price: Money.new(4, 'JPY'))
     expect(record.currency.to_s).to eq('JPY')
   end
