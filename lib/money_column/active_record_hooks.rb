@@ -25,6 +25,11 @@ module MoneyColumn
       super
     end
 
+    def write_attribute_without_type_cast(attr_name, _value, *args)
+      @money_column_cache[attr_name.to_s] = nil
+      super
+    end
+
     def read_money_attribute(column)
       column = column.to_s
       options = self.class.money_column_options[column]
