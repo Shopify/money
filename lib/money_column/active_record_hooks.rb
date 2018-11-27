@@ -58,7 +58,7 @@ module MoneyColumn
       if options[:currency_read_only]
         currency_source = Money::Helpers.value_to_currency(currency_raw_source)
         if currency_raw_source && !money.currency.compatible?(currency_source)
-          Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency}.")
+          Money.deprecate("[money_column] currency mismatch between #{currency_source} and #{money.currency} in column #{column}.")
         end
       else
         self[options[:currency_column]] = money.currency.to_s unless money.no_currency?
