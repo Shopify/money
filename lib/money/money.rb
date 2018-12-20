@@ -346,13 +346,8 @@ class Money
     high = Money.from_subunits(low.subunits + 1, currency)
 
     remainder = subunits % num
-    result = []
 
-    num.times do |index|
-      result[index] = index < remainder ? high : low
-    end
-
-    return result
+    return Array.new(remainder, high) + Array.new(num - remainder, low)
   end
 
   # Clamps the value to be within the specified minimum and maximum. Returns
