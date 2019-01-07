@@ -482,6 +482,18 @@ RSpec.describe "Money" do
       expect(moneys[1]).to eq(Money.new(0.03))
     end
 
+    specify "#allocate assigns extra penny to the split that's closest to rounding up" do
+      moneys = Money.new(0.05).allocate([0.45,0.55])
+      expect(moneys[0]).to eq(Money.new(0.02))
+      expect(moneys[1]).to eq(Money.new(0.03))
+    end
+
+    specify "#allocate assigns extra pennies round robin when splits are the same" do
+      moneys = Money.new(0.05).allocate([0.1,0.1])
+      expect(moneys[0]).to eq(Money.new(0.03))
+      expect(moneys[1]).to eq(Money.new(0.02))
+    end
+
     specify "#allocate does not lose dollars with non-decimal currency" do
       moneys = Money.new(5, 'JPY').allocate([0.3,0.7])
       expect(moneys[0]).to eq(Money.new(2, 'JPY'))
@@ -507,7 +519,7 @@ RSpec.describe "Money" do
 
     specify "#allocate will use rationals if provided" do
       splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
-      expect(Money.new(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])
+      expect(Money.new(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.22), Money.new(0.16), Money.new(0.16), Money.new(0.29)])
     end
 
     specify "#allocate will convert rationals with high precision" do

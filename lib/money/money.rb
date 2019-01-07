@@ -254,14 +254,16 @@ class Money
   #     #=> [#<Money value:2.50 currency:USD>, #<Money value:1.25 currency:USD>, #<Money value:1.25 currency:USD>]
   #   Money.new(5, "USD").allocate([0.3, 0.7])
   #     #=> [#<Money value:1.50 currency:USD>, #<Money value:3.50 currency:USD>]
+
+  # @example extra pennies are first distributed to the split that is the closest to rounding up 55% of 0.05 is 0.0275
+  #   Money.new(0.05, "USD").allocate([0.45, 0.55])
+  #     #=> [#<Money value:0.02 currency:USD>, #<Money value:0.03 currency:USD>]
+
+  # @example left over cents are distributed round robin when splits are equal
   #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33])
   #     #=> [#<Money value:33.34 currency:USD>, #<Money value:33.33 currency:USD>, #<Money value:33.33 currency:USD>]
 
-  # @example left over cents distributed to first party due to rounding, and two solutions for a more natural distribution
-  #   Money.new(30, "USD").allocate([0.667, 0.333])
-  #     #=> [#<Money value:20.01 currency:USD>, #<Money value:9.99 currency:USD>]
-  #   Money.new(30, "USD").allocate([0.333, 0.667])
-  #     #=> [#<Money value:20.00 currency:USD>, #<Money value:10.00 currency:USD>]
+  # @example rational number can also be used to avoid floats adding up to more then 1
   #   Money.new(30, "USD").allocate([Rational(2, 3), Rational(1, 3)])
   #     #=> [#<Money value:20.00 currency:USD>, #<Money value:10.00 currency:USD>]
   def allocate(splits)
@@ -275,9 +277,7 @@ class Money
       raise ArgumentError, "splits add to more than 100%"
     end
 
-    amounts, left_over = amounts_from_splits(allocations, splits)
-
-    left_over.to_i.times { |i| amounts[i % amounts.length] += 1 }
+    amounts = fair_amounts_from_splits(allocations, splits)
 
     amounts.collect { |subunits| Money.from_subunits(subunits, currency) }
   end
@@ -387,6 +387,30 @@ class Money
     end
 
     [amounts, left_over]
+  end
+
+  def fair_amounts_from_splits(allocations, splits, subunits_to_split = subunits)
+    left_over = subunits_to_split
+
+    amounts = splits.collect do |ratio|
+      frac = (Helpers.value_to_decimal(subunits_to_split * ratio) / allocations).floor
+      left_over -= frac
+      frac
+    end
+
+    split_indexes_by_the_closest_to_rounding_up = splits.collect do |ratio|
+      frac = (Helpers.value_to_decimal(subunits_to_split * ratio) / allocations)
+      frac - frac.floor
+    end.each_with_index.sort do |a, b|
+      closest_to_rounding = b.first <=> a.first
+      closest_to_rounding == 0 ? a.last <=> b.last : closest_to_rounding
+    end.collect(&:last)
+
+    left_over.to_i.times do |i|
+      amounts[split_indexes_by_the_closest_to_rounding_up[i % split_indexes_by_the_closest_to_rounding_up.length]] += 1
+    end
+
+    amounts
   end
 
   def arithmetic(money_or_numeric)
