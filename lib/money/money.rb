@@ -340,14 +340,32 @@ class Money
   # @example
   #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
+    calculate_splits(num).sum { |value, count| Array.new(count, value) }
+  end
+
+  # Calculate the splits evenly without losing pennies.
+  # Returns the number of high and low splits and the value of the high and low splits.
+  # Where high represents the Money value with the extra penny
+  # and low a Money without the extra penny.
+  #
+  # @param [2] number of parties.
+  #
+  # @return [Hash<Money, Integer>]
+  #
+  # @example
+  #   Money.new(100, "USD").calculate_splits(3) #=> {Money.new(34) => 1, Money.new(33) => 2}
+  def calculate_splits(num)
     raise ArgumentError, "need at least one party" if num < 1
     subunits = self.subunits
     low = Money.from_subunits(subunits / num, currency)
     high = Money.from_subunits(low.subunits + 1, currency)
 
-    remainder = subunits % num
+    num_high = subunits % num
 
-    return Array.new(remainder, high) + Array.new(num - remainder, low)
+    {}.tap do |result|
+      result[high] = num_high if num_high > 0
+      result[low] = num - num_high
+    end
   end
 
   # Clamps the value to be within the specified minimum and maximum. Returns

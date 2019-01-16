@@ -618,6 +618,25 @@ RSpec.describe "Money" do
     end
   end
 
+  describe "calculate_splits" do
+    specify "#calculate_splits gives 1 cent to both people if we start with 2" do
+      actual = Money.new(0.02, 'CAD').calculate_splits(2)
+
+      expect(actual).to eq({
+        Money.new(0.01, 'CAD') => 2,
+      })
+    end
+
+    specify "#calculate_splits gives an extra penny to one" do
+      actual = Money.new(0.04, 'CAD').calculate_splits(3)
+
+      expect(actual).to eq({
+        Money.new(0.02, 'CAD') => 1,
+        Money.new(0.01, 'CAD') => 2,
+      })
+    end
+  end
+
   describe "fraction" do
     specify "#fraction needs a positive rate" do
       expect {Money.new(1).fraction(-0.5)}.to raise_error(ArgumentError)

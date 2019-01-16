@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rails", "~> 5.0")
   s.add_development_dependency("rspec", "~> 3.2")
   s.add_development_dependency("database_cleaner", "~> 1.6")
-  s.add_development_dependency("sqlite3", "~> 1.3")
+  s.add_development_dependency("sqlite3", "~> 1.3.6")
   s.add_development_dependency("bigdecimal", "~> 1.3.2")
 
   s.files = `git ls-files`.split($/)
