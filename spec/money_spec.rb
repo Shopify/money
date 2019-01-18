@@ -83,6 +83,11 @@ RSpec.describe "Money" do
     expect(money.as_json).to eq("1.00")
   end
 
+  it "is constructable with a Money" do
+    expected = Money.new(3.52, 'EUR')
+    expect(Money.new(expected)).to eq(expected)
+  end
+
   it "is constructable with a BigDecimal" do
     expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))
   end

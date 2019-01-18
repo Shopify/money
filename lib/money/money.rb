@@ -11,8 +11,13 @@ class Money
     attr_accessor :parser, :default_currency
 
     def new(value = 0, currency = nil)
+      currency = if value.is_a?(Money) && currency.blank?
+        Helpers.value_to_currency(value.currency)
+      else
+        Helpers.value_to_currency(currency)
+      end
+
       value = Helpers.value_to_decimal(value)
-      currency = Helpers.value_to_currency(currency)
 
       if value.zero?
         @@zero_money ||= {}

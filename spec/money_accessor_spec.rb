@@ -69,6 +69,12 @@ RSpec.shared_examples_for "an object with a money accessor" do
 
     expect(object.price).to eq(nil)
   end
+
+  it 'preserves the currency value when passed to money_accessor' do
+    object = described_class.new(Money.new(10, 'USD'))
+    currency = Money::Currency.new('USD')
+    expect(object.price.currency).to eq(currency)
+  end
 end
 
 RSpec.describe NormalObject do
