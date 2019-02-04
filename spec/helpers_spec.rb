@@ -44,15 +44,9 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_decimal(' -1.23 ')).to eq(-amount)
     end
 
-    it 'invalid string returns zero' do
-      expect(Money).to receive(:deprecate).once
-      expect(subject.value_to_decimal('invalid')).to eq(0)
-    end
-
-    it 'returns the bigdecimal representation of numbers while they are deprecated' do
-      expect(Money).to receive(:deprecate).exactly(2).times
-      expect(subject.value_to_decimal('1.23abc')).to eq(amount)
-      expect(subject.value_to_decimal("1.23\n23")).to eq(amount)
+    it 'raises on invalid number strings' do
+      expect { subject.value_to_decimal('1.23abc') }.to raise_error(ArgumentError)
+      expect { subject.value_to_decimal("1.23\n23") }.to raise_error(ArgumentError)
     end
 
     it 'raises on invalid object' do

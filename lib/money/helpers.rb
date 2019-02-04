@@ -56,16 +56,11 @@ class Money
     end
 
     def string_to_decimal(num)
-      if num =~ NUMERIC_REGEX
-        return BigDecimal(num)
+      unless num =~ NUMERIC_REGEX
+        raise ArgumentError, "`#{num}` is not a number, consider using Money.parse('#{num}', currency)"
       end
 
-      Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
-      begin
-        BigDecimal(num)
-      rescue ArgumentError
-        DECIMAL_ZERO
-      end
+      BigDecimal(num)
     end
   end
 end

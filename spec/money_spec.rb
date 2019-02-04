@@ -60,8 +60,7 @@ RSpec.describe "Money" do
   end
 
   it "defaults to 0 when constructed with an invalid string" do
-    expect(Money).to receive(:deprecate).once
-    expect(Money.new('invalid')).to eq(Money.new(0.00))
+    expect{ Money.new('invalid') }.to raise_error(ArgumentError)
   end
 
   it "to_s correctly displays the right number of decimal places" do

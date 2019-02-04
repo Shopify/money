@@ -164,8 +164,8 @@ RSpec.describe 'MoneyColumn' do
   describe 'garbage amount' do
     let(:amount) { 'foo' }
 
-    it 'raises a deprecation warning' do
-      expect { subject }.to raise_error(ActiveSupport::DeprecationException)
+    it 'raises an argument error' do
+      expect { subject }.to raise_error(ArgumentError)
     end
   end
 
