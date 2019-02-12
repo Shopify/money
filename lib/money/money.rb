@@ -340,7 +340,7 @@ class Money
   # @example
   #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
-    calculate_splits(num).sum { |value, count| Array.new(count, value) }
+    calculate_splits(num).sum([]) { |value, count| Array.new(count, value) }
   end
 
   # Calculate the splits evenly without losing pennies.
