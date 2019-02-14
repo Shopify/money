@@ -340,32 +340,33 @@ class Money
   # @example
   #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
+    raise ArgumentError, 'need at least one party' if num < 1
+
     calculate_splits(num).sum([]) { |value, count| Array.new(count, value) }
   end
 
-  # Calculate the splits evenly without losing pennies.
-  # Returns the number of high and low splits and the value of the high and low splits.
-  # Where high represents the Money value with the extra penny
-  # and low a Money without the extra penny.
+  # Sum splits allows to perform arithmetic operations on the splits
+  # and get the resulting Money. This method should be used when it's not
+  # a requirement to get the splits. This will skip the Array creation for
+  # better performance.
   #
-  # @param [2] number of parties.
+  # @param [2] number of parties
   #
-  # @return [Hash<Money, Integer>]
+  # @return Money
   #
   # @example
-  #   Money.new(100, "USD").calculate_splits(3) #=> {Money.new(34) => 1, Money.new(33) => 2}
-  def calculate_splits(num)
-    raise ArgumentError, "need at least one party" if num < 1
-    subunits = self.subunits
-    low = Money.from_subunits(subunits / num, currency)
-    high = Money.from_subunits(low.subunits + 1, currency)
+  #   Money.new(100, "USD").sum_splits(3) #=> Money.new(100, "USD")
+  #   Money.new(100, "USD").sum_splits(3) do |split|
+  #     split.allocate([0.9, 0.1]).last
+  #   end #=> Money.new(9.99, "USD")
+  def sum_splits(num)
+    raise ArgumentError, 'need at least one party' if num < 1
 
-    num_high = subunits % num
-
-    {}.tap do |result|
-      result[high] = num_high if num_high > 0
-      result[low] = num - num_high
+    unless block_given?
+      return self
     end
+
+    calculate_splits(num).sum { |value, count| yield(value) * count }
   end
 
   # Clamps the value to be within the specified minimum and maximum. Returns
@@ -424,5 +425,18 @@ class Money
       raise ArgumentError, "operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
     end
     currencies.first || NULL_CURRENCY
+  end
+
+  def calculate_splits(num)
+    subunits = self.subunits
+    low = Money.from_subunits(subunits / num, currency)
+    high = Money.from_subunits(low.subunits + 1, currency)
+
+    num_high = subunits % num
+
+    {}.tap do |result|
+      result[high] = num_high if num_high > 0
+      result[low] = num - num_high
+    end
   end
 end

@@ -618,22 +618,17 @@ RSpec.describe "Money" do
     end
   end
 
-  describe "calculate_splits" do
-    specify "#calculate_splits gives 1 cent to both people if we start with 2" do
-      actual = Money.new(0.02, 'CAD').calculate_splits(2)
+  describe "sum_splits" do
+    specify "returns self if no block given" do
+      actual = Money.new(0.02, 'CAD').sum_splits(2)
 
-      expect(actual).to eq({
-        Money.new(0.01, 'CAD') => 2,
-      })
+      expect(actual).to eq(Money.new(0.02, 'CAD'))
     end
 
-    specify "#calculate_splits gives an extra penny to one" do
-      actual = Money.new(0.04, 'CAD').calculate_splits(3)
+    specify "returns a transformed Money based on given block" do
+      actual = Money.new(100, 'USD').sum_splits(3) { |m| m.allocate([0.9, 0.1]).last}
 
-      expect(actual).to eq({
-        Money.new(0.02, 'CAD') => 1,
-        Money.new(0.01, 'CAD') => 2,
-      })
+      expect(actual).to eq(Money.new(9.99, 'USD'))
     end
   end
 
