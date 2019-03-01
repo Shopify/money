@@ -1,3 +1,5 @@
+require 'forwardable'
+
 class Money
   include Comparable
   extend Forwardable
