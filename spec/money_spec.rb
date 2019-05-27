@@ -180,12 +180,13 @@ RSpec.describe "Money" do
     expect(money).to eq(Money.new(1, 'CAD'))
   end
 
-  it "does not eql? with a non money object" do
-    expect(money).to_not eq(1)
+  it "does not eql? with a non-coercible non-money object" do
     expect(money).to_not eq(OpenStruct.new(value: 1))
+    expect(money).to_not eq(nil)
   end
 
   it "does not eql? when currency missmatch" do
+    expect(Money).to receive(:deprecate).once
     expect(money).to_not eq(Money.new(1, 'JPY'))
   end
 
@@ -383,10 +384,10 @@ RSpec.describe "Money" do
       expect(Money.new(2000, 'JPY') <=> Money.new(1000, Money::NULL_CURRENCY)).to eq(1)
     end
 
-    it "<=> issues deprecation warning when comparing incompatible currency" do
+    it "<=> returns nil when comparing incompatible currency" do
       expect(Money).to receive(:deprecate).twice
-      expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(-1)
-      expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(1)
+      expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(nil)
+      expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(nil)
     end
 
     it "have the same hash value as $1" do

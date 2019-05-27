@@ -115,16 +115,10 @@ class Money
 
   def <=>(other)
     return unless other.respond_to?(:to_money)
-    arithmetic(other) do |money|
-      value <=> money.value
-    end
-  end
 
-  # TODO: Remove once cross-currency mathematical operations are no longer allowed
-  def ==(other)
-    return false unless other.is_a?(Money)
-    return false unless currency.compatible?(other.currency)
-    super
+    arithmetic(other) do |money|
+      value <=> money.value if currency.compatible?(money.currency)
+    end
   end
   alias_method(:eql?, :==)
 
