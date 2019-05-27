@@ -114,10 +114,19 @@ class Money
   end
 
   def <=>(other)
+    return unless other.respond_to?(:to_money)
     arithmetic(other) do |money|
       value <=> money.value
     end
   end
+
+  # TODO: Remove once cross-currency mathematical operations are no longer allowed
+  def ==(other)
+    return false unless other.is_a?(Money)
+    return false unless currency.compatible?(other.currency)
+    super
+  end
+  alias_method(:eql?, :==)
 
   def +(other)
     arithmetic(other) do |money|
@@ -144,16 +153,6 @@ class Money
 
   def inspect
     "#<#{self.class} value:#{self} currency:#{self.currency}>"
-  end
-
-  def ==(other)
-    eql?(other)
-  end
-
-  def eql?(other)
-    return false unless other.is_a?(Money)
-    return false unless currency.compatible?(other.currency)
-    value == other.value
   end
 
   class ReverseOperationProxy

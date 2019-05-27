@@ -3,7 +3,7 @@ require 'yaml'
 
 RSpec.describe "Money" do
 
-  let (:money) {Money.new(1)}
+  let (:money) { Money.new(1) }
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
@@ -374,16 +374,8 @@ RSpec.describe "Money" do
       expect((0.5 <=> money)).to eq(-1)
     end
 
-    it "raises error if compared other is not compatible" do
-      expect{ Money.new(5.00) <=> nil }.to raise_error(TypeError)
-    end
-
-    it "have the same hash value as $1" do
-      expect(money.hash).to eq(Money.new(1.00).hash)
-    end
-
-    it "does not have the same hash value as $2" do
-      expect(money.hash).to eq(Money.new(1.00).hash)
+    it "<=> returns nil with non-coercible non-money objects" do
+      expect((money <=> nil)).to(eq(nil))
     end
 
     it "<=> can compare with and without currency" do
@@ -395,6 +387,14 @@ RSpec.describe "Money" do
       expect(Money).to receive(:deprecate).twice
       expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(-1)
       expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(1)
+    end
+
+    it "have the same hash value as $1" do
+      expect(money.hash).to eq(Money.new(1.00).hash)
+    end
+
+    it "does not have the same hash value as $2" do
+      expect(money.hash).to eq(Money.new(1.00).hash)
     end
   end
 
