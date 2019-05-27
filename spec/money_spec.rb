@@ -500,12 +500,12 @@ RSpec.describe "Money" do
     end
 
     describe('any values, non-to_money types') do
-      it { expect { cad_10 <=> nil }.to(raise_error(TypeError)) }
-      it { expect { cad_10 >  nil }.to(raise_error(TypeError)) }
-      it { expect { cad_10 >= nil }.to(raise_error(TypeError)) }
+      it { expect(cad_10 <=> nil).to(eq(nil)) }
+      it { expect { cad_10 >  nil }.to(raise_error(ArgumentError)) }
+      it { expect { cad_10 >= nil }.to(raise_error(ArgumentError)) }
       it { expect(cad_10 == nil).to(eq(false)) }
-      it { expect { cad_10 <= nil }.to(raise_error(TypeError)) }
-      it { expect { cad_10 <  nil }.to(raise_error(TypeError)) }
+      it { expect { cad_10 <= nil }.to(raise_error(ArgumentError)) }
+      it { expect { cad_10 <  nil }.to(raise_error(ArgumentError)) }
     end
   end
 

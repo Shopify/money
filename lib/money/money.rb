@@ -114,6 +114,7 @@ class Money
   end
 
   def <=>(other)
+    return unless other.respond_to?(:to_money)
     arithmetic(other) do |money|
       value <=> money.value
     end
@@ -150,6 +151,7 @@ class Money
     eql?(other)
   end
 
+  # TODO: Remove once cross-currency mathematical operations are no longer allowed
   def eql?(other)
     return false unless other.is_a?(Money)
     return false unless currency.compatible?(other.currency)
