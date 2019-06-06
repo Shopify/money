@@ -114,8 +114,8 @@ generate methods for use with ActiveRecord:
 
 ```ruby
 create_table :orders do |t|
-  t.decimal :sub_total, precision: 20, scale: 3
-  t.decimal :tax, precision: 20, scale: 3
+  t.decimal :sub_total, precision: 21, scale: 3
+  t.decimal :tax, precision: 21, scale: 3
   t.string :currency, limit: 3
 end
 
