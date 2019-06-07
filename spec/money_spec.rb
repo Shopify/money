@@ -383,7 +383,7 @@ RSpec.describe "Money" do
     end
 
     it "does not have the same hash value as $2" do
-      expect(money.hash).to eq(Money.new(1.00).hash)
+      expect(money.hash).to_not eq(Money.new(2.00).hash)
     end
 
     it "<=> can compare with and without currency" do
