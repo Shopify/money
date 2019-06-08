@@ -633,6 +633,22 @@ RSpec.describe "Money" do
       expect { Money.new(1).allocate([rate, 1 - rate]) }.not_to raise_error
     end
 
+    specify "#allocate fills pennies from beginning to end with roundrobin strategy" do
+      moneys = Money.new(0.05).allocate([0.3,0.7], :roundrobin)
+      expect(moneys[0]).to eq(Money.new(0.02))
+      expect(moneys[1]).to eq(Money.new(0.03))
+    end
+
+    specify "#allocate fills pennies from end to beginning with roundrobin_reverse strategy" do
+      moneys = Money.new(0.05).allocate([0.3,0.7], :roundrobin_reverse)
+      expect(moneys[0]).to eq(Money.new(0.01))
+      expect(moneys[1]).to eq(Money.new(0.04))
+    end
+
+    specify "#allocate raise ArgumentError when invalid strategy is provided" do
+      expect { Money.new(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
+    end
+
     specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder" do
       expect(
         Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),

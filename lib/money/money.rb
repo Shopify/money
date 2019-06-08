@@ -251,7 +251,12 @@ class Money
   # listed first will likely receive more pennies than ones that are listed later
   #
   # @param splits [Array<Numeric>]
+  # @param strategy Symbol
   # @return [Array<Money>]
+  #
+  # Strategies:
+  # - `:roundrobin` (default): leftover pennies will be accumulated starting from the first allocation left to right
+  # - `:roundrobin_reverse`: leftover pennies will be accumulated starting from the last allocation right to left
   #
   # @example
   #   Money.new(5, "USD").allocate([0.50, 0.25, 0.25])
@@ -268,7 +273,11 @@ class Money
   #     #=> [#<Money value:20.00 currency:USD>, #<Money value:10.00 currency:USD>]
   #   Money.new(30, "USD").allocate([Rational(2, 3), Rational(1, 3)])
   #     #=> [#<Money value:20.00 currency:USD>, #<Money value:10.00 currency:USD>]
-  def allocate(splits)
+
+  # @example left over pennies distributed reverse order when using roundrobin_reverse strategy
+  #   Money.new(10.01, "USD").allocate([0.5, 0.5], :roundrobin_reverse)
+  #     #=> [#<Money value:5.00 currency:USD>, #<Money value:5.01 currency:USD>]
+  def allocate(splits, strategy = :roundrobin)
     if all_rational?(splits)
       allocations = splits.inject(0) { |sum, n| sum + n }
     else
@@ -281,7 +290,18 @@ class Money
 
     amounts, left_over = amounts_from_splits(allocations, splits)
 
-    left_over.to_i.times { |i| amounts[i % amounts.length] += 1 }
+    left_over.to_i.times do |i|
+      idx = case strategy
+      when :roundrobin
+        i % amounts.length
+      when :roundrobin_reverse
+        amounts.length - (i % amounts.length) - 1
+      else
+        raise ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse"
+      end
+
+      amounts[idx] += 1
+    end
 
     amounts.collect { |subunits| Money.from_subunits(subunits, currency) }
   end
