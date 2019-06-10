@@ -3,7 +3,7 @@ require 'yaml'
 
 RSpec.describe "Money" do
 
-  let (:money) {Money.new(1)}
+  let (:money) { Money.new(1) }
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
@@ -374,17 +374,23 @@ RSpec.describe "Money" do
       expect((0.5 <=> money)).to eq(-1)
     end
 
-    it "raises error if compared other is not compatible" do
-      expect{ Money.new(5.00) <=> nil }.to raise_error(TypeError)
-    end
-
     it "have the same hash value as $1" do
       expect(money.hash).to eq(Money.new(1.00).hash)
     end
 
     it "does not have the same hash value as $2" do
-      expect(money.hash).to eq(Money.new(1.00).hash)
+      expect(money.hash).to_not eq(Money.new(2.00).hash)
     end
+  end
+
+  describe('Comparable') do
+    let (:cad_05) { Money.new(5.00, 'CAD') }
+    let (:cad_10) { Money.new(10.00, 'CAD') }
+    let (:cad_20) { Money.new(20.00, 'CAD') }
+    let (:nil_05) { Money.new(5.00, Money::NULL_CURRENCY) }
+    let (:nil_10) { Money.new(10.00, Money::NULL_CURRENCY) }
+    let (:nil_20) { Money.new(20.00, Money::NULL_CURRENCY) }
+    let (:usd_10) { Money.new(10.00, 'USD') }
 
     it "<=> can compare with and without currency" do
       expect(Money.new(1000, Money::NULL_CURRENCY) <=> Money.new(2000, 'JPY')).to eq(-1)
@@ -395,6 +401,111 @@ RSpec.describe "Money" do
       expect(Money).to receive(:deprecate).twice
       expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(-1)
       expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(1)
+    end
+
+    describe('same values') do
+      describe('same currencies') do
+        it { expect(cad_10 <=> cad_10).to(eq(0)) }
+        it { expect(cad_10 >  cad_10).to(eq(false)) }
+        it { expect(cad_10 >= cad_10).to(eq(true)) }
+        it { expect(cad_10 == cad_10).to(eq(true)) }
+        it { expect(cad_10 <= cad_10).to(eq(true)) }
+        it { expect(cad_10 <  cad_10).to(eq(false)) }
+      end
+
+      describe('null currency') do
+        it { expect(cad_10 <=> nil_10).to(eq(0)) }
+        it { expect(cad_10 >  nil_10).to(eq(false)) }
+        it { expect(cad_10 >= nil_10).to(eq(true)) }
+        it { expect(cad_10 == nil_10).to(eq(true)) }
+        it { expect(cad_10 <= nil_10).to(eq(true)) }
+        it { expect(cad_10 <  nil_10).to(eq(false)) }
+      end
+
+      describe('different currencies') do
+        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=> usd_10).to(eq(0)) }
+        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >  usd_10).to(eq(false)) }
+        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >= usd_10).to(eq(true)) }
+        it { expect(cad_10 == usd_10).to(eq(false)) }
+        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <= usd_10).to(eq(true)) }
+        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <  usd_10).to(eq(false)) }
+      end
+
+      describe('to_money types') do
+        it { expect(cad_10 <=> 10.00).to(eq(0)) }
+        it { expect(cad_10 >   10.00).to(eq(false)) }
+        it { expect(cad_10 >=  10.00).to(eq(true)) }
+        it { expect(cad_10 ==  10.00).to(eq(false)) }
+        it { expect(cad_10 <=  10.00).to(eq(true)) }
+        it { expect(cad_10 <   10.00).to(eq(false)) }
+      end
+    end
+
+    describe('left lower than right') do
+      describe('same currencies') do
+        it { expect(cad_10 <=> cad_20).to(eq(-1)) }
+        it { expect(cad_10 >   cad_20).to(eq(false)) }
+        it { expect(cad_10 >=  cad_20).to(eq(false)) }
+        it { expect(cad_10 ==  cad_20).to(eq(false)) }
+        it { expect(cad_10 <=  cad_20).to(eq(true)) }
+        it { expect(cad_10 <   cad_20).to(eq(true)) }
+      end
+
+      describe('null currency') do
+        it { expect(cad_10 <=> nil_20).to(eq(-1)) }
+        it { expect(cad_10 >   nil_20).to(eq(false)) }
+        it { expect(cad_10 >=  nil_20).to(eq(false)) }
+        it { expect(cad_10 ==  nil_20).to(eq(false)) }
+        it { expect(cad_10 <=  nil_20).to(eq(true)) }
+        it { expect(cad_10 <   nil_20).to(eq(true)) }
+      end
+
+      describe('to_money types') do
+        it { expect(cad_10 <=> 20.00).to(eq(-1)) }
+        it { expect(cad_10 >   20.00).to(eq(false)) }
+        it { expect(cad_10 >=  20.00).to(eq(false)) }
+        it { expect(cad_10 ==  20.00).to(eq(false)) }
+        it { expect(cad_10 <=  20.00).to(eq(true)) }
+        it { expect(cad_10 <   20.00).to(eq(true)) }
+      end
+    end
+
+    describe('left greater than right') do
+      describe('same currencies') do
+        it { expect(cad_10 <=> cad_05).to(eq(1)) }
+        it { expect(cad_10 >   cad_05).to(eq(true)) }
+        it { expect(cad_10 >=  cad_05).to(eq(true)) }
+        it { expect(cad_10 ==  cad_05).to(eq(false)) }
+        it { expect(cad_10 <=  cad_05).to(eq(false)) }
+        it { expect(cad_10 <   cad_05).to(eq(false)) }
+      end
+
+      describe('null currency') do
+        it { expect(cad_10 <=> nil_05).to(eq(1)) }
+        it { expect(cad_10 >   nil_05).to(eq(true)) }
+        it { expect(cad_10 >=  nil_05).to(eq(true)) }
+        it { expect(cad_10 ==  nil_05).to(eq(false)) }
+        it { expect(cad_10 <=  nil_05).to(eq(false)) }
+        it { expect(cad_10 <   nil_05).to(eq(false)) }
+      end
+
+      describe('to_money types') do
+        it { expect(cad_10 <=> 5.00).to(eq(1)) }
+        it { expect(cad_10 >   5.00).to(eq(true)) }
+        it { expect(cad_10 >=  5.00).to(eq(true)) }
+        it { expect(cad_10 ==  5.00).to(eq(false)) }
+        it { expect(cad_10 <=  5.00).to(eq(false)) }
+        it { expect(cad_10 <   5.00).to(eq(false)) }
+      end
+    end
+
+    describe('any values, non-to_money types') do
+      it { expect(cad_10 <=> nil).to(eq(nil)) }
+      it { expect { cad_10 >  nil }.to(raise_error(ArgumentError)) }
+      it { expect { cad_10 >= nil }.to(raise_error(ArgumentError)) }
+      it { expect(cad_10 == nil).to(eq(false)) }
+      it { expect { cad_10 <= nil }.to(raise_error(ArgumentError)) }
+      it { expect { cad_10 <  nil }.to(raise_error(ArgumentError)) }
     end
   end
 
