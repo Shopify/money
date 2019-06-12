@@ -589,10 +589,22 @@ RSpec.describe "Money" do
       expect(Money.new(2).allocate([0.5, 0.5])).to eq(expected)
     end
 
+    specify "#allocate does not lose pennies (integration test)" do
+      moneys = Money.new(0.05).allocate([0.3,0.7])
+      expect(moneys[0]).to eq(Money.new(0.02))
+      expect(moneys[1]).to eq(Money.new(0.03))
+    end
+
     specify "#allocate_max_amounts is calculated by Money::Allocator#allocate_max_amounts" do
       expected = [Money.new(1), [Money.new(1)]]
       expect_any_instance_of(Money::Allocator).to receive(:allocate_max_amounts).and_return(expected)
       expect(Money.new(2).allocate_max_amounts([0.5, 0.5])).to eq(expected)
+    end
+
+    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder (integration test)" do
+      expect(
+        Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
+      ).to eq([Money.new(26), Money.new(4.75)])
     end
   end
 
