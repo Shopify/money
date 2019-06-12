@@ -585,7 +585,7 @@ RSpec.describe "Money" do
   describe "allocation"do
     specify "#allocate is calculated by Money::Allocator#allocate" do
       expected = [Money.new(1), [Money.new(1)]]
-      expect_any_instance_of(Money::Allocator).to receive(:allocate).and_return(expected)
+      expect_any_instance_of(Money::Allocator).to receive(:allocate).with([0.5, 0.5], :roundrobin).and_return(expected)
       expect(Money.new(2).allocate([0.5, 0.5])).to eq(expected)
     end
 
