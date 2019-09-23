@@ -56,6 +56,6 @@ RSpec.describe BigDecimal do
   it_should_behave_like "an object supporting to_money"
 
   it "parses a zero BigDecimal to Money.zero" do
-    expect(BigDecimal.new("-0.000").to_money).to eq(Money.zero)
+    expect(BigDecimal("-0.000").to_money).to eq(Money.zero)
   end
 end

@@ -744,8 +744,8 @@ RSpec.describe "Money" do
     end
 
     it "accepts Rational number" do
-      expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal.new("1000000000000000000", Money::Helpers::MAX_DECIMAL))
-      expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal.new("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal("1000000000000000000", Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
     end
 
     it "raises ArgumentError with unsupported argument" do
