@@ -37,11 +37,8 @@ class Money
     #   Money.new(10.01, "USD").allocate([0.5, 0.5], :roundrobin_reverse)
     #     #=> [#<Money value:5.00 currency:USD>, #<Money value:5.01 currency:USD>]
     def allocate(splits, strategy = :roundrobin)
-      if all_rational?(splits)
-        allocations = splits.inject(0) { |sum, n| sum + n }
-      else
-        allocations = splits.inject(0) { |sum, n| sum + Helpers.value_to_decimal(n) }
-      end
+      splits.map!(&:to_r)
+      allocations = splits.inject(0, :+)
 
       if (allocations - BigDecimal("1")) > Float::EPSILON
         raise ArgumentError, "splits add to more than 100%"
@@ -81,14 +78,11 @@ class Money
       maximums_total = maximums.reduce(Money.new(0, allocation_currency), :+)
 
       splits = maximums.map do |max_amount|
-        next(0) if maximums_total.zero?
+        next(Rational(0)) if maximums_total.zero?
         Money.rational(max_amount, maximums_total)
       end
 
-      total_allocatable = [
-        value * allocation_currency.subunit_to_unit,
-        maximums_total.value * allocation_currency.subunit_to_unit
-      ].min
+      total_allocatable = [maximums_total.subunits, self.subunits].min
 
       subunits_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
 
@@ -116,10 +110,12 @@ class Money
     end
 
     def amounts_from_splits(allocations, splits, subunits_to_split = subunits)
+      raise ArgumentError, "All splits values must be of type Rational." unless all_rational?(splits)
+
       left_over = subunits_to_split
 
       amounts = splits.collect do |ratio|
-        frac = (Helpers.value_to_decimal(subunits_to_split * ratio) / allocations).floor
+        frac = (subunits_to_split * ratio / allocations.to_r).floor
         left_over -= frac
         frac
       end
