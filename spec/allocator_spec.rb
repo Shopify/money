@@ -67,6 +67,12 @@ RSpec.describe "Allocator" do
     specify "#allocate raise ArgumentError when invalid strategy is provided" do
       expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
     end
+
+    specify "#allocate does not raise ArgumentError when invalid splits types are provided" do
+      moneys = new_allocator(0.03).allocate([0.5, 0.5], :roundrobin)
+      expect(moneys[0]).to eq(Money.new(0.02))
+      expect(moneys[1]).to eq(Money.new(0.01))
+    end
   end
 
   describe 'allocate_max_amounts' do
@@ -126,6 +132,12 @@ RSpec.describe "Allocator" do
       expect(
         new_allocator(3).allocate_max_amounts([Money.empty, Money.empty, Money.empty]),
       ).to eq([Money.empty, Money.empty, Money.empty])
+    end
+
+    specify "#allocate_max_amounts allocates the right amount without rounding error" do
+      expect(
+        new_allocator(24.2).allocate_max_amounts([Money.new(46), Money.new(46), Money.new(50), Money.new(50),Money.new(50)]),
+        ).to eq([Money.new(4.6), Money.new(4.6), Money.new(5), Money.new(5), Money.new(5)])
     end
   end
 
