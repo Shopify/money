@@ -1,3 +1,5 @@
+require 'delegate'
+
 class Money
   class Allocator < SimpleDelegator
     def initialize(money)
