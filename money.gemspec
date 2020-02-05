@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# frozen_string_literal: true
 require_relative "lib/money/version"
 
 Gem::Specification.new do |s|
@@ -14,11 +15,12 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency("bundler", ">= 1.5")
   s.add_development_dependency("simplecov", ">= 0")
-  s.add_development_dependency("rails", "~> 5.0")
+  s.add_development_dependency("rails", "~> 6.0")
   s.add_development_dependency("rspec", "~> 3.2")
   s.add_development_dependency("database_cleaner", "~> 1.6")
-  s.add_development_dependency("sqlite3", "~> 1.3.6")
-  s.add_development_dependency("bigdecimal", "~> 1.4.4")
+  s.add_development_dependency("sqlite3", "~> 1.4.2")
+
+  s.required_ruby_version = '>= 2.5'
 
   s.files = `git ls-files`.split($/)
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }

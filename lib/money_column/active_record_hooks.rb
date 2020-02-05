@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module MoneyColumn
   module ActiveRecordHooks
     def self.included(base)
