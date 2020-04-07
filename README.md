@@ -139,6 +139,25 @@ currency on the model or attribute level.
 There are no validations generated. You can add these for the specified money
 and currency attributes as you normally would for any other.
 
+## Rubocop
+
+A RuboCop rule to enforce the presence of a currency using static analysis is available.
+
+Add to your `.rubocop.yml`
+```yaml
+require:
+  - money
+
+Money/MissingCurrency:
+  Enabled: true
+```
+
+If your application is currently handling only one currency, it can autocorrect this by specifying a currency under the `Enabled` line:
+
+```yaml
+ReplacementCurrency: 'CAD'
+```
+
 ## Contributing to money
 
 - Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
