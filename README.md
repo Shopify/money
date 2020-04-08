@@ -1,6 +1,6 @@
 # money
 
-[![Build Status](https://travis-ci.org/Shopify/money.svg?branch=master)](https://travis-ci.org/Shopify/money) [![codecov](https://codecov.io/gh/Shopify/money/branch/master/graph/badge.svg)](https://codecov.io/gh/Shopify/money)
+[![Build Status](https://travis-ci.org/Shopify/money.svg?branch=master)](https://travis-ci.org/Shopify/money)
 
 
 money_column expects a DECIMAL(21,3) database field.
