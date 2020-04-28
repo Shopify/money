@@ -19,7 +19,7 @@ module RuboCop
         #
 
         def_node_matcher :money_new_without_currency?, <<~PATTERN
-          (send (const nil? :Money) :new _)
+          (send (const nil? :Money) {:new :from_amount :from_cents} _)
         PATTERN
 
         def_node_matcher :to_money_without_currency?, <<~PATTERN
