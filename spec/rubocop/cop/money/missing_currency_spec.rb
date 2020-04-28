@@ -22,6 +22,32 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
+    it 'registers an offense for Money.from_amount without a currency argument' do
+      expect_offense(<<~RUBY)
+        Money.from_amount(1)
+        ^^^^^^^^^^^^^^^^^^^^ Money is missing currency argument
+      RUBY
+    end
+
+    it 'does not register an offense for Money.from_amount with currency argument' do
+      expect_no_offenses(<<~RUBY)
+        Money.from_amount(1, 'CAD')
+      RUBY
+    end
+
+    it 'registers an offense for Money.from_cents without a currency argument' do
+      expect_offense(<<~RUBY)
+        Money.from_cents(1)
+        ^^^^^^^^^^^^^^^^^^^ Money is missing currency argument
+      RUBY
+    end
+
+    it 'does not register an offense for Money.from_cents with currency argument' do
+      expect_no_offenses(<<~RUBY)
+        Money.from_cents(1, 'CAD')
+      RUBY
+    end
+
     it 'registers an offense for to_money without a currency argument' do
       expect_offense(<<~RUBY)
         '1'.to_money
