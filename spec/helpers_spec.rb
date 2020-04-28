@@ -50,12 +50,6 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_decimal('invalid')).to eq(0)
     end
 
-    it 'returns the bigdecimal representation of numbers while they are deprecated' do
-      expect(Money).to receive(:deprecate).exactly(2).times
-      expect(subject.value_to_decimal('0.00123e3')).to eq(amount)
-      expect(subject.value_to_decimal("0.123e1")).to eq(amount)
-    end
-
     it 'raises on invalid object' do
       expect { subject.value_to_decimal(OpenStruct.new(amount: 1)) }.to raise_error(ArgumentError)
     end
