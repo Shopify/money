@@ -11,6 +11,7 @@ module RuboCop
         # @example
         #   # bad
         #   Money.new(123.45)
+        #   Money.new
         #   "1,234.50".to_money
         #
         #   # good
@@ -18,8 +19,8 @@ module RuboCop
         #   "1,234.50".to_money('CAD')
         #
 
-        def_node_matcher :money_new_without_currency?, <<~PATTERN
-          (send (const nil? :Money) {:new :from_amount :from_cents} _)
+        def_node_matcher :money_new, <<~PATTERN
+          (send (const nil? :Money) {:new :from_amount :from_cents} $...)
         PATTERN
 
         def_node_matcher :to_money_without_currency?, <<~PATTERN
@@ -31,7 +32,9 @@ module RuboCop
         PATTERN
 
         def on_send(node)
-          if money_new_without_currency?(node)
+          money_new(node) do |_amount, currency_arg|
+            return if currency_arg
+
             add_offense(node, message: 'Money is missing currency argument')
           end
 
@@ -44,12 +47,19 @@ module RuboCop
           currency = cop_config['ReplacementCurrency']
           return unless currency
 
-          receiver, method, *args = *node
+          receiver, method, _ = *node
 
           lambda do |corrector|
-            if money_new_without_currency?(node)
-              corrector.insert_after(args[0].loc.expression, ", '#{currency}'")
-            elsif to_money_without_currency?(node)
+            money_new(node) do |amount, currency_arg|
+              return if currency_arg
+
+              corrector.replace(
+                node.loc.expression,
+                "#{receiver.source}.#{method}(#{amount&.source || 0}, '#{currency}')"
+              )
+            end
+
+            if to_money_without_currency?(node)
               corrector.insert_after(node.loc.expression, "('#{currency}')")
             elsif to_money_block?(node)
               corrector.replace(
