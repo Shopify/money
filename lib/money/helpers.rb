@@ -5,7 +5,6 @@ class Money
   module Helpers
     module_function
 
-    NUMERIC_REGEX = /\A\s*[\+\-]?(\d+|\d*\.\d+)\s*\z/
     DECIMAL_ZERO = BigDecimal(0).freeze
     MAX_DECIMAL = 21
 
@@ -25,7 +24,11 @@ class Money
         when Rational
           BigDecimal(num, MAX_DECIMAL)
         when String
-          string_to_decimal(num)
+          decimal = BigDecimal(num, exception: false)
+          return decimal if decimal
+
+          Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
+          DECIMAL_ZERO
         else
           raise ArgumentError, "could not parse as decimal #{num.inspect}"
         end
@@ -52,19 +55,6 @@ class Money
         end
       else
         raise ArgumentError, "could not parse as currency #{currency.inspect}"
-      end
-    end
-
-    def string_to_decimal(num)
-      if num =~ NUMERIC_REGEX
-        return BigDecimal(num)
-      end
-
-      Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
-      begin
-        BigDecimal(num)
-      rescue ArgumentError
-        DECIMAL_ZERO
       end
     end
   end
