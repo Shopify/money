@@ -43,7 +43,7 @@ RSpec.describe "Allocator" do
 
     specify "#allocate will convert rationals with high precision" do
       ratios = [Rational(1, 1), Rational(0)]
-      expect(new_allocator("858993456.12").allocate(ratios)).to eq([Money.new("858993456.12"), Money.empty])
+      expect(new_allocator("858993456.12").allocate(ratios)).to eq([Money.new("858993456.12"), Money.new(0, Money::NULL_CURRENCY)])
       ratios = [Rational(1, 6), Rational(5, 6)]
       expect(new_allocator("3.00").allocate(ratios)).to eq([Money.new("0.50"), Money.new("2.50")])
     end
@@ -131,8 +131,8 @@ RSpec.describe "Allocator" do
 
     specify "#allocate_max_amounts supports all-zero maxima" do
       expect(
-        new_allocator(3).allocate_max_amounts([Money.empty, Money.empty, Money.empty]),
-      ).to eq([Money.empty, Money.empty, Money.empty])
+        new_allocator(3).allocate_max_amounts([Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY)]),
+      ).to eq([Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY)])
     end
 
     specify "#allocate_max_amounts allocates the right amount without rounding error" do

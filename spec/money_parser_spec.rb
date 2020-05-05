@@ -8,12 +8,12 @@ RSpec.describe MoneyParser do
 
   describe "parsing of amounts with period decimal separator" do
     it "parses an empty string to $0" do
-      expect(@parser.parse("")).to eq(Money.zero)
+      expect(@parser.parse("")).to eq(Money.new(0, Money::NULL_CURRENCY))
     end
 
     it "parses an invalid string when not strict" do
       expect(Money).to receive(:deprecate).twice
-      expect(@parser.parse("no money")).to eq(Money.zero)
+      expect(@parser.parse("no money")).to eq(Money.new(0, Money::NULL_CURRENCY))
       expect(@parser.parse("1..")).to eq(Money.new(1))
     end
 

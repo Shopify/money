@@ -136,7 +136,7 @@ RSpec.describe 'MoneyColumn' do
 
   it 'does not overwrite a currency column with a default currency when saving zero' do
     expect(record.currency.to_s).to eq('EUR')
-    record.update(price: Money.zero)
+    record.update(price: Money.new(0, Money::NULL_CURRENCY))
     expect(record.currency.to_s).to eq('EUR')
   end
 
