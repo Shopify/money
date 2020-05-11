@@ -20,7 +20,7 @@ module RuboCop
         #
 
         def_node_matcher :money_new, <<~PATTERN
-          (send (const nil? :Money) {:new :from_amount :from_cents} $...)
+          (send (const {nil? cbase} :Money) {:new :from_amount :from_cents} $...)
         PATTERN
 
         def_node_matcher :to_money_without_currency?, <<~PATTERN
@@ -44,9 +44,6 @@ module RuboCop
         end
 
         def autocorrect(node)
-          currency = cop_config['ReplacementCurrency']
-          return unless currency
-
           receiver, method, _ = *node
 
           lambda do |corrector|
@@ -55,18 +52,28 @@ module RuboCop
 
               corrector.replace(
                 node.loc.expression,
-                "#{receiver.source}.#{method}(#{amount&.source || 0}, '#{currency}')"
+                "#{receiver.source}.#{method}(#{amount&.source || 0}, #{replacement_currency})"
               )
             end
 
             if to_money_without_currency?(node)
-              corrector.insert_after(node.loc.expression, "('#{currency}')")
+              corrector.insert_after(node.loc.expression, "(#{replacement_currency})")
             elsif to_money_block?(node)
               corrector.replace(
                 node.loc.expression,
-                "#{receiver.source}.#{method} { |x| x.to_money('#{currency}') }"
+                "#{receiver.source}.#{method} { |x| x.to_money(#{replacement_currency}) }"
               )
             end
+          end
+        end
+
+        private
+
+        def replacement_currency
+          if cop_config['ReplacementCurrency']
+            "'#{cop_config['ReplacementCurrency']}'"
+          else
+            'Money::NULL_CURRENCY'
           end
         end
       end

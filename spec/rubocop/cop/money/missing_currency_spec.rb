@@ -8,11 +8,15 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
 
   let(:config) { RuboCop::Config.new }
 
-  describe '#on_send' do
-    it 'registers an offense for Money.new without a currency argument' do
+  context 'with default configuration' do
+    it 'registers an offense and corrects for Money.new without a currency argument' do
       expect_offense(<<~RUBY)
         Money.new(1)
         ^^^^^^^^^^^^ Money is missing currency argument
+      RUBY
+
+      expect_correction(<<~RUBY)
+        Money.new(1, Money::NULL_CURRENCY)
       RUBY
     end
 
@@ -22,17 +26,25 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
-    it 'registers an offense for Money.new without a currency argument' do
+    it 'registers an offense and corrects for Money.new without a currency argument' do
       expect_offense(<<~RUBY)
         Money.new
         ^^^^^^^^^ Money is missing currency argument
       RUBY
+
+      expect_correction(<<~RUBY)
+        Money.new(0, Money::NULL_CURRENCY)
+      RUBY
     end
 
-    it 'registers an offense for Money.from_amount without a currency argument' do
+    it 'registers an offense and corrects for Money.from_amount without a currency argument' do
       expect_offense(<<~RUBY)
         Money.from_amount(1)
         ^^^^^^^^^^^^^^^^^^^^ Money is missing currency argument
+      RUBY
+
+      expect_correction(<<~RUBY)
+        Money.from_amount(1, Money::NULL_CURRENCY)
       RUBY
     end
 
@@ -42,10 +54,14 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
-    it 'registers an offense for Money.from_cents without a currency argument' do
+    it 'registers an offense and corrects for Money.from_cents without a currency argument' do
       expect_offense(<<~RUBY)
         Money.from_cents(1)
         ^^^^^^^^^^^^^^^^^^^ Money is missing currency argument
+      RUBY
+
+      expect_correction(<<~RUBY)
+        Money.from_cents(1, Money::NULL_CURRENCY)
       RUBY
     end
 
@@ -55,10 +71,14 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
-    it 'registers an offense for to_money without a currency argument' do
+    it 'registers an offense and corrects for to_money without a currency argument' do
       expect_offense(<<~RUBY)
         '1'.to_money
         ^^^^^^^^^^^^ to_money is missing currency argument
+      RUBY
+
+      expect_correction(<<~RUBY)
+        '1'.to_money(Money::NULL_CURRENCY)
       RUBY
     end
 
@@ -68,15 +88,19 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
-    it 'registers an offense for to_money block pass form' do
+    it 'registers an offense and corrects for to_money block pass form' do
       expect_offense(<<~RUBY)
         ['1'].map(&:to_money)
         ^^^^^^^^^^^^^^^^^^^^^ to_money is missing currency argument
       RUBY
+
+      expect_correction(<<~RUBY)
+        ['1'].map { |x| x.to_money(Money::NULL_CURRENCY) }
+      RUBY
     end
   end
 
-  describe '#autocorrect' do
+  context 'with ReplacementCurrency configuration' do
     let(:config) do
       RuboCop::Config.new(
         'Money/MissingCurrency' => {
