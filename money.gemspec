@@ -13,6 +13,8 @@ Gem::Specification.new do |s|
   s.licenses = "MIT"
   s.summary = "Shopify's money gem"
 
+  s.metadata['allowed_push_host'] = "https://rubygems.org"
+
   s.add_development_dependency("bundler", ">= 1.5")
   s.add_development_dependency("simplecov", ">= 0")
   s.add_development_dependency("rails", "~> 6.0")
