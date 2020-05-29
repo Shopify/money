@@ -31,8 +31,8 @@ class Money
     end
     alias_method :empty, :zero
 
-    def parse(*args)
-      parser.parse(*args)
+    def parse(*args, **kwargs)
+      parser.parse(*args, **kwargs)
     end
 
     def from_cents(cents, currency = nil)
