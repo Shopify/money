@@ -1,26 +1,38 @@
 # frozen_string_literal: true
-require 'json'
+require 'yaml'
 
 class Money
   class Currency
     module Loader
-      extend self
+      class << self
+        def load_currencies
+          currency_data_path = File.expand_path("../../../../config", __FILE__)
 
-      CURRENCY_DATA_PATH = File.expand_path("../../../../config", __FILE__)
+          currencies = {}
+          currencies.merge! YAML.load_file("#{currency_data_path}/currency_historic.yml")
+          currencies.merge! YAML.load_file("#{currency_data_path}/currency_non_iso.yml")
+          currencies.merge! YAML.load_file("#{currency_data_path}/currency_iso.yml")
+          deep_deduplicate!(currencies)
+        end
 
-      def load_currencies
-        currencies = {}
-        currencies.merge! parse_currency_file("currency_historic.json")
-        currencies.merge! parse_currency_file("currency_non_iso.json")
-        currencies.merge! parse_currency_file("currency_iso.json")
-      end
+        private
 
-      private
-
-      def parse_currency_file(filename)
-        json = File.read("#{CURRENCY_DATA_PATH}/#{filename}")
-        json.force_encoding(::Encoding::UTF_8) if defined?(::Encoding)
-        JSON.parse(json)
+        def deep_deduplicate!(data)
+          case data
+          when Hash
+            return data if data.frozen?
+            data.transform_keys! { |k| deep_deduplicate!(k) }
+            data.transform_values! { |v| deep_deduplicate!(v) }
+            data.freeze
+          when Array
+            return data if data.frozen?
+            data.map! { |d| deep_deduplicate!(d) }.freeze
+          when String
+            -data
+          else
+            data.duplicable? ? data.freeze : data
+          end
+        end
       end
     end
   end
