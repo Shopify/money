@@ -30,7 +30,7 @@ class Money
           when String
             -data
           else
-            data.duplicable? ? data.freeze : data
+            data.freeze
           end
         end
       end
