@@ -1446,11 +1446,12 @@ mop:
   thousands_separator: ","
   iso_numeric: '446'
   smallest_denomination: 10
-mro:
+mru:
   priority: 100
-  iso_code: MRO
-  name: Mauritanian Ouguiya
+  iso_code: MRU
+  name: Mauritanian New Ouguiya
   symbol: UM
+  disambiguate_symbol: MRU
   alternate_symbols: []
   subunit: Khoums
   subunit_to_unit: 5
@@ -1458,7 +1459,7 @@ mro:
   html_entity: ''
   decimal_mark: "."
   thousands_separator: ","
-  iso_numeric: '478'
+  iso_numeric: '929'
   smallest_denomination: 1
 mur:
   priority: 100
@@ -2300,11 +2301,11 @@ uzs:
   thousands_separator: ","
   iso_numeric: '860'
   smallest_denomination: 100
-vef:
+ves:
   priority: 100
-  iso_code: VEF
-  name: Venezuelan Bolívar fuerte
-  symbol: Bs.F.
+  iso_code: VES
+  name: Venezuelan Bolívar soberano
+  symbol: Bs.S.
   alternate_symbols: []
   subunit: Céntimo
   subunit_to_unit: 100
@@ -2312,8 +2313,11 @@ vef:
   html_entity: ''
   decimal_mark: ","
   thousands_separator: "."
-  iso_numeric: '937'
-  smallest_denomination: 1
+  iso_numeric: '928'
+  # "On 20 August 2018, [...] New coins in denominations of 50 céntimos and 1 bolívar soberano, and new banknotes
+  #  in denominations of 2, 5, 10, 20, 50, 100, 200 and 500 bolívares soberanos were introduced."
+  # Source: https://en.wikipedia.org/wiki/Venezuelan_bol%C3%ADvar
+  smallest_denomination: 50
 vnd:
   priority: 100
   iso_code: VND

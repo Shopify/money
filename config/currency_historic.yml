@@ -43,6 +43,21 @@ ghc:
   thousands_separator: ","
   iso_numeric: '288'
   smallest_denomination: 1
+mro:
+  priority: 100
+  iso_code: MRO
+  name: Mauritanian Ouguiya
+  symbol: UM
+  disambiguate_symbol: MRO
+  alternate_symbols: []
+  subunit: Khoums
+  subunit_to_unit: 5
+  symbol_first: false
+  html_entity: ''
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: '478'
+  smallest_denomination: 1
 mtl:
   priority: 100
   iso_code: MTL
@@ -85,6 +100,20 @@ VEB:
   decimal_mark: ","
   thousands_separator: "."
   iso_numeric: '862'
+  smallest_denomination: 1
+vef:
+  priority: 100
+  iso_code: VEF
+  name: Venezuelan Bolívar fuerte
+  symbol: Bs.F.
+  alternate_symbols: []
+  subunit: Céntimo
+  subunit_to_unit: 100
+  symbol_first: true
+  html_entity: ''
+  decimal_mark: ","
+  thousands_separator: "."
+  iso_numeric: '937'
   smallest_denomination: 1
 zwd:
   priority: 100
