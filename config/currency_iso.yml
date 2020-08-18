@@ -1454,7 +1454,7 @@ mru:
   disambiguate_symbol: MRU
   alternate_symbols: []
   subunit: Khoums
-  subunit_to_unit: 5
+  subunit_to_unit: 1
   symbol_first: false
   html_entity: ''
   decimal_mark: "."
