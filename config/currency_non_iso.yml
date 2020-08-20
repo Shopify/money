@@ -14,6 +14,25 @@ jep:
   thousands_separator: ","
   iso_numeric: ''
   smallest_denomination: 1
+kid:
+  # The Kiribati Dollar is pegged 1:1 to the AUD, but banknotes and coins in both currencies circulate interchangeably.
+  # "Although Kiribati retained 1 and 2 cents coins well after Australia demoted theirs,
+  #  redundancy and devaluation has slowly removed these coins from general circulation."
+  # Source:  https://en.wikipedia.org/wiki/Kiribati_dollar
+  priority: 100
+  iso_code: KID
+  name: Kiribati Dollar
+  symbol: "$"
+  disambiguate_symbol: KID
+  alternate_symbols: []
+  subunit: Cent
+  subunit_to_unit: 100
+  symbol_first: true
+  html_entity: "$"
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: ''
+  smallest_denomination: 5
 ggp:
   priority: 100
   iso_code: GGP
