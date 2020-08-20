@@ -1454,6 +1454,9 @@ mru:
   disambiguate_symbol: MRU
   alternate_symbols: []
   subunit: Khoums
+  # MRU actually has 5 Khoums per Ouguiya, but we treat it as if it has no subunits.
+  # We do this because the Khoum's value is so small that it's not likely to be relevant in an online transaction,
+  # and we suspect that, when our payment partners add support for MRU, they're likely to ignore subunits.
   subunit_to_unit: 1
   symbol_first: false
   html_entity: ''
