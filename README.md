@@ -20,6 +20,14 @@ money_column expects a DECIMAL(21,3) database field.
 
     gem 'shopify-money', require: 'money'
 
+## Upgrade to 1.0
+
+In order to prepare for the 1.0 release, please add to an initializer:
+```ruby
+Money.active_support_deprecator.behavior = :raise
+Money.default_currency = nil # if you'd like to force every Money object to set a currency
+```
+
 ## Usage
 
 ``` ruby
