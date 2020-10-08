@@ -207,11 +207,20 @@ class Money
   end
 
   def to_s(style = nil)
-    case style
+    units = case style
     when :legacy_dollars
-      sprintf("%.2f", value)
+      2
     when :amount, nil
-      sprintf("%.#{currency.minor_units}f", value)
+      currency.minor_units
+    else
+      raise ArgumentError, "Unexpected style: #{style}"
+    end
+
+    rounded_value = value.round(units)
+    if units == 0
+      sprintf("%d", rounded_value)
+    else
+      sprintf("%d.%0#{units}d", rounded_value.truncate, rounded_value.frac * (10 ** units))
     end
   end
 
