@@ -80,6 +80,26 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s(:amount)).to eq("1")
   end
 
+  it "to_s rounds when  more fractions than currency allows" do
+    expect(Money.new("9.999", "USD").to_s).to eq("10.00")
+    expect(Money.new("9.889", "USD").to_s).to eq("9.89")
+  end
+
+  it "to_s does not round when fractions same as currency allows" do
+    expect(Money.new("1.25", "USD").to_s).to eq("1.25")
+    expect(Money.new("9.99", "USD").to_s).to eq("9.99")
+    expect(Money.new("9.999", "BHD").to_s).to eq("9.999")
+  end
+
+  it "to_s does not round if amount is larger than float allows" do
+    expect(Money.new("99999999999999.99", "USD").to_s).to eq("99999999999999.99")
+    expect(Money.new("999999999999999999.99", "USD").to_s).to eq("999999999999999999.99")
+  end
+
+  it "to_s raises ArgumentError on unsupported style" do
+    expect{ money.to_s(:some_weird_style) }.to raise_error(ArgumentError)
+  end
+
   it "as_json as a float with 2 decimal places" do
     expect(money.as_json).to eq("1.00")
   end
