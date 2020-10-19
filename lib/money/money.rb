@@ -220,7 +220,9 @@ class Money
     if units == 0
       sprintf("%d", rounded_value)
     else
-      sprintf("%d.%0#{units}d", rounded_value.truncate, rounded_value.frac * (10 ** units))
+      sign = rounded_value < 0 ? '-' : ''
+      rounded_value = rounded_value.abs
+      sprintf("%s%d.%0#{units}d", sign, rounded_value.truncate, rounded_value.frac * (10 ** units))
     end
   end
 

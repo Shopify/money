@@ -80,6 +80,13 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s(:amount)).to eq("1")
   end
 
+  it "to_s correctly displays negative numbers" do
+    expect((-money).to_s).to eq("-1.00")
+    expect((-amount_money).to_s).to eq("-1.23")
+    expect((-non_fractional_money).to_s).to eq("-1")
+    expect((-Money.new("0.05")).to_s).to eq("-0.05")
+  end
+
   it "to_s rounds when  more fractions than currency allows" do
     expect(Money.new("9.999", "USD").to_s).to eq("10.00")
     expect(Money.new("9.889", "USD").to_s).to eq("9.89")
