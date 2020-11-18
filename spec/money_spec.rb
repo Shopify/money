@@ -342,12 +342,28 @@ RSpec.describe "Money" do
     expect(Money.from_cents(1950.5)).to eq(Money.new(19.51))
   end
 
-  it "is creatable from an integer value in cents and currency" do
-    expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50))
-  end
+  describe '#from_subunits' do 
+    it "creates Money object from an integer value in cents and currency" do
+      expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50))
+    end
 
-  it "is creatable from an integer value in dollars and currency with no cents" do
-    expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950, 'JPY'))
+    it "creates Money object from an integer value in dollars and currency with no cents" do
+      expect(Money.from_subunits(1950, 'JPY')).to eq(Money.new(1950, 'JPY'))
+    end
+
+    describe 'with format specified' do
+      it 'overrides the subunit_to_unit amount' do
+        expect(Money.from_subunits(100, 'ISK', format: :stripe)).to eq(Money.new(1, 'ISK'))
+      end
+
+      it 'fallbacks to the default subunit_to_unit amount if no override is specified' do
+        expect(Money.from_subunits(100, 'USD', format: :stripe)).to eq(Money.new(1, 'USD'))
+      end
+
+      it 'raises if the format is not found' do
+        expect { Money.from_subunits(100, 'ISK', format: :unknown) }.to(raise_error(ArgumentError))
+      end
+    end
   end
 
   it "raises when constructed with a NaN value" do
@@ -543,6 +559,20 @@ RSpec.describe "Money" do
       expect(Money.new(1, 'JPY').subunits).to eq(1)
       expect(Money.new(1, 'IQD').subunits).to eq(1000)
       expect(Money.new(1).subunits).to eq(100)
+    end
+
+    describe 'with format specified' do
+      it 'overrides the subunit_to_unit amount' do
+        expect(Money.new(1, 'ISK').subunits(format: :stripe)).to eq(100)
+      end
+
+      it 'fallbacks to the default subunit_to_unit amount if no override is specified' do
+        expect(Money.new(1, 'USD').subunits(format: :stripe)).to eq(100)
+      end
+
+      it 'raises if the format is not found' do
+        expect { Money.new(1, 'ISK').subunits(format: :unknown) }.to(raise_error(ArgumentError))
+      end
     end
   end
 

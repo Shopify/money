@@ -39,9 +39,18 @@ class Money
       new(cents.round.to_f / 100, currency)
     end
 
-    def from_subunits(subunits, currency_iso)
+    def from_subunits(subunits, currency_iso, format: :iso4217)
       currency = Helpers.value_to_currency(currency_iso)
-      value = Helpers.value_to_decimal(subunits) / currency.subunit_to_unit
+
+      subunit_to_unit_value = if format == :iso4217
+        currency.subunit_to_unit
+      elsif format == :stripe
+        Helpers::STRIPE_SUBUNIT_OVERRIDE.fetch(currency.iso_code, currency.subunit_to_unit)
+      else
+        raise ArgumentError, "unknown format #{format}"
+      end
+
+      value = Helpers.value_to_decimal(subunits) / subunit_to_unit_value
       new(value, currency)
     end
 
@@ -102,8 +111,16 @@ class Money
     (value * 100).to_i
   end
 
-  def subunits
-    (@value * @currency.subunit_to_unit).to_i
+  def subunits(format: :iso4217)
+    subunit_to_unit_value = if format == :iso4217
+      @currency.subunit_to_unit
+    elsif format == :stripe
+      Helpers::STRIPE_SUBUNIT_OVERRIDE.fetch(@currency.iso_code, @currency.subunit_to_unit)
+    else
+      raise ArgumentError, "unknown format #{format}"
+    end
+
+    (@value * subunit_to_unit_value).to_i
   end
 
   def no_currency?
