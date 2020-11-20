@@ -1,6 +1,6 @@
 # money
 
-[![Build Status](https://travis-ci.org/Shopify/money.svg?branch=master)](https://travis-ci.org/Shopify/money)
+[![tests](https://github.com/Shopify/money/workflows/tests/badge.svg)](https://github.com/Shopify/money/actions?query=workflow%3Atests+branch%3Amaster)
 
 
 money_column expects a DECIMAL(21,3) database field.
