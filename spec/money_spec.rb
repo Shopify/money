@@ -9,10 +9,6 @@ RSpec.describe "Money" do
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
 
-  it "is contructable with empty class method" do
-    expect(Money.empty).to eq(Money.new)
-  end
-
   context "default currency not set" do
     before(:each) do
       @default_currency = Money.default_currency
@@ -28,15 +24,11 @@ RSpec.describe "Money" do
   end
 
   it ".zero has no currency" do
-    expect(Money.zero.currency).to be_a(Money::NullCurrency)
+    expect(Money.new(0, Money::NULL_CURRENCY).currency).to be_a(Money::NullCurrency)
   end
 
   it ".zero is a 0$ value" do
-    expect(Money.zero).to eq(Money.new(0))
-  end
-
-  it ".zero accepts an optional currency" do
-    expect(Money.zero('USD')).to eq(Money.new(0, 'USD'))
+    expect(Money.new(0, Money::NULL_CURRENCY)).to eq(Money.new(0))
   end
 
   it "returns itself with to_money" do
