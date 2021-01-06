@@ -93,7 +93,7 @@ class Money
   def initialize(value, currency)
     raise ArgumentError if value.nan?
     @currency = Helpers.value_to_currency(currency)
-    @value = value.round(@currency.minor_units)
+    @value = BigDecimal(value.round(@currency.minor_units))
     freeze
   end
 

@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.metadata['allowed_push_host'] = "https://rubygems.org"
 
-  s.add_development_dependency("bundler", ">= 1.5")
+  s.add_development_dependency("bundler")
   s.add_development_dependency("simplecov", ">= 0")
   s.add_development_dependency("rails", "~> 6.0")
   s.add_development_dependency("rspec", "~> 3.2")
