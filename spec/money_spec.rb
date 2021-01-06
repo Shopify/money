@@ -963,4 +963,10 @@ RSpec.describe "Money" do
       expect(money.currency.iso_code).to eq('EUR')
     end
   end
+
+  describe '#to_yaml' do
+    it 'returns a yaml representation' do
+      expect(Money.new(100, 'JPY').to_yaml).to eq("--- !ruby/object:Money\nvalue: '100.0'\ncurrency: JPY\n")
+    end
+  end
 end
