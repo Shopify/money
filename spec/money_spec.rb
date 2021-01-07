@@ -808,10 +808,14 @@ RSpec.describe "Money" do
       money = YAML.dump(Money.new(750, 'usd'))
       expect(money).to eq("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
     end
+
+    it "does not change BigDecimal value to Integer while rounding for currencies without subunits" do
+      money = Money.new(100, 'JPY').to_yaml
+      expect(money).to eq("--- !ruby/object:Money\nvalue: '100.0'\ncurrency: JPY\n")
+    end
   end
 
   describe "YAML deserialization" do
-
     it "accepts values with currencies" do
       money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
       expect(money).to eq(Money.new(750, 'usd'))
@@ -953,12 +957,6 @@ RSpec.describe "Money" do
       money = Money.new(-9001, 'EUR').clamp(min, max)
       expect(money.value).to eq(-9000)
       expect(money.currency.iso_code).to eq('EUR')
-    end
-  end
-
-  describe '#to_yaml' do
-    it 'returns a yaml representation' do
-      expect(Money.new(100, 'JPY').to_yaml).to eq("--- !ruby/object:Money\nvalue: '100.0'\ncurrency: JPY\n")
     end
   end
 end
