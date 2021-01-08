@@ -239,11 +239,6 @@ RSpec.describe "Money" do
     expect((1.50 * Money.new(1.00))).to eq(Money.new(1.50))
   end
 
-  it "is multipliable by a cents amount" do
-    expect((Money.new(1.00) * 0.50)).to eq(Money.new(0.50))
-    expect((0.50 * Money.new(1.00))).to eq(Money.new(0.50))
-  end
-
   it "is multipliable by a rational" do
     expect((Money.new(3.3) * Rational(1, 12))).to eq(Money.new(0.28))
     expect((Rational(1, 12) * Money.new(3.3))).to eq(Money.new(0.28))
@@ -298,10 +293,6 @@ RSpec.describe "Money" do
     expect { Money.new(55.00) / 55 }.to raise_error(RuntimeError)
   end
 
-  it "returns cents in to_liquid" do
-    expect(Money.new(1.00).to_liquid).to eq(100)
-  end
-
   it "returns cents in to_json" do
     expect(Money.new(1.00).to_json).to eq("1.00")
   end
@@ -322,19 +313,7 @@ RSpec.describe "Money" do
     expect(Money.new(1.50).to_f.to_s).to eq("1.5")
   end
 
-  it "is creatable from an integer value in cents" do
-    expect(Money.from_cents(1950)).to eq(Money.new(19.50))
-  end
-
-  it "is creatable from an integer value of 0 in cents" do
-    expect(Money.from_cents(0)).to eq(Money.new)
-  end
-
-  it "is creatable from a float cents amount" do
-    expect(Money.from_cents(1950.5)).to eq(Money.new(19.51))
-  end
-
-  describe '#from_subunits' do 
+  describe '#from_subunits' do
     it "creates Money object from an integer value in cents and currency" do
       expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50))
     end
@@ -612,10 +591,6 @@ RSpec.describe "Money" do
     end
 
     it "returns cents as 100 cents" do
-      expect(money.cents).to eq(100)
-    end
-
-    it "returns cents as 100 cents" do
       expect(money.subunits).to eq(100)
     end
 
@@ -775,20 +750,6 @@ RSpec.describe "Money" do
   end
 
   describe "from_amount quacks like RubyMoney" do
-    it "accepts numeric values" do
-      expect(Money.from_amount(1)).to eq Money.from_cents(1_00)
-      expect(Money.from_amount(1.0)).to eq Money.from_cents(1_00)
-      expect(Money.from_amount(BigDecimal("1"))).to eq Money.from_cents(1_00)
-    end
-
-    it "accepts string values" do
-      expect(Money.from_amount("1")).to eq Money.from_cents(1_00)
-    end
-
-    it "accepts nil values" do
-      expect(Money.from_amount(nil)).to eq Money.from_cents(0)
-    end
-
     it "accepts an optional currency parameter" do
       expect { Money.from_amount(1, "CAD") }.to_not raise_error
     end

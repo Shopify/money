@@ -30,10 +30,6 @@ class Money
       parser.parse(*args, **kwargs)
     end
 
-    def from_cents(cents, currency = nil)
-      new(cents.round.to_f / 100, currency)
-    end
-
     def from_subunits(subunits, currency_iso, format: :iso4217)
       currency = Helpers.value_to_currency(currency_iso)
 
@@ -99,11 +95,6 @@ class Money
   def encode_with(coder)
     coder['value'] = @value.to_s('F')
     coder['currency'] = @currency.iso_code
-  end
-
-  def cents
-    # Money.deprecate('`money.cents` is deprecated and will be removed in the next major release. Please use `money.subunits` instead. Keep in mind, subunits are currency aware.')
-    (value * 100).to_i
   end
 
   def subunits(format: :iso4217)
@@ -236,10 +227,6 @@ class Money
       rounded_value = rounded_value.abs
       sprintf("%s%d.%0#{units}d", sign, rounded_value.truncate, rounded_value.frac * (10 ** units))
     end
-  end
-
-  def to_liquid
-    cents
   end
 
   def to_json(options = {})
