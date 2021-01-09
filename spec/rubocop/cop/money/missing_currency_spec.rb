@@ -82,6 +82,17 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
+    it 'registers an offense and corrects for safe navigation to_money without a currency argument' do
+      expect_offense(<<~RUBY)
+        item&.to_money
+        ^^^^^^^^^^^^^^ to_money is missing currency argument
+      RUBY
+
+      expect_correction(<<~RUBY)
+        item&.to_money(Money::NULL_CURRENCY)
+      RUBY
+    end
+
     it 'does not register an offense for to_money with currency argument' do
       expect_no_offenses(<<~RUBY)
         '1'.to_money('CAD')

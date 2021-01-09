@@ -24,7 +24,7 @@ module RuboCop
         PATTERN
 
         def_node_matcher :to_money_without_currency?, <<~PATTERN
-          (send _ :to_money)
+          ({send csend} _ :to_money)
         PATTERN
 
         def_node_matcher :to_money_block?, <<~PATTERN
@@ -42,6 +42,7 @@ module RuboCop
             add_offense(node, message: 'to_money is missing currency argument')
           end
         end
+        alias on_csend on_send
 
         def autocorrect(node)
           receiver, method, _ = *node
