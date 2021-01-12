@@ -50,6 +50,10 @@ class Money
       self.class == other.class && iso_code == other.iso_code
     end
 
+    def hash
+      [ self.class, iso_code ].hash
+    end
+
     def compatible?(other)
       other.is_a?(NullCurrency) || eql?(other)
     end
