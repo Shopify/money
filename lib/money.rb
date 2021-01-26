@@ -9,7 +9,6 @@ require_relative 'money/errors'
 require_relative 'money/deprecations'
 require_relative 'money/accounting_money_parser'
 require_relative 'money/core_extensions'
-require_relative 'money_accessor'
 require_relative 'money_column' if defined?(ActiveRecord)
 
 require_relative 'rubocop/cop/money' if defined?(RuboCop)
