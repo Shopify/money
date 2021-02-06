@@ -704,7 +704,7 @@ RSpec.describe "Money" do
     end
 
     it "supports parenthesis from AccountingMoneyParser" do
-      expect(Money.parse("($5.00)")).to eq(Money.new(-5, 'CAD'))
+      expect(Money.parse("($5.00)", 'CAD')).to eq(Money.new(-5, 'CAD'))
     end
 
     it "supports parenthesis from AccountingMoneyParser for .to_money" do
