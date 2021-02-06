@@ -65,12 +65,14 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_currency(Money::NULL_CURRENCY)).to be_a(Money::NullCurrency)
     end
 
-    it 'returns the default currency when value is nil' do
-      expect(subject.value_to_currency(nil)).to eq(Money.default_currency)
+    it 'logs a deprecation and returns NullCurrency when value is nil' do
+      expect(Money).to receive(:deprecate)
+      expect(subject.value_to_currency(nil)).to eq(Money::NULL_CURRENCY)
     end
 
-    it 'returns the default currency when value is empty' do
-      expect(subject.value_to_currency('')).to eq(Money.default_currency)
+    it 'logs a deprecation and returns NullCurrency when value is empty' do
+      expect(Money).to receive(:deprecate)
+      expect(subject.value_to_currency('')).to eq(Money::NULL_CURRENCY)
     end
 
     it 'returns the default currency when value is xxx' do

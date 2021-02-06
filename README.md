@@ -71,15 +71,6 @@ currency.symbol   #=> '$'
 currency.disambiguate_symbol #=> 'US$'
 ```
 
-### Default Currency
-
-By default `Money` defaults to Money::NullCurrency as its currency. This is a
-global variable that can be changed using:
-
-``` ruby
-Money.default_currency = Money::Currency.new("USD")
-```
-
 In web apps you might want to set the default currency on a per request basis.
 In Rails you can do this with an around action, for example:
 

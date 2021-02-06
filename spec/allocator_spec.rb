@@ -142,7 +142,7 @@ RSpec.describe "Allocator" do
     end
   end
 
-  def new_allocator(amount, currency = nil)
+  def new_allocator(amount, currency = 'CAD')
     Money::Allocator.new(Money.new(amount, currency))
   end
 end

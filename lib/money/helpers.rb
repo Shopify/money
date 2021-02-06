@@ -45,7 +45,10 @@ class Money
       when Money::Currency, Money::NullCurrency
         currency
       when nil, ''
-        default = Money.current_currency || Money.default_currency
+        default = Money.current_currency || begin
+          Money.deprecate("nil or '' currency argument given, falling back to Money::NULL_CURRENCY")
+          Money::NULL_CURRENCY
+        end
         raise(ArgumentError, 'missing currency') if default.nil? || default == ''
         value_to_currency(default)
       when 'xxx', 'XXX'

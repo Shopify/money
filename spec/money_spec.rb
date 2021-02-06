@@ -9,20 +9,6 @@ RSpec.describe "Money" do
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0, 'CAD') }
 
-  context "default currency not set" do
-    before(:each) do
-      @default_currency = Money.default_currency
-      Money.default_currency = nil
-    end
-    after(:each) do
-      Money.default_currency = @default_currency
-    end
-
-    it "raises an error" do
-      expect { money }.to raise_error(ArgumentError)
-    end
-  end
-
   it ".zero has no currency" do
     expect(Money.new(0, Money::NULL_CURRENCY).currency).to be_a(Money::NullCurrency)
   end
@@ -817,7 +803,7 @@ RSpec.describe "Money" do
           value: !ruby/object:BigDecimal 18:0.75E3
           cents: 75000
       EOS
-      expect(money).to be == Money.new(750, 'CAD')
+      expect(money).to be == Money.new(750, Money::NULL_CURRENCY)
       expect(money.value).to be_a BigDecimal
     end
 
@@ -828,7 +814,7 @@ RSpec.describe "Money" do
           value: 750.00
           cents: 75000
       EOS
-      expect(money).to be == Money.new(750, 'CAD')
+      expect(money).to be == Money.new(750, Money::NULL_CURRENCY)
       expect(money.value).to be_a BigDecimal
     end
   end
@@ -872,29 +858,6 @@ RSpec.describe "Money" do
       end
 
       expect(money.currency.iso_code).to eq('USD')
-    end
-
-    context "with .default_currency set" do
-      before(:each) { Money.default_currency = Money::Currency.new('EUR') }
-      after(:each) { Money.default_currency = Money::NULL_CURRENCY }
-
-      it "can be nested and falls back to default_currency outside of the blocks" do
-        money2, money3 = nil
-
-        money1 = Money.new(1.00, 'CAD')
-        Money.with_currency('CAD') do
-          Money.with_currency('USD') do
-            money2 = Money.new(1.00, 'CAD')
-          end
-          money3 = Money.new(1.00, 'CAD')
-        end
-        money4 = Money.new(1.00, 'CAD')
-
-        expect(money1.currency.iso_code).to eq('EUR')
-        expect(money2.currency.iso_code).to eq('USD')
-        expect(money3.currency.iso_code).to eq('CAD')
-        expect(money4.currency.iso_code).to eq('EUR')
-      end
     end
   end
 

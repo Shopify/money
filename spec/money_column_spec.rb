@@ -209,6 +209,7 @@ RSpec.describe 'MoneyColumn' do
     let(:subject) { MoneyWithValidation.new(price: money) }
 
     it 'is not allowed to be saved because `to_s` returns a blank string' do
+      expect(Money).to receive(:deprecate).with("nil or '' currency argument given, falling back to Money::NULL_CURRENCY")
       subject.valid?
       expect(subject.errors[:currency]).to include("can't be blank")
     end
@@ -248,11 +249,13 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'handle cases where the delegate allow_nil is false' do
+      expect(Money).to receive(:deprecate).with("nil or '' currency argument given, falling back to Money::NULL_CURRENCY")
       record = MoneyWithDelegatedCurrency.new(price: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
       expect(record.price.currency.to_s).to eq('USD')
     end
 
     it 'handle cases where a manual delegate does not allow nil' do
+      expect(Money).to receive(:deprecate).with("nil or '' currency argument given, falling back to Money::NULL_CURRENCY")
       record = MoneyWithDelegatedCurrency.new(prix: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
       expect(record.price.currency.to_s).to eq('USD')
     end
@@ -266,6 +269,7 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'returns 0$ when money value have not been set and coerce_null is true' do
+      expect(Money).to receive(:deprecate).with("nil or '' currency argument given, falling back to Money::NULL_CURRENCY")
       record = MoneyRecordCoerceNull.new(price: nil)
       expect(record.price.value).to eq(0)
        expect(record.price_usd.value).to eq(0)
@@ -365,30 +369,6 @@ RSpec.describe 'MoneyColumn' do
       expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', :currency)).to eq('CAD')
       expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq(nil)
       expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).keys).to_not include('prix')
-    end
-  end
-
-  describe 'default_currency = nil' do
-    around do |example|
-      default_currency = Money.default_currency
-      Money.default_currency = nil
-      example.run
-      Money.default_currency = default_currency
-    end
-
-    it 'writes currency from input value to the db' do
-      record.update(currency: nil)
-      record.update(price: Money.new(7, 'GBP'))
-      record.reload
-      expect(record.price.value).to eq(7)
-      expect(record.price.currency.to_s).to eq('GBP')
-    end
-
-    it 'raises missing currency error when input is not a money object' do
-      record.update(currency: nil)
-
-      expect { record.update(price: 3) }
-        .to raise_error(ArgumentError, 'missing currency')
     end
   end
 end

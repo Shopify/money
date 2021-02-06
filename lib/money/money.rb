@@ -11,7 +11,7 @@ class Money
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
   class << self
-    attr_accessor :parser, :default_currency
+    attr_accessor :parser
 
     def new(value = 0, currency = nil)
       value = Helpers.value_to_decimal(value)
@@ -60,7 +60,7 @@ class Money
       Thread.current[:money_currency] = currency
     end
 
-    # Set Money.default_currency inside the supplied block, resets it to
+    # Set Money.current_currency inside the supplied block, resets it to
     # the previous value when done to prevent leaking state. Similar to
     # I18n.with_locale and ActiveSupport's Time.use_zone. This won't affect
     # instances being created with explicitly set currency.
@@ -76,7 +76,6 @@ class Money
 
     def default_settings
       self.parser = MoneyParser
-      self.default_currency = Money::NULL_CURRENCY
     end
   end
   default_settings
@@ -89,7 +88,8 @@ class Money
   end
 
   def init_with(coder)
-    initialize(Helpers.value_to_decimal(coder['value']), coder['currency'])
+    currency = coder['currency'] || Money::NULL_CURRENCY
+    initialize(Helpers.value_to_decimal(coder['value']), currency)
   end
 
   def encode_with(coder)
