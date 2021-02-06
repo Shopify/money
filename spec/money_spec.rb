@@ -4,10 +4,10 @@ require 'yaml'
 
 RSpec.describe "Money" do
 
-  let (:money) { Money.new(1) }
+  let (:money) { Money.new(1, 'CAD') }
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
-  let (:zero_money) { Money.new(0) }
+  let (:zero_money) { Money.new(0, 'CAD') }
 
   context "default currency not set" do
     before(:each) do
@@ -28,15 +28,15 @@ RSpec.describe "Money" do
   end
 
   it ".zero is a 0$ value" do
-    expect(Money.new(0, Money::NULL_CURRENCY)).to eq(Money.new(0))
+    expect(Money.new(0, Money::NULL_CURRENCY)).to eq(Money.new(0, 'CAD'))
   end
 
   it "returns itself with to_money" do
-    expect(money.to_money).to eq(money)
+    expect(money.to_money('CAD')).to eq(money)
   end
 
   it "#to_money uses the provided currency when it doesn't already have one" do
-    expect(Money.new(1).to_money('CAD')).to eq(Money.new(1, 'CAD'))
+    expect(Money.new(1, 'CAD').to_money('CAD')).to eq(Money.new(1, 'CAD'))
   end
 
   it "#to_money doesn't overwrite the money object's currency" do
@@ -45,16 +45,16 @@ RSpec.describe "Money" do
   end
 
   it "defaults to 0 when constructed with no arguments" do
-    expect(Money.new).to eq(Money.new(0))
+    expect(Money.new(0, 'CAD')).to eq(Money.new(0, 'CAD'))
   end
 
   it "defaults to 0 when constructed with an empty string" do
-    expect(Money.new('')).to eq(Money.new(0))
+    expect(Money.new('', 'CAD')).to eq(Money.new(0, 'CAD'))
   end
 
   it "defaults to 0 when constructed with an invalid string" do
     expect(Money).to receive(:deprecate).once
-    expect(Money.new('invalid')).to eq(Money.new(0.00))
+    expect(Money.new('invalid', 'CAD')).to eq(Money.new(0.00, 'CAD'))
   end
 
   it "to_s correctly displays the right number of decimal places" do
@@ -76,7 +76,7 @@ RSpec.describe "Money" do
     expect((-money).to_s).to eq("-1.00")
     expect((-amount_money).to_s).to eq("-1.23")
     expect((-non_fractional_money).to_s).to eq("-1")
-    expect((-Money.new("0.05")).to_s).to eq("-0.05")
+    expect((-Money.new("0.05", 'CAD')).to_s).to eq("-0.05")
   end
 
   it "to_s rounds when  more fractions than currency allows" do
@@ -104,19 +104,19 @@ RSpec.describe "Money" do
   end
 
   it "is constructable with a BigDecimal" do
-    expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))
+    expect(Money.new(BigDecimal("1.23"), 'CAD')).to eq(Money.new(1.23, 'CAD'))
   end
 
   it "is constructable with an Integer" do
-    expect(Money.new(3)).to eq(Money.new(3.00))
+    expect(Money.new(3, 'CAD')).to eq(Money.new(3.00, 'CAD'))
   end
 
   it "is construcatable with a Float" do
-    expect(Money.new(3.00)).to eq(Money.new(BigDecimal('3.00')))
+    expect(Money.new(3.00, 'CAD')).to eq(Money.new(BigDecimal('3.00'), 'CAD'))
   end
 
   it "is construcatable with a String" do
-    expect(Money.new('3.00')).to eq(Money.new(3.00))
+    expect(Money.new('3.00', 'CAD')).to eq(Money.new(3.00, 'CAD'))
   end
 
   it "is aware of the currency" do
@@ -124,7 +124,7 @@ RSpec.describe "Money" do
   end
 
   it "is addable" do
-    expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
+    expect((Money.new(1.51, 'CAD') + Money.new(3.49, 'CAD'))).to eq(Money.new(5.00, 'CAD'))
   end
 
   it "keeps currency across calculations" do
@@ -132,11 +132,11 @@ RSpec.describe "Money" do
   end
 
   it "raises error if added other is not compatible" do
-    expect{ Money.new(5.00) + nil }.to raise_error(TypeError)
+    expect{ Money.new(5.00, 'CAD') + nil }.to raise_error(TypeError)
   end
 
   it "is able to add $0 + $0" do
-    expect((Money.new + Money.new)).to eq(Money.new)
+    expect((Money.new(0, 'CAD') + Money.new(0, 'CAD'))).to eq(Money.new(0, 'CAD'))
   end
 
   it "adds inconsistent currencies" do
@@ -145,15 +145,15 @@ RSpec.describe "Money" do
   end
 
   it "is subtractable" do
-    expect((Money.new(5.00) - Money.new(3.49))).to eq(Money.new(1.51))
+    expect((Money.new(5.00, 'CAD') - Money.new(3.49, 'CAD'))).to eq(Money.new(1.51, 'CAD'))
   end
 
   it "raises error if subtracted other is not compatible" do
-    expect{ Money.new(5.00) - nil }.to raise_error(TypeError)
+    expect{ Money.new(5.00, 'CAD') - nil }.to raise_error(TypeError)
   end
 
   it "is subtractable to $0" do
-    expect((Money.new(5.00) - Money.new(5.00))).to eq(Money.new)
+    expect((Money.new(5.00, 'CAD') - Money.new(5.00, 'CAD'))).to eq(Money.new(0, 'CAD'))
   end
 
   it "logs a deprecation warning when adding across currencies" do
@@ -177,12 +177,12 @@ RSpec.describe "Money" do
   end
 
   it "is substractable to a negative amount" do
-    expect((Money.new(0.00) - Money.new(1.00))).to eq(Money.new("-1.00"))
+    expect((Money.new(0.00, 'CAD') - Money.new(1.00, 'CAD'))).to eq(Money.new("-1.00", 'CAD'))
   end
 
   it "is never negative zero" do
-    expect(Money.new(-0.00).to_s).to eq("0.00")
-    expect((Money.new(0) * -1).to_s).to eq("0.00")
+    expect(Money.new(-0.00, 'CAD').to_s).to eq("0.00")
+    expect((Money.new(0, 'CAD') * -1).to_s).to eq("0.00")
   end
 
   it "#inspects to a presentable string" do
@@ -196,7 +196,7 @@ RSpec.describe "Money" do
   end
 
   it "correctly support eql? as a value object" do
-    expect(money).to eq(Money.new(1))
+    expect(money).to eq(Money.new(1, 'CAD'))
     expect(money).to eq(Money.new(1, 'CAD'))
   end
 
@@ -210,112 +210,112 @@ RSpec.describe "Money" do
   end
 
   it "is addable with integer" do
-    expect((Money.new(1.33) + 1)).to eq(Money.new(2.33))
-    expect((1 + Money.new(1.33))).to eq(Money.new(2.33))
+    expect((Money.new(1.33, 'CAD') + 1)).to eq(Money.new(2.33, 'CAD'))
+    expect((1 + Money.new(1.33, 'CAD'))).to eq(Money.new(2.33, 'CAD'))
   end
 
   it "is addable with float" do
-    expect((Money.new(1.33) + 1.50)).to eq(Money.new(2.83))
-    expect((1.50 + Money.new(1.33))).to eq(Money.new(2.83))
+    expect((Money.new(1.33, 'CAD') + 1.50)).to eq(Money.new(2.83, 'CAD'))
+    expect((1.50 + Money.new(1.33, 'CAD'))).to eq(Money.new(2.83, 'CAD'))
   end
 
   it "is subtractable with integer" do
-    expect((Money.new(1.66) - 1)).to eq(Money.new(0.66))
-    expect((2 - Money.new(1.66))).to eq(Money.new(0.34))
+    expect((Money.new(1.66, 'CAD') - 1)).to eq(Money.new(0.66, 'CAD'))
+    expect((2 - Money.new(1.66, 'CAD'))).to eq(Money.new(0.34, 'CAD'))
   end
 
   it "is subtractable with float" do
-    expect((Money.new(1.66) - 1.50)).to eq(Money.new(0.16))
-    expect((1.50 - Money.new(1.33))).to eq(Money.new(0.17))
+    expect((Money.new(1.66, 'CAD') - 1.50)).to eq(Money.new(0.16, 'CAD'))
+    expect((1.50 - Money.new(1.33, 'CAD'))).to eq(Money.new(0.17, 'CAD'))
   end
 
   it "is multipliable with an integer" do
-    expect((Money.new(1.00) * 55)).to eq(Money.new(55.00))
-    expect((55 * Money.new(1.00))).to eq(Money.new(55.00))
+    expect((Money.new(1.00, 'CAD') * 55)).to eq(Money.new(55.00, 'CAD'))
+    expect((55 * Money.new(1.00, 'CAD'))).to eq(Money.new(55.00, 'CAD'))
   end
 
   it "is multiplable with a float" do
-    expect((Money.new(1.00) * 1.50)).to eq(Money.new(1.50))
-    expect((1.50 * Money.new(1.00))).to eq(Money.new(1.50))
+    expect((Money.new(1.00, 'CAD') * 1.50)).to eq(Money.new(1.50, 'CAD'))
+    expect((1.50 * Money.new(1.00, 'CAD'))).to eq(Money.new(1.50, 'CAD'))
   end
 
   it "is multipliable by a rational" do
-    expect((Money.new(3.3) * Rational(1, 12))).to eq(Money.new(0.28))
-    expect((Rational(1, 12) * Money.new(3.3))).to eq(Money.new(0.28))
+    expect((Money.new(3.3, 'CAD') * Rational(1, 12))).to eq(Money.new(0.28, 'CAD'))
+    expect((Rational(1, 12) * Money.new(3.3, 'CAD'))).to eq(Money.new(0.28, 'CAD'))
   end
 
   it "is multipliable by a repeatable floating point number" do
-    expect((Money.new(24.00) * (1 / 30.0))).to eq(Money.new(0.80))
-    expect(((1 / 30.0) * Money.new(24.00))).to eq(Money.new(0.80))
+    expect((Money.new(24.00, 'CAD') * (1 / 30.0))).to eq(Money.new(0.80, 'CAD'))
+    expect(((1 / 30.0) * Money.new(24.00, 'CAD'))).to eq(Money.new(0.80, 'CAD'))
   end
 
   it "is multipliable by a repeatable floating point number where the floating point error rounds down" do
-    expect((Money.new(3.3) * (1.0 / 12))).to eq(Money.new(0.28))
-    expect(((1.0 / 12) * Money.new(3.3))).to eq(Money.new(0.28))
+    expect((Money.new(3.3, 'CAD') * (1.0 / 12))).to eq(Money.new(0.28, 'CAD'))
+    expect(((1.0 / 12) * Money.new(3.3, 'CAD'))).to eq(Money.new(0.28, 'CAD'))
   end
 
   it "is multipliable by a money object" do
     expect(Money).to receive(:deprecate).once
-    expect((Money.new(3.3) * Money.new(1))).to eq(Money.new(3.3))
+    expect((Money.new(3.3, 'CAD') * Money.new(1, 'CAD'))).to eq(Money.new(3.3, 'CAD'))
   end
 
   it "rounds multiplication result with fractional penny of 5 or higher up" do
-    expect((Money.new(0.03) * 0.5)).to eq(Money.new(0.02))
-    expect((0.5 * Money.new(0.03))).to eq(Money.new(0.02))
+    expect((Money.new(0.03, 'CAD') * 0.5)).to eq(Money.new(0.02, 'CAD'))
+    expect((0.5 * Money.new(0.03, 'CAD'))).to eq(Money.new(0.02, 'CAD'))
   end
 
   it "rounds multiplication result with fractional penny of 4 or lower down" do
-    expect((Money.new(0.10) * 0.33)).to eq(Money.new(0.03))
-    expect((0.33 * Money.new(0.10))).to eq(Money.new(0.03))
+    expect((Money.new(0.10, 'CAD') * 0.33)).to eq(Money.new(0.03, 'CAD'))
+    expect((0.33 * Money.new(0.10, 'CAD'))).to eq(Money.new(0.03, 'CAD'))
   end
 
   it "is less than a bigger integer" do
-    expect(Money.new(1)).to be < 2
-    expect(2).to be > Money.new(1)
+    expect(Money.new(1, 'CAD')).to be < 2
+    expect(2).to be > Money.new(1, 'CAD')
   end
 
   it "is less than or equal to a bigger integer" do
-    expect(Money.new(1)).to be <= 2
-    expect(2).to be >= Money.new(1)
+    expect(Money.new(1, 'CAD')).to be <= 2
+    expect(2).to be >= Money.new(1, 'CAD')
   end
 
   it "is greater than a lesser integer" do
-    expect(Money.new(2)).to be > 1
-    expect(1).to be < Money.new(2)
+    expect(Money.new(2, 'CAD')).to be > 1
+    expect(1).to be < Money.new(2, 'CAD')
   end
 
   it "is greater than or equal to a lesser integer" do
-    expect(Money.new(2)).to be >= 1
-    expect(1).to be <= Money.new(2)
+    expect(Money.new(2, 'CAD')).to be >= 1
+    expect(1).to be <= Money.new(2, 'CAD')
   end
 
   it "raises if divided" do
-    expect { Money.new(55.00) / 55 }.to raise_error(RuntimeError)
+    expect { Money.new(55.00, 'CAD') / 55 }.to raise_error(RuntimeError)
   end
 
   it "returns cents in to_json" do
-    expect(Money.new(1.00).to_json).to eq("1.00")
+    expect(Money.new(1.00, 'CAD').to_json).to eq("1.00")
   end
 
   it "supports absolute value" do
-    expect(Money.new(-1.00).abs).to eq(Money.new(1.00))
+    expect(Money.new(-1.00, 'CAD').abs).to eq(Money.new(1.00, 'CAD'))
   end
 
   it "supports to_i" do
-    expect(Money.new(1.50).to_i).to eq(1)
+    expect(Money.new(1.50, 'CAD').to_i).to eq(1)
   end
 
   it "supports to_d" do
-    expect(Money.new(1.29).to_d).to eq(BigDecimal('1.29'))
+    expect(Money.new(1.29, 'CAD').to_d).to eq(BigDecimal('1.29'))
   end
 
   it "supports to_f" do
-    expect(Money.new(1.50).to_f.to_s).to eq("1.5")
+    expect(Money.new(1.50, 'CAD').to_f.to_s).to eq("1.5")
   end
 
   describe '#from_subunits' do
     it "creates Money object from an integer value in cents and currency" do
-      expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50))
+      expect(Money.from_subunits(1950, 'CAD')).to eq(Money.new(19.50, 'CAD'))
     end
 
     it "creates Money object from an integer value in dollars and currency with no cents" do
@@ -338,7 +338,7 @@ RSpec.describe "Money" do
   end
 
   it "raises when constructed with a NaN value" do
-    expect { Money.new( 0.0 / 0) }.to raise_error(ArgumentError)
+    expect { Money.new(0.0 / 0, 'CAD') }.to raise_error(ArgumentError)
   end
 
   it "is comparable with non-money objects" do
@@ -346,38 +346,38 @@ RSpec.describe "Money" do
   end
 
   it "supports floor" do
-    expect(Money.new(15.52).floor).to eq(Money.new(15.00))
-    expect(Money.new(18.99).floor).to eq(Money.new(18.00))
-    expect(Money.new(21).floor).to eq(Money.new(21))
+    expect(Money.new(15.52, 'CAD').floor).to eq(Money.new(15.00, 'CAD'))
+    expect(Money.new(18.99, 'CAD').floor).to eq(Money.new(18.00, 'CAD'))
+    expect(Money.new(21, 'CAD').floor).to eq(Money.new(21, 'CAD'))
   end
 
   it "generates a true rational" do
-    expect(Money.rational(Money.new(10.0), Money.new(15.0))).to eq(Rational(2,3))
+    expect(Money.rational(Money.new(10.0, 'CAD'), Money.new(15.0, 'CAD'))).to eq(Rational(2,3))
     expect(Money).to receive(:deprecate).once
     expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY'))).to eq(Rational(2,3))
   end
 
   describe "frozen with amount of $1" do
-    let (:money) { Money.new(1.00) }
+    let (:money) { Money.new(1.00, 'CAD') }
 
     it "is equals to $1" do
-      expect(money).to eq(Money.new(1.00))
+      expect(money).to eq(Money.new(1.00, 'CAD'))
     end
 
     it "is not equals to $2" do
-      expect(money).not_to eq(Money.new(2.00))
+      expect(money).not_to eq(Money.new(2.00, 'CAD'))
     end
 
     it "<=> $1 is 0" do
-      expect((money <=> Money.new(1.00))).to eq(0)
+      expect((money <=> Money.new(1.00, 'CAD'))).to eq(0)
     end
 
     it "<=> $2 is -1" do
-      expect((money <=> Money.new(2.00))).to eq(-1)
+      expect((money <=> Money.new(2.00, 'CAD'))).to eq(-1)
     end
 
     it "<=> $0.50 equals 1" do
-      expect((money <=> Money.new(0.50))).to eq(1)
+      expect((money <=> Money.new(0.50, 'CAD'))).to eq(1)
     end
 
     it "<=> works with non-money objects" do
@@ -390,11 +390,11 @@ RSpec.describe "Money" do
     end
 
     it "have the same hash value as $1" do
-      expect(money.hash).to eq(Money.new(1.00).hash)
+      expect(money.hash).to eq(Money.new(1.00, 'CAD').hash)
     end
 
     it "does not have the same hash value as $2" do
-      expect(money.hash).to_not eq(Money.new(2.00).hash)
+      expect(money.hash).to_not eq(Money.new(2.00, 'CAD').hash)
     end
   end
 
@@ -529,7 +529,7 @@ RSpec.describe "Money" do
       expect(Money.new(1, 'USD').subunits).to eq(100)
       expect(Money.new(1, 'JPY').subunits).to eq(1)
       expect(Money.new(1, 'IQD').subunits).to eq(1000)
-      expect(Money.new(1).subunits).to eq(100)
+      expect(Money.new(1, 'CAD').subunits).to eq(100)
     end
 
     describe 'with format specified' do
@@ -556,31 +556,31 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $0" do
-    let (:money) { Money.new(0) }
+    let (:money) { Money.new(0, 'CAD') }
 
     it "is zero" do
       expect(money).to be_zero
     end
 
     it "is greater than -$1" do
-      expect(money).to be > Money.new("-1.00")
+      expect(money).to be > Money.new("-1.00", 'CAD')
     end
 
     it "is greater than or equal to $0" do
-      expect(money).to be >= Money.new
+      expect(money).to be >= Money.new(0, 'CAD')
     end
 
     it "is less than or equal to $0" do
-      expect(money).to be <= Money.new
+      expect(money).to be <= Money.new(0, 'CAD')
     end
 
     it "is less than $1" do
-      expect(money).to be < Money.new(1.00)
+      expect(money).to be < Money.new(1.00, 'CAD')
     end
   end
 
   describe "with amount of $1" do
-    let (:money) { Money.new(1.00) }
+    let (:money) { Money.new(1.00, 'CAD') }
 
     it "is not zero" do
       expect(money).not_to be_zero
@@ -595,60 +595,60 @@ RSpec.describe "Money" do
     end
 
     it "is greater than $0" do
-      expect(money).to be > Money.new(0.00)
+      expect(money).to be > Money.new(0.00, 'CAD')
     end
 
     it "is less than $2" do
-      expect(money).to be < Money.new(2.00)
+      expect(money).to be < Money.new(2.00, 'CAD')
     end
 
     it "is equal to $1" do
-      expect(money).to eq(Money.new(1.00))
+      expect(money).to eq(Money.new(1.00, 'CAD'))
     end
   end
 
   describe "allocation"do
     specify "#allocate is calculated by Money::Allocator#allocate" do
-      expected = [Money.new(1), [Money.new(1)]]
+      expected = [Money.new(1, 'CAD'), [Money.new(1, 'CAD')]]
       expect_any_instance_of(Money::Allocator).to receive(:allocate).with([0.5, 0.5], :roundrobin).and_return(expected)
-      expect(Money.new(2).allocate([0.5, 0.5])).to eq(expected)
+      expect(Money.new(2, 'CAD').allocate([0.5, 0.5])).to eq(expected)
     end
 
     specify "#allocate does not lose pennies (integration test)" do
-      moneys = Money.new(0.05).allocate([0.3,0.7])
-      expect(moneys[0]).to eq(Money.new(0.02))
-      expect(moneys[1]).to eq(Money.new(0.03))
+      moneys = Money.new(0.05, 'CAD').allocate([0.3,0.7])
+      expect(moneys[0]).to eq(Money.new(0.02, 'CAD'))
+      expect(moneys[1]).to eq(Money.new(0.03, 'CAD'))
     end
 
     specify "#allocate_max_amounts is calculated by Money::Allocator#allocate_max_amounts" do
-      expected = [Money.new(1), [Money.new(1)]]
+      expected = [Money.new(1, 'CAD'), [Money.new(1, 'CAD')]]
       expect_any_instance_of(Money::Allocator).to receive(:allocate_max_amounts).and_return(expected)
-      expect(Money.new(2).allocate_max_amounts([0.5, 0.5])).to eq(expected)
+      expect(Money.new(2, 'CAD').allocate_max_amounts([0.5, 0.5])).to eq(expected)
     end
 
     specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder (integration test)" do
       expect(
-        Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
-      ).to eq([Money.new(26), Money.new(4.75)])
+        Money.new(30.75, 'CAD').allocate_max_amounts([Money.new(26, 'CAD'), Money.new(4.75, 'CAD')]),
+      ).to eq([Money.new(26, 'CAD'), Money.new(4.75, 'CAD')])
     end
   end
 
   describe "split" do
     specify "#split needs at least one party" do
-      expect {Money.new(1).split(0)}.to raise_error(ArgumentError)
-      expect {Money.new(1).split(-1)}.to raise_error(ArgumentError)
+      expect {Money.new(1, 'CAD').split(0)}.to raise_error(ArgumentError)
+      expect {Money.new(1, 'CAD').split(-1)}.to raise_error(ArgumentError)
     end
 
     specify "#gives 1 cent to both people if we start with 2" do
-      expect(Money.new(0.02).split(2)).to eq([Money.new(0.01), Money.new(0.01)])
+      expect(Money.new(0.02, 'CAD').split(2)).to eq([Money.new(0.01, 'CAD'), Money.new(0.01, 'CAD')])
     end
 
     specify "#split may distribute no money to some parties if there isnt enough to go around" do
-      expect(Money.new(0.02).split(3)).to eq([Money.new(0.01), Money.new(0.01), Money.new(0)])
+      expect(Money.new(0.02, 'CAD').split(3)).to eq([Money.new(0.01, 'CAD'), Money.new(0.01, 'CAD'), Money.new(0, 'CAD')])
     end
 
     specify "#split does not lose pennies" do
-      expect(Money.new(0.05).split(2)).to eq([Money.new(0.03), Money.new(0.02)])
+      expect(Money.new(0.05, 'CAD').split(2)).to eq([Money.new(0.03, 'CAD'), Money.new(0.02, 'CAD')])
     end
 
     specify "#split does not lose dollars with non-decimal currencies" do
@@ -656,7 +656,7 @@ RSpec.describe "Money" do
     end
 
     specify "#split a dollar" do
-      moneys = Money.new(1).split(3)
+      moneys = Money.new(1, 'CAD').split(3)
       expect(moneys[0].subunits).to eq(34)
       expect(moneys[1].subunits).to eq(33)
       expect(moneys[2].subunits).to eq(33)
@@ -691,18 +691,18 @@ RSpec.describe "Money" do
 
   describe "fraction" do
     specify "#fraction needs a positive rate" do
-      expect {Money.new(1).fraction(-0.5)}.to raise_error(ArgumentError)
+      expect {Money.new(1, 'CAD').fraction(-0.5)}.to raise_error(ArgumentError)
     end
 
     specify "#fraction returns the amount minus a fraction" do
-      expect(Money.new(1.15).fraction(0.15)).to eq(Money.new(1.00))
-      expect(Money.new(2.50).fraction(0.15)).to eq(Money.new(2.17))
-      expect(Money.new(35.50).fraction(0)).to eq(Money.new(35.50))
+      expect(Money.new(1.15, 'CAD').fraction(0.15)).to eq(Money.new(1.00, 'CAD'))
+      expect(Money.new(2.50, 'CAD').fraction(0.15)).to eq(Money.new(2.17, 'CAD'))
+      expect(Money.new(35.50, 'CAD').fraction(0)).to eq(Money.new(35.50, 'CAD'))
     end
   end
 
   describe "with amount of $1 with created with 3 decimal places" do
-    let (:money) { Money.new(1.125) }
+    let (:money) { Money.new(1.125, 'CAD') }
 
     it "rounds 3rd decimal place" do
       expect(money.value).to eq(BigDecimal("1.13"))
@@ -714,37 +714,37 @@ RSpec.describe "Money" do
     after(:each) { Money.parser = MoneyParser }
 
     it "keeps AccountingMoneyParser class on new money objects" do
-      expect(Money.new.class.parser).to eq(AccountingMoneyParser)
+      expect(Money.new(0, 'CAD').class.parser).to eq(AccountingMoneyParser)
     end
 
     it "supports parenthesis from AccountingMoneyParser" do
-      expect(Money.parse("($5.00)")).to eq(Money.new(-5))
+      expect(Money.parse("($5.00)")).to eq(Money.new(-5, 'CAD'))
     end
 
     it "supports parenthesis from AccountingMoneyParser for .to_money" do
-      expect("($5.00)".to_money).to eq(Money.new(-5))
+      expect("($5.00)".to_money('CAD')).to eq(Money.new(-5, 'CAD'))
     end
   end
 
   describe "round" do
 
     it "rounds to 0 decimal places by default" do
-      expect(Money.new(54.1).round).to eq(Money.new(54))
-      expect(Money.new(54.5).round).to eq(Money.new(55))
+      expect(Money.new(54.1, 'CAD').round).to eq(Money.new(54, 'CAD'))
+      expect(Money.new(54.5, 'CAD').round).to eq(Money.new(55, 'CAD'))
     end
 
     # Overview of standard vs. banker's rounding for next 4 specs:
     # http://www.xbeat.net/vbspeed/i_BankersRounding.htm
     it "implements standard rounding for 2 digits" do
-      expect(Money.new(54.1754).round(2)).to eq(Money.new(54.18))
-      expect(Money.new(343.2050).round(2)).to eq(Money.new(343.21))
-      expect(Money.new(106.2038).round(2)).to eq(Money.new(106.20))
+      expect(Money.new(54.1754, 'CAD').round(2)).to eq(Money.new(54.18, 'CAD'))
+      expect(Money.new(343.2050, 'CAD').round(2)).to eq(Money.new(343.21, 'CAD'))
+      expect(Money.new(106.2038, 'CAD').round(2)).to eq(Money.new(106.20, 'CAD'))
     end
 
     it "implements standard rounding for 1 digit" do
-      expect(Money.new(27.25).round(1)).to eq(Money.new(27.3))
-      expect(Money.new(27.45).round(1)).to eq(Money.new(27.5))
-      expect(Money.new(27.55).round(1)).to eq(Money.new(27.6))
+      expect(Money.new(27.25, 'CAD').round(1)).to eq(Money.new(27.3, 'CAD'))
+      expect(Money.new(27.45, 'CAD').round(1)).to eq(Money.new(27.5, 'CAD'))
+      expect(Money.new(27.55, 'CAD').round(1)).to eq(Money.new(27.6, 'CAD'))
     end
 
   end
@@ -755,12 +755,12 @@ RSpec.describe "Money" do
     end
 
     it "accepts Rational number" do
-      expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal("1000000000000000000", Money::Helpers::MAX_DECIMAL))
-      expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.999"), 'CAD').value).to eql(BigDecimal("1000000000000000000", Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.99"), 'CAD').value).to eql(BigDecimal("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
     end
 
     it "raises ArgumentError with unsupported argument" do
-      expect { Money.from_amount(Object.new) }.to raise_error(ArgumentError)
+      expect { Money.from_amount(Object.new, 'CAD') }.to raise_error(ArgumentError)
     end
   end
 
@@ -784,7 +784,7 @@ RSpec.describe "Money" do
 
     it "accepts values with null currencies" do
       money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: XXX\n")
-      expect(money).to eq(Money.new(750))
+      expect(money).to eq(Money.new(750, 'CAD'))
     end
 
     it "accepts serialized NullCurrency objects" do
@@ -817,7 +817,7 @@ RSpec.describe "Money" do
           value: !ruby/object:BigDecimal 18:0.75E3
           cents: 75000
       EOS
-      expect(money).to be == Money.new(750)
+      expect(money).to be == Money.new(750, 'CAD')
       expect(money.value).to be_a BigDecimal
     end
 
@@ -828,7 +828,7 @@ RSpec.describe "Money" do
           value: 750.00
           cents: 75000
       EOS
-      expect(money).to be == Money.new(750)
+      expect(money).to be == Money.new(750, 'CAD')
       expect(money.value).to be_a BigDecimal
     end
   end
@@ -859,7 +859,7 @@ RSpec.describe "Money" do
     it "allows setting the implicit default currency for a block scope" do
       money = nil
       Money.with_currency('CAD') do
-        money = Money.new(1.00)
+        money = Money.new(1.00, 'CAD')
       end
 
       expect(money.currency.iso_code).to eq('CAD')
@@ -881,14 +881,14 @@ RSpec.describe "Money" do
       it "can be nested and falls back to default_currency outside of the blocks" do
         money2, money3 = nil
 
-        money1 = Money.new(1.00)
+        money1 = Money.new(1.00, 'CAD')
         Money.with_currency('CAD') do
           Money.with_currency('USD') do
-            money2 = Money.new(1.00)
+            money2 = Money.new(1.00, 'CAD')
           end
-          money3 = Money.new(1.00)
+          money3 = Money.new(1.00, 'CAD')
         end
-        money4 = Money.new(1.00)
+        money4 = Money.new(1.00, 'CAD')
 
         expect(money1.currency.iso_code).to eq('EUR')
         expect(money2.currency.iso_code).to eq('USD')
