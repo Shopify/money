@@ -29,7 +29,7 @@ eek:
   smallest_denomination: 5
 ghc:
   priority: 100
-  iso_code: GHS
+  iso_code: GHC
   name: Ghanaian Cedi
   symbol: "₵"
   disambiguate_symbol: GH₵
