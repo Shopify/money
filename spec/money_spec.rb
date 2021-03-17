@@ -8,6 +8,7 @@ RSpec.describe "Money" do
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
+  let (:opt_in_v1_config) { Money.config.dup.tap { |config| config.opt_in_v1! }}
 
   context "default currency not set" do
     before(:each) do
@@ -24,9 +25,33 @@ RSpec.describe "Money" do
   end
 
   it ".opt_in_v1 sets deprecations to raise" do
-    Money.opt_in_v1 = true
-    expect { Money.deprecate("test")}.to raise_error(ActiveSupport::DeprecationException)
-    Money.opt_in_v1 = false
+    old_config = Money.config
+    Money.config = opt_in_v1_config
+
+    expect { Money.deprecate("test") }.to raise_error(ActiveSupport::DeprecationException)
+    Money.config = old_config
+  end
+
+  it ".opt_in_v1 respects the default currency" do
+    old_config = Money.config
+    Money.config = old_config.dup.tap do |config|
+      config.default_currency = 'USD'
+      config.opt_in_v1!
+    end
+
+    expect(Money.default_currency).to eq("USD")
+    Money.config = old_config
+  end
+
+  it ".opt_in_v1 removes NULL_CURRENCY as default currency" do
+    old_config = Money.config
+    Money.config = old_config.dup.tap do |config|
+      config.default_currency = Money::NULL_CURRENCY
+      config.opt_in_v1!
+    end
+
+    expect(Money.default_currency).to eq(nil)
+    Money.config = old_config
   end
 
   it ".zero has no currency" do
@@ -110,9 +135,11 @@ RSpec.describe "Money" do
   end
 
   it "as_json as a json containing the value and currency" do
-    Money.opt_in_v1 = true
+    old_config = Money.config
+    Money.config = opt_in_v1_config
+
     expect(money.as_json).to eq(value: "1.00", currency: "CAD")
-    Money.opt_in_v1 = false
+    Money.config = old_config
   end
 
   it "is constructable with a BigDecimal" do
@@ -310,9 +337,11 @@ RSpec.describe "Money" do
   end
 
   it "returns value and currency in to_json" do
-    Money.opt_in_v1 = true
+    old_config = Money.config
+    Money.config = opt_in_v1_config
+
     expect(Money.new(1.00).to_json).to eq('{"value":"1.00","currency":"CAD"}')
-    Money.opt_in_v1 = false
+    Money.config = old_config
   end
 
   it "supports absolute value" do

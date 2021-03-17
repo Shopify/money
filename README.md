@@ -23,7 +23,9 @@ money_column expects a DECIMAL(21,3) database field.
 ## Road to v1.0
 To make sure you're ready for v1.0 which includes numerous breaking changes, **please enable `opt_in_v1`**
 ```ruby
-Money.opt_in_v1 = true
+Money.configure do |config|
+  config.opt_in_v1!
+end
 ```
 #### Breaking changes:
 
@@ -121,7 +123,9 @@ By default `Money` defaults to Money::NullCurrency as its currency. This is a
 global variable that can be changed using:
 
 ``` ruby
-Money.default_currency = Money::Currency.new("USD")
+Money.configure do |config|
+  config.default_currency = Money::Currency.new("USD")
+end
 ```
 
 In web apps you might want to set the default currency on a per request basis.
