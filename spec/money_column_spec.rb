@@ -114,12 +114,12 @@ RSpec.describe 'MoneyColumn' do
     expect(record.prix.currency.to_s).to eq('CAD')
   end
 
-  it 'handles legacy support for saving floats with correct currency rounding' do
+  it 'handles legacy support for saving floats as provided' do
     record.update(price: 3.2112, prix: 3.2156)
-    expect(record.attributes['price']).to eq(3.21)
+    expect(record.attributes['price']).to eq(3.2112)
     expect(record.price.value).to eq(3.21)
     expect(record.price.currency.to_s).to eq(currency)
-    expect(record.attributes['prix']).to eq(3.22)
+    expect(record.attributes['prix']).to eq(3.2156)
     expect(record.prix.value).to eq(3.22)
     expect(record.prix.currency.to_s).to eq('CAD')
   end
@@ -384,11 +384,17 @@ RSpec.describe 'MoneyColumn' do
       expect(record.price.currency.to_s).to eq('GBP')
     end
 
-    it 'raises missing currency error when input is not a money object' do
-      record.update(currency: nil)
+    it 'raises missing currency error reading a value that was saved using legacy non-money object' do
+      record.update(currency: nil, price: 3)
+      expect { record.price }.to raise_error(ArgumentError, 'missing currency')
+    end
 
-      expect { record.update(price: 3) }
-        .to raise_error(ArgumentError, 'missing currency')
+    it 'handles legacy support for saving price and currency separately' do
+      record.update(currency: nil)
+      record.update(price: 7, currency: 'GBP')
+      record.reload
+      expect(record.price.value).to eq(7)
+      expect(record.price.currency.to_s).to eq('GBP')
     end
   end
 end
