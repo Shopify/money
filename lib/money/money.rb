@@ -11,16 +11,13 @@ class Money
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
   class << self
-    attr_accessor :parser, :default_currency
+    extend Forwardable
+    attr_accessor :config
+    def_delegators :@config, :parser, :parser=, :default_currency, :default_currency=
 
-    def opt_in_v1?
-      @opt_in_v1
-    end
-    def opt_in_v1=(value)
-      @opt_in_v1 = value
-      if value
-        Money.active_support_deprecator.behavior = :raise
-      end
+    def configure
+      self.config ||= Config.new
+      yield(config) if block_given?
     end
 
     def new(value = 0, currency = nil)
@@ -83,13 +80,8 @@ class Money
         Money.current_currency = old_currency
       end
     end
-
-    def default_settings
-      self.parser = MoneyParser
-      self.default_currency = opt_in_v1? ? nil : Money::NULL_CURRENCY
-    end
   end
-  default_settings
+  configure
 
   def initialize(value, currency)
     raise ArgumentError if value.nan?
@@ -240,7 +232,7 @@ class Money
   end
 
   def to_json(options = {})
-    if Money.opt_in_v1?
+    if Money.config.opt_in_v1?
       as_json.to_json
     else
       to_s
@@ -248,7 +240,7 @@ class Money
   end
 
   def as_json(*_args)
-    if Money.opt_in_v1?
+    if Money.config.opt_in_v1?
       { value: to_s(:amount), currency: currency.to_s }
     else
       to_s
