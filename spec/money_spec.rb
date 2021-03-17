@@ -23,6 +23,12 @@ RSpec.describe "Money" do
     end
   end
 
+  it ".opt_in_v1 sets deprecations to raise" do
+    Money.opt_in_v1 = true
+    expect { Money.deprecate("test")}.to raise_error(ActiveSupport::DeprecationException)
+    Money.opt_in_v1 = false
+  end
+
   it ".zero has no currency" do
     expect(Money.new(0, Money::NULL_CURRENCY).currency).to be_a(Money::NullCurrency)
   end
@@ -101,6 +107,12 @@ RSpec.describe "Money" do
 
   it "as_json as a float with 2 decimal places" do
     expect(money.as_json).to eq("1.00")
+  end
+
+  it "as_json as a json containing the value and currency" do
+    Money.opt_in_v1 = true
+    expect(money.as_json).to eq(value: "1.00", currency: "CAD")
+    Money.opt_in_v1 = false
   end
 
   it "is constructable with a BigDecimal" do
@@ -294,7 +306,13 @@ RSpec.describe "Money" do
   end
 
   it "returns cents in to_json" do
-    expect(Money.new(1.00).to_json).to eq("1.00")
+    expect(Money.new(1.00).to_json).to eq('1.00')
+  end
+
+  it "returns value and currency in to_json" do
+    Money.opt_in_v1 = true
+    expect(Money.new(1.00).to_json).to eq('{"value":"1.00","currency":"CAD"}')
+    Money.opt_in_v1 = false
   end
 
   it "supports absolute value" do

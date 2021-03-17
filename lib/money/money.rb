@@ -13,6 +13,16 @@ class Money
   class << self
     attr_accessor :parser, :default_currency
 
+    def opt_in_v1?
+      @opt_in_v1
+    end
+    def opt_in_v1=(value)
+      @opt_in_v1 = value
+      if value
+        Money.active_support_deprecator.behavior = :raise
+      end
+    end
+
     def new(value = 0, currency = nil)
       value = Helpers.value_to_decimal(value)
       currency = Helpers.value_to_currency(currency)
@@ -76,7 +86,7 @@ class Money
 
     def default_settings
       self.parser = MoneyParser
-      self.default_currency = Money::NULL_CURRENCY
+      self.default_currency = opt_in_v1? ? nil : Money::NULL_CURRENCY
     end
   end
   default_settings
@@ -230,11 +240,19 @@ class Money
   end
 
   def to_json(options = {})
-    to_s
+    if Money.opt_in_v1?
+      as_json.to_json
+    else
+      to_s
+    end
   end
 
-  def as_json(*args)
-    to_s
+  def as_json(*_args)
+    if Money.opt_in_v1?
+      { value: to_s(:amount), currency: currency.to_s }
+    else
+      to_s
+    end
   end
 
   def abs
