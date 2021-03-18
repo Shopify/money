@@ -140,7 +140,11 @@ class Money
 
   def *(numeric)
     unless numeric.is_a?(Numeric)
-      Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
+      if Money.config.legacy_support?
+        Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
+      else
+        raise ArgumentError, "Money objects can only be multiplied by a Numeric"
+      end
     end
     Money.new(value.to_r * numeric, currency)
   end
@@ -200,8 +204,12 @@ class Money
 
     curr = Helpers.value_to_currency(curr)
     unless currency.compatible?(curr)
-      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}. " \
-        "A Money::IncompatibleCurrencyError will raise in the next major release")
+      if Money.config.legacy_support?
+        Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}. " \
+          "A Money::IncompatibleCurrencyError will raise in the next major release")
+      else
+        raise Money::IncompatibleCurrencyError, "mathematical operation not permitted for Money objects with different currencies"
+      end
     end
 
     self
@@ -232,18 +240,18 @@ class Money
   end
 
   def to_json(options = {})
-    if Money.config.opt_in_v1?
-      as_json.to_json
-    else
+    if Money.config.legacy_support?
       to_s
+    else
+      as_json.to_json
     end
   end
 
   def as_json(*_args)
-    if Money.config.opt_in_v1?
-      { value: to_s(:amount), currency: currency.to_s }
-    else
+    if Money.config.legacy_support?
       to_s
+    else
+      { value: to_s(:amount), currency: currency.to_s }
     end
   end
 

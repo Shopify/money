@@ -46,8 +46,10 @@ RSpec.describe Money::Helpers do
     end
 
     it 'invalid string returns zero' do
-      expect(Money).to receive(:deprecate).once
-      expect(subject.value_to_decimal('invalid')).to eq(0)
+      configure(legacy_support: true) do
+        expect(Money).to receive(:deprecate).once
+        expect(subject.value_to_decimal('invalid')).to eq(0)
+      end
     end
 
     it 'raises on invalid object' do
@@ -86,8 +88,10 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns the null currency when invalid iso is passed' do
-      expect(Money).to receive(:deprecate).once
-      expect(subject.value_to_currency('invalid')).to eq(Money::NULL_CURRENCY)
+      configure(legacy_support: true) do
+        expect(Money).to receive(:deprecate).once
+        expect(subject.value_to_currency('invalid')).to eq(Money::NULL_CURRENCY)
+      end
     end
 
     it 'raises on invalid object' do

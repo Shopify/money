@@ -68,3 +68,14 @@ RSpec::Matchers.define :quack_like do
     expected.instance_methods - actual.instance_methods
   end
 end
+
+def configure(default_currency: nil, legacy_support: nil, parser: nil)
+  old_config = Money.config
+  Money.config = Money::Config.new.tap do |config|
+    config.default_currency = default_currency if default_currency
+    config.parser = parser if parser
+    config.legacy_support! if legacy_support
+  end
+  yield
+  Money.config = old_config
+end

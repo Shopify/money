@@ -1,46 +1,60 @@
-## Road to v1.0
-To make sure you're ready for v1.0 which includes numerous breaking changes, **please enable `opt_in_v1`**
+## Upgrading to v1.0
+
+1) In an initializer add the following
 ```ruby
-Money.configure do |config|
-  config.opt_in_v1!
-end
+Money.active_support_deprecator.behavior = :raise
+Money.default_currency = nil # if you do not have a default currency
 ```
+Make sure everything is running smoothly
 
-#### Breaking changes:
+2) Handle both format of the `to_json` (see breaking changes below)
 
-invalid value will raise
+3) upgrade to v1.0
+
+#### Breaking changes
+
+- invalid value will raise
 ```ruby
 Money.new('a', 'USD')
 ```
 
-money with no currency will raise (setting a default currency is still supported)
+- money with no currency will raise (setting a default currency is still supported)
 ```ruby
 Money.new(1)
 ```
 
-invalid currency will raise
+- invalid currency will raise
 ```ruby
 Money.new(1, 'ABCD')
 ```
 
-mathematical operations between objects with different currencies will raise
+- mathematical operations between objects with different currencies will raise
 ```ruby
 Money.new(1, 'USD') + Money.new(1, 'CAD')
 ```
 
-parsing a string with invalid delimiters will raise
+- parsing a string with invalid delimiters will raise
 ```ruby
 Money.parse('123*12')
 ```
 
-saving a money object with a new currency to a money_column will raise
-```ruby
-model.update(price: Money.new(1, 'USD'))
-model.update(price: Money.new(1, 'CAD'))
-```
-(if you'd like to modify the currency you'll need to do so explicitly beforehand)
+- saving a money object with a new currency to a money_column with `read_only_currency: true` will raise
 
-to_json will return both value and currency, instead of just the value
+- to_json will return both value and currency, instead of just the value
 ```ruby
+# before
+money.to_json #=> "1"
+
+# after
 money.to_json #=> { value: 1, currency: 'USD' }
+```
+
+#### Legacy support
+
+If you'd like more time to make the transition to v1.0 but still want the latest fixes add the following to an initializer
+```ruby
+Money.configure do |config|
+  config.legacy_support!
+  #...
+end
 ```

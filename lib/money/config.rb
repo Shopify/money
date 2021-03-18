@@ -5,22 +5,19 @@ class Money
   class Config
     attr_accessor :parser, :default_currency
 
-    def opt_in_v1?
-      @opt_in_v1
+    def legacy_support?
+      @legacy_support
     end
 
-    def opt_in_v1!
-      @opt_in_v1 = true
-      Money.active_support_deprecator.behavior = :raise
-      if @default_currency == Money::NULL_CURRENCY
-        @default_currency = nil
-      end
+    def legacy_support!
+      @legacy_support = true
+      @default_currency ||= Money::NULL_CURRENCY
     end
 
     def initialize
       @parser = MoneyParser
-      @default_currency = Money::NULL_CURRENCY
-      @opt_in_v1 = false
+      @default_currency = nil
+      @legacy_support = false
     end
   end
 end

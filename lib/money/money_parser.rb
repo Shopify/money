@@ -82,9 +82,12 @@ class MoneyParser
     number = number.to_s.strip
 
     if number.empty?
-      raise MoneyFormatError, "invalid money string: #{input}" if strict
-      Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
-      return '0'
+      if Money.config.legacy_support? && !strict
+        Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
+        '0'
+      else
+        raise MoneyFormatError, "invalid money string: #{input}"
+      end
     end
 
     marks = number.scan(/[#{ESCAPED_MARKS}]/).flatten
@@ -107,8 +110,11 @@ class MoneyParser
       return amount.tr(ESCAPED_NON_COMMA_MARKS, '').sub(',', '.')
     end
 
-    raise MoneyFormatError, "invalid money string: #{input}" if strict
-    Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
+    if Money.config.legacy_support? && !strict
+      Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
+    else
+      raise MoneyFormatError, "invalid money string: #{input}"
+    end
 
     normalize_number(number, marks, currency)
   end
