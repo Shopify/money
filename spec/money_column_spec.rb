@@ -30,12 +30,17 @@ end
 
 class MoneyWithDelegatedCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
-  attr_accessor :delegated_record
   delegate :currency, to: :delegated_record
   money_column :price, currency_column: 'currency', currency_read_only: true
   money_column :prix, currency_column: 'currency2', currency_read_only: true
   def currency2
     delegated_record.currency
+  end
+
+  private
+
+  def delegated_record
+    MoneyRecord.new(currency: 'USD')
   end
 end
 
@@ -97,7 +102,7 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'returns money with null currency when the currency in the DB is invalid' do
-    configure(legacy_support: true) do
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
       record.update_columns(currency: 'invalid')
       record.reload
@@ -223,8 +228,8 @@ RSpec.describe 'MoneyColumn' do
       expect { record.update(price: Money.new(4, 'CAD')) }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
     end
 
-    it 'legacy_support does not write the currency to the db' do
-      configure(legacy_support: true) do
+    it 'legacy_deprecations does not write the currency to the db' do
+      configure(legacy_deprecations: true) do
         record = MoneyWithReadOnlyCurrency.create
         record.update_columns(currency: 'USD')
 
@@ -244,7 +249,7 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'reads an invalid currency from the db and generates a no currency object' do
-      configure(legacy_support: true) do
+      configure(legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).once
         record = MoneyWithReadOnlyCurrency.create
         record.update_columns(currency: 'invalid', price: 1)
@@ -261,12 +266,12 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'handle cases where the delegate allow_nil is false' do
-      record = MoneyWithDelegatedCurrency.new(price: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
+      record = MoneyWithDelegatedCurrency.new(price: Money.new(10, 'USD'))
       expect(record.price.currency.to_s).to eq('USD')
     end
 
     it 'handle cases where a manual delegate does not allow nil' do
-      record = MoneyWithDelegatedCurrency.new(prix: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
+      record = MoneyWithDelegatedCurrency.new(prix: Money.new(10, 'USD'))
       expect(record.price.currency.to_s).to eq('USD')
     end
   end

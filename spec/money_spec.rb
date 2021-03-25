@@ -7,7 +7,6 @@ RSpec.describe "Money" do
   let (:amount_money) { Money.new(1.23, 'USD') }
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
-  let (:legacy_support_config) { Money.config.dup.tap { |config| config.legacy_support! }}
 
   context "default currency not set" do
     it "raises an error" do
@@ -33,8 +32,8 @@ RSpec.describe "Money" do
     expect(Money.new(1).to_money('CAD')).to eq(Money.new(1, 'CAD'))
   end
 
-  it "legacy_support #to_money doesn't overwrite the money object's currency" do
-    configure(legacy_support: true) do
+  it "legacy_deprecations #to_money doesn't overwrite the money object's currency" do
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
       expect(Money.new(1, 'USD').to_money('CAD')).to eq(Money.new(1, 'USD'))
     end
@@ -52,10 +51,10 @@ RSpec.describe "Money" do
     expect(Money.new('')).to eq(Money.new(0))
   end
 
-  it "legacy_support defaults to 0 when constructed with an invalid string" do
-    configure(legacy_support: true) do
+  it "legacy_deprecations defaults to 0 when constructed with an invalid string" do
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
-      expect(Money.new('invalid')).to eq(Money.new(0.00))
+      expect(Money.new('invalid', 'USD')).to eq(Money.new(0.00, 'USD'))
     end
   end
 
@@ -105,9 +104,9 @@ RSpec.describe "Money" do
     expect{ money.to_s(:some_weird_style) }.to raise_error(ArgumentError)
   end
 
-  it "legacy_support as_json as a float with 2 decimal places" do
-    configure(legacy_support: true) do
-      expect(money.as_json).to eq("1.00")
+  it "legacy_deprecations as_json as a float with 2 decimal places" do
+    configure(legacy_json_format: true) do
+      expect(Money.new(1, 'CAD').as_json).to eq("1.00")
     end
   end
 
@@ -151,8 +150,8 @@ RSpec.describe "Money" do
     expect((Money.new + Money.new)).to eq(Money.new)
   end
 
-  it "legacy_support adds inconsistent currencies" do
-    configure(legacy_support: true) do
+  it "legacy_deprecations adds inconsistent currencies" do
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
       expect(Money.new(5, 'USD') + Money.new(1, 'CAD')).to eq(Money.new(6, 'USD'))
     end
@@ -175,7 +174,7 @@ RSpec.describe "Money" do
   end
 
   it "logs a deprecation warning when adding across currencies" do
-    configure(legacy_support: true) do
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate)
       expect(Money.new(10, 'USD') - Money.new(1, 'JPY')).to eq(Money.new(9, 'USD'))
     end
@@ -274,10 +273,10 @@ RSpec.describe "Money" do
     expect(((1.0 / 12) * Money.new(3.3))).to eq(Money.new(0.28))
   end
 
-  it "legacy_support is multipliable by a money object" do
-    configure(legacy_support: true) do
+  it "legacy_deprecations is multipliable by a money object" do
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
-      expect((Money.new(3.3) * Money.new(1))).to eq(Money.new(3.3))
+      expect((Money.new(3.3, 'USD') * Money.new(1, 'USD'))).to eq(Money.new(3.3, 'USD'))
     end
   end
 
@@ -320,8 +319,8 @@ RSpec.describe "Money" do
   end
 
   it "returns cents in to_json" do
-    configure(legacy_support: true) do
-      expect(Money.new(1.00).to_json).to eq('1.00')
+    configure(legacy_json_format: true) do
+      expect(Money.new('1.23', 'USD').to_json).to eq('1.23')
     end
   end
 
@@ -384,8 +383,9 @@ RSpec.describe "Money" do
   end
 
   it "generates a true rational" do
-    configure(legacy_support: true) do
-      expect(Money.rational(Money.new(10.0), Money.new(15.0))).to eq(Rational(2,3))
+    expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'USD'))).to eq(Rational(2,3))
+
+    configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
       expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY'))).to eq(Rational(2,3))
     end
@@ -447,7 +447,7 @@ RSpec.describe "Money" do
     end
 
     it "<=> issues deprecation warning when comparing incompatible currency" do
-      configure(legacy_support: true) do
+      configure(legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).twice
         expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(-1)
         expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(1)
@@ -475,7 +475,7 @@ RSpec.describe "Money" do
 
       describe('legacy different currencies') do
         around(:each) do |test|
-          configure(legacy_support: true) { test.run }
+          configure(legacy_deprecations: true) { test.run }
         end
 
         it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=> usd_10).to(eq(0)) }
@@ -753,8 +753,7 @@ RSpec.describe "Money" do
   end
 
   describe "parser dependency injection" do
-    before(:each) { Money.parser = AccountingMoneyParser }
-    after(:each) { Money.parser = MoneyParser }
+    around(:each) { |test| configure(parser: AccountingMoneyParser, default_currency: 'CAD') { test.run }}
 
     it "keeps AccountingMoneyParser class on new money objects" do
       expect(Money.new.class.parser).to eq(AccountingMoneyParser)
@@ -918,8 +917,7 @@ RSpec.describe "Money" do
     end
 
     context "with .default_currency set" do
-      before(:each) { Money.default_currency = Money::Currency.new('EUR') }
-      after(:each) { Money.default_currency = Money::NULL_CURRENCY }
+      around(:each) { |test| configure(default_currency: Money::Currency.new('EUR')) { test.run }}
 
       it "can be nested and falls back to default_currency outside of the blocks" do
         money2, money3 = nil

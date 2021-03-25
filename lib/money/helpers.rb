@@ -28,7 +28,7 @@ class Money
         when Rational
           BigDecimal(num, MAX_DECIMAL)
         when String
-          decimal = BigDecimal(num, exception: !Money.config.legacy_support?)
+          decimal = BigDecimal(num, exception: !Money.config.legacy_deprecations)
           return decimal if decimal
 
           Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
@@ -46,7 +46,7 @@ class Money
         currency
       when nil, ''
         default = Money.current_currency || Money.default_currency
-        raise(ArgumentError, 'missing currency') if default.nil? || default == ''
+        raise(Money::Currency::UnknownCurrency, 'missing currency') if default.nil? || default == ''
         value_to_currency(default)
       when 'xxx', 'XXX'
         Money::NULL_CURRENCY
@@ -54,7 +54,7 @@ class Money
         begin
           Currency.find!(currency)
         rescue Money::Currency::UnknownCurrency => error
-          if Money.config.legacy_support?
+          if Money.config.legacy_deprecations
             Money.deprecate(error.message)
             Money::NULL_CURRENCY
           else

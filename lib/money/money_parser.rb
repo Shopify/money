@@ -82,7 +82,7 @@ class MoneyParser
     number = number.to_s.strip
 
     if number.empty?
-      if Money.config.legacy_support? && !strict
+      if Money.config.legacy_deprecations && !strict
         Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
         '0'
       else
@@ -110,7 +110,7 @@ class MoneyParser
       return amount.tr(ESCAPED_NON_COMMA_MARKS, '').sub(',', '.')
     end
 
-    if Money.config.legacy_support? && !strict
+    if Money.config.legacy_deprecations && !strict
       Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
     else
       raise MoneyFormatError, "invalid money string: #{input}"

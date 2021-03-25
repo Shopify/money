@@ -1,23 +1,26 @@
 # frozen_string_literal: true
-require 'forwardable'
 
 class Money
   class Config
-    attr_accessor :parser, :default_currency
+    attr_accessor :parser, :default_currency, :legacy_json_format, :legacy_deprecations
 
-    def legacy_support?
-      @legacy_support
+    def legacy_default_currency!
+      @default_currency ||= Money::NULL_CURRENCY
     end
 
-    def legacy_support!
-      @legacy_support = true
-      @default_currency ||= Money::NULL_CURRENCY
+    def legacy_deprecations!
+      @legacy_deprecations = true
+    end
+
+    def legacy_json_format!
+      @legacy_json_format = true
     end
 
     def initialize
       @parser = MoneyParser
       @default_currency = nil
-      @legacy_support = false
+      @legacy_json_format = false
+      @legacy_deprecations = false
     end
   end
 end
