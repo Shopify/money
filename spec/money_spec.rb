@@ -110,6 +110,11 @@ RSpec.describe "Money" do
     end
   end
 
+  it "legacy_format correctly sets the json format" do
+    expect(Money.new(1, 'CAD').as_json(legacy_format: true)).to eq("1.00")
+    expect(Money.new(1, 'CAD').to_json(legacy_format: true)).to eq("1.00")
+  end
+
   it "as_json as a json containing the value and currency" do
     expect(money.as_json).to eq(value: "1.00", currency: "CAD")
   end

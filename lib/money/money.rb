@@ -240,15 +240,15 @@ class Money
   end
 
   def to_json(options = {})
-    if Money.config.legacy_json_format
+    if options.delete(:legacy_format) || Money.config.legacy_json_format
       to_s
     else
-      as_json.to_json
+      as_json(options).to_json
     end
   end
 
-  def as_json(*_args)
-    if Money.config.legacy_json_format
+  def as_json(options = {})
+    if options.delete(:legacy_format) || Money.config.legacy_json_format
       to_s
     else
       { value: to_s(:amount), currency: currency.to_s }
