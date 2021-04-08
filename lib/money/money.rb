@@ -204,11 +204,11 @@ class Money
 
     curr = Helpers.value_to_currency(curr)
     unless currency.compatible?(curr)
+      msg = "mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}"
       if Money.config.legacy_deprecations
-        Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}. " \
-          "A Money::IncompatibleCurrencyError will raise in the next major release")
+        Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
       else
-        raise Money::IncompatibleCurrencyError, "mathematical operation not permitted for Money objects with different currencies"
+        raise Money::IncompatibleCurrencyError, msg
       end
     end
 
