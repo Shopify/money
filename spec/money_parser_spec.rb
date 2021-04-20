@@ -12,14 +12,22 @@ RSpec.describe MoneyParser do
     end
 
     it "parses an invalid string when not strict" do
-      expect(Money).to receive(:deprecate).twice
-      expect(@parser.parse("no money")).to eq(Money.new(0, Money::NULL_CURRENCY))
-      expect(@parser.parse("1..")).to eq(Money.new(1))
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).twice
+        expect(@parser.parse("no money", 'USD')).to eq(Money.new(0, 'USD'))
+        expect(@parser.parse("1..", 'USD')).to eq(Money.new(1, 'USD'))
+      end
     end
 
     it "parses raise with an invalid string and strict option" do
       expect { @parser.parse("no money", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
       expect { @parser.parse("1..1", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
+    end
+
+    it "parses raise with an invalid when a currency is missing" do
+      configure do
+        expect { @parser.parse("1") }.to raise_error(Money::Currency::UnknownCurrency)
+      end
     end
 
     it "parses a single digit integer string" do
@@ -144,8 +152,10 @@ RSpec.describe MoneyParser do
     end
 
     it "parses amount with multiple inconsistent thousands delimiters" do
-      expect(Money).to receive(:deprecate).once
-      expect(@parser.parse("1.1.11.111")).to eq(Money.new(1_111_111))
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).once
+        expect(@parser.parse("1.1.11.111", 'USD')).to eq(Money.new(1_111_111, 'USD'))
+      end
     end
 
     it "parses raises with multiple inconsistent thousands delimiters and strict option" do
@@ -216,8 +226,10 @@ RSpec.describe MoneyParser do
     end
 
     it "parses amount with multiple inconsistent thousands delimiters" do
-      expect(Money).to receive(:deprecate).once
-      expect(@parser.parse("1,1,11,111")).to eq(Money.new(1_111_111))
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).once
+        expect(@parser.parse("1,1,11,111", 'USD')).to eq(Money.new(1_111_111, 'USD'))
+      end
     end
 
     it "parses raises with multiple inconsistent thousands delimiters and strict option" do

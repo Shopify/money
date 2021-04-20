@@ -30,12 +30,17 @@ end
 
 class MoneyWithDelegatedCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
-  attr_accessor :delegated_record
   delegate :currency, to: :delegated_record
   money_column :price, currency_column: 'currency', currency_read_only: true
   money_column :prix, currency_column: 'currency2', currency_read_only: true
   def currency2
     delegated_record.currency
+  end
+
+  private
+
+  def delegated_record
+    MoneyRecord.new(currency: 'USD')
   end
 end
 
@@ -97,11 +102,13 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'returns money with null currency when the currency in the DB is invalid' do
-    expect(Money).to receive(:deprecate).once
-    record.update_columns(currency: 'invalid')
-    record.reload
-    expect(record.price.currency).to be_a(Money::NullCurrency)
-    expect(record.price.value).to eq(1.23)
+    configure(legacy_deprecations: true) do
+      expect(Money).to receive(:deprecate).once
+      record.update_columns(currency: 'invalid')
+      record.reload
+      expect(record.price.currency).to be_a(Money::NullCurrency)
+      expect(record.price.value).to eq(1.23)
+    end
   end
 
   it 'handles legacy support for saving floats' do
@@ -165,8 +172,8 @@ RSpec.describe 'MoneyColumn' do
   describe 'garbage amount' do
     let(:amount) { 'foo' }
 
-    it 'raises a deprecation warning' do
-      expect { subject }.to raise_error(ActiveSupport::DeprecationException)
+    it 'raises an ArgumentError' do
+      expect { subject }.to raise_error(ArgumentError)
     end
   end
 
@@ -174,7 +181,7 @@ RSpec.describe 'MoneyColumn' do
     let(:currency) { 'foo' }
 
     it 'raises an UnknownCurrency error' do
-      expect { subject }.to raise_error(ActiveSupport::DeprecationException)
+      expect { subject }.to raise_error(Money::Currency::UnknownCurrency)
     end
   end
 
@@ -217,11 +224,20 @@ RSpec.describe 'MoneyColumn' do
   describe 'read_only_currency true' do
     it 'does not write the currency to the db' do
       record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(price: 1, currency: 'USD')
-      expect(Money).to receive(:deprecate).once
-      record.update(price: Money.new(4, 'CAD'))
-      expect(record.price.value).to eq(4)
-      expect(record.price.currency.to_s).to eq('USD')
+      record.update_columns(currency: 'USD')
+      expect { record.update(price: Money.new(4, 'CAD')) }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
+    end
+
+    it 'legacy_deprecations does not write the currency to the db' do
+      configure(legacy_deprecations: true) do
+        record = MoneyWithReadOnlyCurrency.create
+        record.update_columns(currency: 'USD')
+
+        expect(Money).to receive(:deprecate).once
+        record.update(price: Money.new(4, 'CAD'))
+        expect(record.price.value).to eq(4)
+        expect(record.price.currency.to_s).to eq('USD')
+      end
     end
 
     it 'reads the currency that is already in the db' do
@@ -233,12 +249,14 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'reads an invalid currency from the db and generates a no currency object' do
-      expect(Money).to receive(:deprecate).once
-      record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(currency: 'invalid', price: 1)
-      record.reload
-      expect(record.price.value).to eq(1)
-      expect(record.price.currency.to_s).to eq('')
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).once
+        record = MoneyWithReadOnlyCurrency.create
+        record.update_columns(currency: 'invalid', price: 1)
+        record.reload
+        expect(record.price.value).to eq(1)
+        expect(record.price.currency.to_s).to eq('')
+      end
     end
 
     it 'sets the currency correctly when the currency is changed' do
@@ -248,12 +266,12 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'handle cases where the delegate allow_nil is false' do
-      record = MoneyWithDelegatedCurrency.new(price: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
+      record = MoneyWithDelegatedCurrency.new(price: Money.new(10, 'USD'))
       expect(record.price.currency.to_s).to eq('USD')
     end
 
     it 'handle cases where a manual delegate does not allow nil' do
-      record = MoneyWithDelegatedCurrency.new(prix: Money.new(10, 'USD'), delegated_record: MoneyRecord.new(currency: 'USD'))
+      record = MoneyWithDelegatedCurrency.new(prix: Money.new(10, 'USD'))
       expect(record.price.currency.to_s).to eq('USD')
     end
   end
@@ -370,10 +388,7 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'default_currency = nil' do
     around do |example|
-      default_currency = Money.default_currency
-      Money.default_currency = nil
-      example.run
-      Money.default_currency = default_currency
+      configure(default_currency: nil) { example.run }
     end
 
     it 'writes currency from input value to the db' do

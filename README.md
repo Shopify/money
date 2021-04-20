@@ -20,6 +20,10 @@ money_column expects a DECIMAL(21,3) database field.
 
     gem 'shopify-money', require: 'money'
 
+## Upgrading to v1.0
+
+see instructions and breaking changes: https://github.com/Shopify/money/blob/master/UPGRADING.md
+
 ## Usage
 
 ``` ruby
@@ -77,7 +81,9 @@ By default `Money` defaults to Money::NullCurrency as its currency. This is a
 global variable that can be changed using:
 
 ``` ruby
-Money.default_currency = Money::Currency.new("USD")
+Money.configure do |config|
+  config.default_currency = Money::Currency.new("USD")
+end
 ```
 
 In web apps you might want to set the default currency on a per request basis.

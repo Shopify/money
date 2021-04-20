@@ -11,7 +11,14 @@ class Money
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
   class << self
-    attr_accessor :parser, :default_currency
+    extend Forwardable
+    attr_accessor :config
+    def_delegators :@config, :parser, :parser=, :default_currency, :default_currency=
+
+    def configure
+      self.config ||= Config.new
+      yield(config) if block_given?
+    end
 
     def new(value = 0, currency = nil)
       value = Helpers.value_to_decimal(value)
@@ -73,13 +80,8 @@ class Money
         Money.current_currency = old_currency
       end
     end
-
-    def default_settings
-      self.parser = MoneyParser
-      self.default_currency = Money::NULL_CURRENCY
-    end
   end
-  default_settings
+  configure
 
   def initialize(value, currency)
     raise ArgumentError if value.nan?
@@ -138,7 +140,11 @@ class Money
 
   def *(numeric)
     unless numeric.is_a?(Numeric)
-      Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
+      if Money.config.legacy_deprecations
+        Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
+      else
+        raise ArgumentError, "Money objects can only be multiplied by a Numeric"
+      end
     end
     Money.new(value.to_r * numeric, currency)
   end
@@ -198,8 +204,12 @@ class Money
 
     curr = Helpers.value_to_currency(curr)
     unless currency.compatible?(curr)
-      Money.deprecate("mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}. " \
-        "A Money::IncompatibleCurrencyError will raise in the next major release")
+      msg = "mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}"
+      if Money.config.legacy_deprecations
+        Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
+      else
+        raise Money::IncompatibleCurrencyError, msg
+      end
     end
 
     self
@@ -230,11 +240,19 @@ class Money
   end
 
   def to_json(options = {})
-    to_s
+    if options.delete(:legacy_format) || Money.config.legacy_json_format
+      to_s
+    else
+      as_json(options).to_json
+    end
   end
 
-  def as_json(*args)
-    to_s
+  def as_json(options = {})
+    if options.delete(:legacy_format) || Money.config.legacy_json_format
+      to_s
+    else
+      { value: to_s(:amount), currency: currency.to_s }
+    end
   end
 
   def abs
