@@ -84,7 +84,7 @@ class MoneyParser
     if number.empty?
       if Money.config.legacy_deprecations && !strict
         Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
-        '0'
+        return '0'
       else
         raise MoneyFormatError, "invalid money string: #{input}"
       end
