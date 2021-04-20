@@ -104,7 +104,7 @@ RSpec.describe "Money" do
     expect{ money.to_s(:some_weird_style) }.to raise_error(ArgumentError)
   end
 
-  it "legacy_deprecations as_json as a float with 2 decimal places" do
+  it "legacy_json_format makes as_json return the legacy format" do
     configure(legacy_json_format: true) do
       expect(Money.new(1, 'CAD').as_json).to eq("1.00")
     end
