@@ -7,6 +7,8 @@ class Money
       super
     end
 
+    ONE = BigDecimal("1")
+
     # Allocates money between different parties without losing pennies.
     # After the mathematically split has been performed, left over pennies will
     # be distributed round-robin amongst the parties. This means that parties
@@ -43,7 +45,7 @@ class Money
       splits.map!(&:to_r)
       allocations = splits.inject(0, :+)
 
-      if (allocations - BigDecimal("1")) > Float::EPSILON
+      if (allocations - ONE) > Float::EPSILON
         raise ArgumentError, "splits add to more than 100%"
       end
 
