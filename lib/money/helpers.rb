@@ -13,10 +13,13 @@ class Money
     }.freeze
 
     def value_to_decimal(num)
+      if Money.config.legacy_deprecations && num.is_a?(Money)
+        Money.deprecate("Cannot pass a Money object as value. Consider using `to_money` instead.")
+        return num.value
+      end
+
       value =
         case num
-        when Money
-          num.value
         when BigDecimal
           num
         when nil, 0, ''
@@ -36,7 +39,10 @@ class Money
         else
           raise ArgumentError, "could not parse as decimal #{num.inspect}"
         end
-      return DECIMAL_ZERO if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
+
+      if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
+        return DECIMAL_ZERO
+      end
       value
     end
 

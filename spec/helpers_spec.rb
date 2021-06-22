@@ -5,10 +5,13 @@ RSpec.describe Money::Helpers do
 
   describe 'value_to_decimal' do
     let (:amount) { BigDecimal('1.23') }
-    let (:money) { Money.new(amount) }
+    let (:money) { Money.new(amount, 'USD') }
 
-    it 'returns the value of a money object' do
-      expect(subject.value_to_decimal(money)).to eq(amount)
+    it 'legacy_deprecations returns the decimal value of a money object' do
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).once
+        expect(subject.value_to_decimal(money)).to eq(amount)
+      end
     end
 
     it 'returns itself if it is already a big decimal' do
@@ -54,6 +57,7 @@ RSpec.describe Money::Helpers do
 
     it 'raises on invalid object' do
       expect { subject.value_to_decimal(OpenStruct.new(amount: 1)) }.to raise_error(ArgumentError)
+      expect { subject.value_to_decimal(Money.new(1, 'USD')) }.to raise_error(ArgumentError)
     end
 
     it 'returns regular zero for a negative zero value' do

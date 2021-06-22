@@ -43,6 +43,17 @@ RSpec.describe "Money" do
     expect{ Money.new(1, 'USD').to_money('CAD') }.to raise_error(Money::IncompatibleCurrencyError)
   end
 
+  it "legacy_deprecations .new supports money objects as arguments" do
+    configure(legacy_deprecations: true) do
+      expect(Money).to receive(:deprecate).once
+      expect(Money.new(Money.new(1, 'USD'),'CAD')).to eq(Money.new(1, 'CAD'))
+    end
+  end
+
+  it ".new does not accept a money object as argument" do
+    expect{ Money.new(Money.new(1, 'USD'),'CAD') }.to raise_error(ArgumentError)
+  end
+
   it "defaults to 0 when constructed with no arguments" do
     expect(Money.new).to eq(Money.new(0))
   end
@@ -206,6 +217,7 @@ RSpec.describe "Money" do
 
   it "is never negative zero" do
     expect(Money.new(-0.00).to_s).to eq("0.00")
+    expect(Money.new("-0.00").to_s).to eq("0.00")
     expect((Money.new(0) * -1).to_s).to eq("0.00")
   end
 
@@ -280,7 +292,7 @@ RSpec.describe "Money" do
 
   it "legacy_deprecations is multipliable by a money object" do
     configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
+      expect(Money).to receive(:deprecate).twice
       expect((Money.new(3.3, 'USD') * Money.new(1, 'USD'))).to eq(Money.new(3.3, 'USD'))
     end
   end
