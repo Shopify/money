@@ -18,7 +18,7 @@ money_column expects a DECIMAL(21,3) database field.
 
 ## Installation
 
-    gem 'shopify-money', require: 'money'
+    gem 'shopify-money'
 
 ## Upgrading to v1.0
 
