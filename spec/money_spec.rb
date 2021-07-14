@@ -8,6 +8,10 @@ RSpec.describe "Money" do
   let (:non_fractional_money) { Money.new(1, 'JPY') }
   let (:zero_money) { Money.new(0) }
 
+  it "has a version" do
+    expect(Money::VERSION).not_to(eq(nil)) 
+  end
+
   context "default currency not set" do
     it "raises an error" do
       configure(default_currency: nil) do
