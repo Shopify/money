@@ -17,7 +17,7 @@ class Money
     end
 
     def initialize
-      @parser = MoneyParser
+      @parser = StrictMoneyParser
       @default_currency = nil
       @legacy_json_format = false
       @legacy_deprecations = false

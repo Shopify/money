@@ -12,7 +12,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses an invalid string when not strict" do
-      configure(legacy_deprecations: true) do
+      configure(parser: MoneyParser, legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).twice
         expect(@parser.parse("no money", 'USD')).to eq(Money.new(0, 'USD'))
         expect(@parser.parse("1..", 'USD')).to eq(Money.new(1, 'USD'))
@@ -152,7 +152,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses amount with multiple inconsistent thousands delimiters" do
-      configure(legacy_deprecations: true) do
+      configure(parser: MoneyParser, legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).once
         expect(@parser.parse("1.1.11.111", 'USD')).to eq(Money.new(1_111_111, 'USD'))
       end
@@ -226,7 +226,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses amount with multiple inconsistent thousands delimiters" do
-      configure(legacy_deprecations: true) do
+      configure(parser: MoneyParser, legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).once
         expect(@parser.parse("1,1,11,111", 'USD')).to eq(Money.new(1_111_111, 'USD'))
       end

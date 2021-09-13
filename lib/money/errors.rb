@@ -5,4 +5,7 @@ class Money
 
   class IncompatibleCurrencyError < Error
   end
+
+  class ParserError < Error
+  end
 end

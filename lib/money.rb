@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require_relative 'money/version'
 require_relative 'money/money_parser'
+require_relative 'money/strict_money_parser'
 require_relative 'money/helpers'
 require_relative 'money/currency'
 require_relative 'money/null_currency'

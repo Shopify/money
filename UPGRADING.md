@@ -6,6 +6,7 @@ Money.configure do |config|
   config.legacy_default_currency!
   config.legacy_deprecations!
   config.legacy_json_format!
+  config.parser = MoneyParser
   #...
 end
 ```
@@ -23,30 +24,32 @@ Money.new(1) #=> value: 1, currency: XXX
 ```
 
 #### legacy_deprecations!
+By enabling `legacy_deprecations!` your app will show deprecation warnings instead of raising and will:
 
-invalid money values return zero
+convert invalid money values to zero
 ```ruby
 Money.new('a', 'USD') #=> Money.new(0, 'USD')
 ```
 
-invalid currency is ignored
+ignore invalid currencies
 ```ruby
 Money.new(1, 'ABCD') #=> Money.new(1)
 ```
 
-mathematical operations between objects are allowed
+allow mathematical operations between different currencies
 ```ruby
 Money.new(1, 'USD') + Money.new(1, 'CAD') #=> Money.new(2, 'USD')
 ```
 
-parsing a string with invalid delimiters
+parse a string with invalid delimiters
 ```ruby
 Money.parse('123*12') #=> Money.new(123)
 ```
 
 #### legacy_json_format!
 
-to_json will return only the value (no currency)
+
+By enabling `legacy_json_format!` your app will return only the value (no currency) when calling to_json
 ```ruby
 # with legacy_json_format!
 money.to_json #=> "1"
@@ -55,3 +58,11 @@ money.to_json #=> "1"
 money.to_json #=> { value: 1, currency: 'USD' }
 ```
 
+#### MoneyParser
+
+By setting the parser to `MoneyParser` your app will try to guess if `.` or `,` is a decimal or thousand mark
+
+```ruby
+Money.parse("1,000", "USD") #=> Money.new("1000", "USD")
+Money.parse("1.000", "USD") #=> Money.new("1000", "USD")
+```

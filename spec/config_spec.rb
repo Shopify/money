@@ -34,7 +34,7 @@ RSpec.describe "Money::Config" do
 
   describe 'parser' do
     it 'defaults to MoneyParser' do
-      expect(Money::Config.new.parser).to eq(MoneyParser)
+      expect(Money::Config.new.parser).to eq(StrictMoneyParser)
     end
 
     it 'can be set to a new parser' do
