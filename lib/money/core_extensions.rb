@@ -14,6 +14,6 @@ end
 #   '100.37'.to_money => #<Money @cents=10037>
 class String
   def to_money(currency = nil)
-    Money.parse(self, currency)
+    MoneyParser.parse(self, currency)
   end
 end

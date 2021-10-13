@@ -13,7 +13,7 @@ class Money
   class << self
     extend Forwardable
     attr_accessor :config
-    def_delegators :@config, :parser, :parser=, :default_currency, :default_currency=
+    def_delegators :@config, :default_currency, :default_currency=
 
     def configure
       self.config ||= Config.new
@@ -32,10 +32,6 @@ class Money
       end
     end
     alias_method :from_amount, :new
-
-    def parse(*args, **kwargs)
-      parser.parse(*args, **kwargs)
-    end
 
     def from_subunits(subunits, currency_iso, format: :iso4217)
       currency = Helpers.value_to_currency(currency_iso)
