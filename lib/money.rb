@@ -11,6 +11,7 @@ require_relative 'money/errors'
 require_relative 'money/deprecations'
 require_relative 'money/parser/accounting'
 require_relative 'money/parser/locale_aware'
+require_relative 'money/parser/simple'
 require_relative 'money/core_extensions'
 require_relative 'money_column' if defined?(ActiveRecord)
 require_relative 'money/railtie' if defined?(Rails::Railtie)
