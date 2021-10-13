@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe AccountingMoneyParser do
-  describe "parsing of amounts with period decimal separator" do
-    before(:each) do
-      @parser = AccountingMoneyParser.new
-    end
+RSpec.describe Money::Parser::Accounting do
+  before(:each) do
+    @parser = described_class
+  end
 
+  describe "parsing of amounts with period decimal separator" do
     it "parses parenthesis as a negative amount eg (99.00)" do
       expect(@parser.parse("(99.00)")).to eq(Money.new(-99.00))
     end
@@ -104,10 +104,6 @@ RSpec.describe AccountingMoneyParser do
   end
 
   describe "parsing of amounts with comma decimal separator" do
-    before(:each) do
-      @parser = AccountingMoneyParser.new
-    end
-
     it "parses dollar amount $1,00 with leading $" do
       expect(@parser.parse("$1,00")).to eq(Money.new(1.00))
     end
@@ -156,10 +152,6 @@ RSpec.describe AccountingMoneyParser do
   end
 
   describe "parsing of decimal cents amounts from 0 to 10" do
-    before(:each) do
-      @parser = AccountingMoneyParser.new
-    end
-
     it "parses 50.0" do
       expect(@parser.parse("50.0")).to eq(Money.new(50.00))
     end
