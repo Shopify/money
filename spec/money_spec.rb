@@ -9,7 +9,7 @@ RSpec.describe "Money" do
   let (:zero_money) { Money.new(0) }
 
   it "has a version" do
-    expect(Money::VERSION).not_to(eq(nil)) 
+    expect(Money::VERSION).not_to(eq(nil))
   end
 
   context "default currency not set" do
@@ -335,6 +335,7 @@ RSpec.describe "Money" do
 
   it "returns value and currency in to_json" do
     expect(Money.new(1.00).to_json).to eq('{"value":"1.00","currency":"CAD"}')
+    expect(JSON.dump(Money.new(1.00, "CAD"))).to eq('{"value":"1.00","currency":"CAD"}')
   end
 
   it "supports absolute value" do

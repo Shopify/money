@@ -239,16 +239,16 @@ class Money
     end
   end
 
-  def to_json(options = {})
-    if options.delete(:legacy_format) || Money.config.legacy_json_format
+  def to_json(options = nil)
+    if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format
       to_s
     else
       as_json(options).to_json
     end
   end
 
-  def as_json(options = {})
-    if options.delete(:legacy_format) || Money.config.legacy_json_format
+  def as_json(options = nil)
+    if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format
       to_s
     else
       { value: to_s(:amount), currency: currency.to_s }
