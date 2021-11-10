@@ -2,11 +2,11 @@
 class Money
   module Parser
     class LocaleAware
-      @decimal_separator_resolver = ->() { ::I18n.translate("number.currency.format.separator") }
+      @decimal_separator_resolver = nil
 
       class << self
-        # The +Proc+ called to get the current locale decimal separator. Defaults to the same lookup ActionView's
-        # +number_to_currency+ helper will use to format the monetary amount for display.
+        # The +Proc+ called to get the current locale decimal separator. In Rails apps this defaults to the same lookup
+        # ActionView's +number_to_currency+ helper will use to format the monetary amount for display.
         def decimal_separator_resolver
           @decimal_separator_resolver
         end
@@ -29,7 +29,7 @@ class Money
         # @param strict [Boolean]
         # @param decimal_separator [String]
         # @return [Money, nil]
-        def parse(input, currency, strict: false, decimal_separator: decimal_separator_resolver.call)
+        def parse(input, currency, strict: false, decimal_separator: decimal_separator_resolver&.call)
           raise ArgumentError, "decimal separator cannot be nil" unless decimal_separator
 
           currency = Money::Helpers.value_to_currency(currency)

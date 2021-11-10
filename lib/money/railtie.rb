@@ -8,5 +8,12 @@ class Money
         ActiveJob::Serializers.add_serializers ::Money::Rails::JobArgumentSerializer
       end
     end
+
+    initializer "shopify-money.setup_locale_aware_parser" do
+      ActiveSupport.on_load(:action_view) do
+        Money::Parser::LocaleAware.decimal_separator_resolver =
+          -> { ::I18n.translate("number.currency.format.separator") }
+      end
+    end
   end
 end

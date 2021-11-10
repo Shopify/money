@@ -3,6 +3,7 @@ require 'simplecov'
 SimpleCov.minimum_coverage 100
 SimpleCov.start do
   add_filter "/spec/"
+  add_filter "/lib/money/railtie"
 end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
