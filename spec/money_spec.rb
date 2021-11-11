@@ -401,6 +401,30 @@ RSpec.describe "Money" do
     end
   end
 
+  it "does not allocate a new money object when multiplying by 1" do
+    expect((money * 1).object_id).to eq(money.object_id)
+  end
+
+  it "does not allocate a new money object when adding 0" do
+    expect((money + 0).object_id).to eq(money.object_id)
+  end
+
+  it "does not allocate a new money object when subtracting 0" do
+    expect((money - 0).object_id).to eq(money.object_id)
+  end
+
+  it "does not allocate when computing absolute value when already positive" do
+    expect((money.abs).object_id).to eq(money.object_id)
+  end
+
+  it "does not allocate when computing floor value when already floored" do
+    expect((money.floor).object_id).to eq(money.object_id)
+  end
+
+  it "does not allocate when computing floor value when already rounded" do
+    expect((money.round).object_id).to eq(money.object_id)
+  end
+
   describe "frozen with amount of $1" do
     let (:money) { Money.new(1.00) }
 
