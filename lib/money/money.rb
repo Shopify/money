@@ -128,12 +128,14 @@ class Money
 
   def +(other)
     arithmetic(other) do |money|
+      return self if money.value == 0 && !no_currency?
       Money.new(value + money.value, calculated_currency(money.currency))
     end
   end
 
   def -(other)
     arithmetic(other) do |money|
+      return self if money.value == 0 && !no_currency?
       Money.new(value - money.value, calculated_currency(money.currency))
     end
   end
@@ -146,6 +148,7 @@ class Money
         raise ArgumentError, "Money objects can only be multiplied by a Numeric"
       end
     end
+    return self if numeric == 1
     Money.new(value.to_r * numeric, currency)
   end
 
@@ -256,15 +259,21 @@ class Money
   end
 
   def abs
-    Money.new(value.abs, currency)
+    abs = value.abs
+    return self if value == abs
+    Money.new(abs, currency)
   end
 
   def floor
-    Money.new(value.floor, currency)
+    floor = value.floor
+    return self if floor == value
+    Money.new(floor, currency)
   end
 
   def round(ndigits=0)
-    Money.new(value.round(ndigits), currency)
+    round = value.round(ndigits)
+    return self if round == value
+    Money.new(round, currency)
   end
 
   def fraction(rate)
