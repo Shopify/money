@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module MoneyColumn
   class CurrencyReadOnlyError < StandardError; end
 

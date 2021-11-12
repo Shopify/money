@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Money
   # A placeholder currency for instances where no actual currency is available,
   # as defined by ISO4217. You should rarely, if ever, need to use this

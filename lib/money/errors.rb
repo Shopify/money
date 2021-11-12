@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Money
   class Error < StandardError
   end

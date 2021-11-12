@@ -37,11 +37,6 @@ Layout/ClosingParenthesisIndentation:
   Exclude:
     - 'spec/allocator_spec.rb'
 
-# Offense count: 31
-# Cop supports --auto-correct.
-Layout/EmptyLineAfterMagicComment:
-  Enabled: false
-
 # Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: EmptyLineBetweenMethodDefs, EmptyLineBetweenClassDefs, EmptyLineBetweenModuleDefs, AllowAdjacentOneLineDefs, NumberOfEmptyLines.

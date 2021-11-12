@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 Money.class_eval do
   ACTIVE_SUPPORT_DEFINED = defined?(ActiveSupport)
 

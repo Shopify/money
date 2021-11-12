@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # Allows Writing of 100.to_money for +Numeric+ types
 #   100.to_money => #<Money @cents=10000>
 #   100.37.to_money => #<Money @cents=10037>

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "money/currency/loader"
 
 class Money
