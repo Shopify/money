@@ -4,10 +4,10 @@ require 'spec_helper'
 require 'yaml'
 
 RSpec.describe "Money" do
-  let (:money) { Money.new(1) }
-  let (:amount_money) { Money.new(1.23, 'USD') }
-  let (:non_fractional_money) { Money.new(1, 'JPY') }
-  let (:zero_money) { Money.new(0) }
+  let(:money) { Money.new(1) }
+  let(:amount_money) { Money.new(1.23, 'USD') }
+  let(:non_fractional_money) { Money.new(1, 'JPY') }
+  let(:zero_money) { Money.new(0) }
 
   it "has a version" do
     expect(Money::VERSION).not_to(eq(nil))
@@ -404,7 +404,7 @@ RSpec.describe "Money" do
   end
 
   describe "frozen with amount of $1" do
-    let (:money) { Money.new(1.00) }
+    let(:money) { Money.new(1.00) }
 
     it "is equals to $1" do
       expect(money).to eq(Money.new(1.00))
@@ -445,13 +445,13 @@ RSpec.describe "Money" do
   end
 
   describe('Comparable') do
-    let (:cad_05) { Money.new(5.00, 'CAD') }
-    let (:cad_10) { Money.new(10.00, 'CAD') }
-    let (:cad_20) { Money.new(20.00, 'CAD') }
-    let (:nil_05) { Money.new(5.00, Money::NULL_CURRENCY) }
-    let (:nil_10) { Money.new(10.00, Money::NULL_CURRENCY) }
-    let (:nil_20) { Money.new(20.00, Money::NULL_CURRENCY) }
-    let (:usd_10) { Money.new(10.00, 'USD') }
+    let(:cad_05) { Money.new(5.00, 'CAD') }
+    let(:cad_10) { Money.new(10.00, 'CAD') }
+    let(:cad_20) { Money.new(20.00, 'CAD') }
+    let(:nil_05) { Money.new(5.00, Money::NULL_CURRENCY) }
+    let(:nil_10) { Money.new(10.00, Money::NULL_CURRENCY) }
+    let(:nil_20) { Money.new(20.00, Money::NULL_CURRENCY) }
+    let(:usd_10) { Money.new(10.00, 'USD') }
 
     it "<=> can compare with and without currency" do
       expect(Money.new(1000, Money::NULL_CURRENCY) <=> Money.new(2000, 'JPY')).to eq(-1)
@@ -611,7 +611,7 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $0" do
-    let (:money) { Money.new(0) }
+    let(:money) { Money.new(0) }
 
     it "is zero" do
       expect(money).to be_zero
@@ -635,7 +635,7 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $1" do
-    let (:money) { Money.new(1.00) }
+    let(:money) { Money.new(1.00) }
 
     it "is not zero" do
       expect(money).not_to be_zero
@@ -758,7 +758,7 @@ RSpec.describe "Money" do
   end
 
   describe "with amount of $1 with created with 3 decimal places" do
-    let (:money) { Money.new(1.125) }
+    let(:money) { Money.new(1.125) }
 
     it "rounds 3rd decimal place" do
       expect(money.value).to eq(BigDecimal("1.13"))

@@ -170,14 +170,6 @@ Lint/BinaryOperatorWithIdenticalOperands:
   Exclude:
     - 'spec/money_spec.rb'
 
-# Offense count: 18
-# Cop supports --auto-correct.
-Lint/ParenthesesAsGroupedExpression:
-  Exclude:
-    - 'spec/helpers_spec.rb'
-    - 'spec/money_spec.rb'
-    - 'spec/null_currency_spec.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Naming/BinaryOperatorParameterName:
