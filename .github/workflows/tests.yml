@@ -1,7 +1,7 @@
 name: tests
 
 on: [push, pull_request]
-  
+
 jobs:
   build:
 
@@ -29,6 +29,9 @@ jobs:
         gem install bundler
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
+    - name: Run Rubocop
+      run: |
+        bundle exec rubocop --format github
     - name: Run tests
       run: |
         bundle exec rake

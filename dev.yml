@@ -7,3 +7,4 @@ up:
 - bundler
 commands:
   test: bundle exec rspec
+  style: bundle exec rubocop
