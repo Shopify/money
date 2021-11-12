@@ -395,11 +395,11 @@ RSpec.describe "Money" do
   end
 
   it "generates a true rational" do
-    expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'USD'))).to eq(Rational(2,3))
+    expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'USD'))).to eq(Rational(2, 3))
 
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
-      expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY'))).to eq(Rational(2,3))
+      expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY'))).to eq(Rational(2, 3))
     end
   end
 
@@ -670,7 +670,7 @@ RSpec.describe "Money" do
     end
 
     specify "#allocate does not lose pennies (integration test)" do
-      moneys = Money.new(0.05).allocate([0.3,0.7])
+      moneys = Money.new(0.05).allocate([0.3, 0.7])
       expect(moneys[0]).to eq(Money.new(0.02))
       expect(moneys[1]).to eq(Money.new(0.03))
     end

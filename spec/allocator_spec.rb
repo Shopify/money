@@ -9,36 +9,36 @@ RSpec.describe "Allocator" do
     end
 
     specify "#allocate does not lose pennies" do
-      moneys = new_allocator(0.05).allocate([0.3,0.7])
+      moneys = new_allocator(0.05).allocate([0.3, 0.7])
       expect(moneys[0]).to eq(Money.new(0.02))
       expect(moneys[1]).to eq(Money.new(0.03))
     end
 
     specify "#allocate does not lose dollars with non-decimal currency" do
-      moneys = new_allocator(5, 'JPY').allocate([0.3,0.7])
+      moneys = new_allocator(5, 'JPY').allocate([0.3, 0.7])
       expect(moneys[0]).to eq(Money.new(2, 'JPY'))
       expect(moneys[1]).to eq(Money.new(3, 'JPY'))
     end
 
     specify "#allocate does not lose dollars with three decimal currency" do
-      moneys = new_allocator(0.005, 'JOD').allocate([0.3,0.7])
+      moneys = new_allocator(0.005, 'JOD').allocate([0.3, 0.7])
       expect(moneys[0]).to eq(Money.new(0.002, 'JOD'))
       expect(moneys[1]).to eq(Money.new(0.003, 'JOD'))
     end
 
     specify "#allocate does not lose pennies even when given a lossy split" do
-      moneys = new_allocator(1).allocate([0.333,0.333, 0.333])
+      moneys = new_allocator(1).allocate([0.333, 0.333, 0.333])
       expect(moneys[0].subunits).to eq(34)
       expect(moneys[1].subunits).to eq(33)
       expect(moneys[2].subunits).to eq(33)
     end
 
     specify "#allocate requires total to be less than 1" do
-      expect { new_allocator(0.05).allocate([0.5,0.6]) }.to raise_error(ArgumentError)
+      expect { new_allocator(0.05).allocate([0.5, 0.6]) }.to raise_error(ArgumentError)
     end
 
     specify "#allocate will use rationals if provided" do
-      splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
+      splits = [128400, 20439, 14589, 14589, 25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
       expect(new_allocator(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16),
 Money.new(0.16), Money.new(0.28)])
     end
@@ -57,13 +57,13 @@ Money.new(0, Money::NULL_CURRENCY)])
     end
 
     specify "#allocate fills pennies from beginning to end with roundrobin strategy" do
-      moneys = new_allocator(0.05).allocate([0.3,0.7], :roundrobin)
+      moneys = new_allocator(0.05).allocate([0.3, 0.7], :roundrobin)
       expect(moneys[0]).to eq(Money.new(0.02))
       expect(moneys[1]).to eq(Money.new(0.03))
     end
 
     specify "#allocate fills pennies from end to beginning with roundrobin_reverse strategy" do
-      moneys = new_allocator(0.05).allocate([0.3,0.7], :roundrobin_reverse)
+      moneys = new_allocator(0.05).allocate([0.3, 0.7], :roundrobin_reverse)
       expect(moneys[0]).to eq(Money.new(0.01))
       expect(moneys[1]).to eq(Money.new(0.04))
     end
