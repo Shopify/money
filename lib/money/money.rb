@@ -141,7 +141,8 @@ class Money
   def *(numeric)
     unless numeric.is_a?(Numeric)
       if Money.config.legacy_deprecations
-        Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
+        Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be " \
+        "removed in the next major release.")
       else
         raise ArgumentError, "Money objects can only be multiplied by a Numeric"
       end
@@ -345,7 +346,8 @@ class Money
   private
 
   def arithmetic(money_or_numeric)
-    raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
+    raise TypeError,
+"#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
     other = money_or_numeric.to_money(currency)
 
     yield(other)

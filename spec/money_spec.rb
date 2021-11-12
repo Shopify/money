@@ -148,7 +148,8 @@ RSpec.describe "Money" do
   end
 
   it "keeps currency across calculations" do
-    expect(Money.new(1, 'USD') - Money.new(1, 'USD') + Money.new(1.23, Money::NULL_CURRENCY)).to eq(Money.new(1.23, 'USD'))
+    expect(Money.new(1,
+'USD') - Money.new(1, 'USD') + Money.new(1.23, Money::NULL_CURRENCY)).to eq(Money.new(1.23, 'USD'))
   end
 
   it "raises error if added other is not compatible" do
@@ -679,7 +680,8 @@ RSpec.describe "Money" do
       expect(Money.new(2).allocate_max_amounts([0.5, 0.5])).to eq(expected)
     end
 
-    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder (integration test)" do
+    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room " \
+    "for the remainder (integration test)" do
       expect(
         Money.new(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
       ).to eq([Money.new(26), Money.new(4.75)])
@@ -807,8 +809,10 @@ RSpec.describe "Money" do
     end
 
     it "accepts Rational number" do
-      expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal("1000000000000000000", Money::Helpers::MAX_DECIMAL))
-      expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal("1000000000000000000",
+Money::Helpers::MAX_DECIMAL))
+      expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal("999999999999999999.99",
+Money::Helpers::MAX_DECIMAL))
     end
 
     it "raises ArgumentError with unsupported argument" do

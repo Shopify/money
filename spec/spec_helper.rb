@@ -70,7 +70,8 @@ RSpec::Matchers.define :quack_like do
 end
 
 
-def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil, parser: nil)
+def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil,
+  parser: nil)
   old_config = Money.config
   Money.config = Money::Config.new.tap do |config|
     config.default_currency = default_currency if default_currency

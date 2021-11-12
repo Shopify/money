@@ -38,12 +38,14 @@ RSpec.describe "Allocator" do
 
     specify "#allocate will use rationals if provided" do
       splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
-      expect(new_allocator(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])
+      expect(new_allocator(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16),
+Money.new(0.16), Money.new(0.28)])
     end
 
     specify "#allocate will convert rationals with high precision" do
       ratios = [Rational(1, 1), Rational(0)]
-      expect(new_allocator("858993456.12").allocate(ratios)).to eq([Money.new("858993456.12"), Money.new(0, Money::NULL_CURRENCY)])
+      expect(new_allocator("858993456.12").allocate(ratios)).to eq([Money.new("858993456.12"),
+Money.new(0, Money::NULL_CURRENCY)])
       ratios = [Rational(1, 6), Rational(5, 6)]
       expect(new_allocator("3.00").allocate(ratios)).to eq([Money.new("0.50"), Money.new("2.50")])
     end
@@ -66,7 +68,9 @@ RSpec.describe "Allocator" do
     end
 
     specify "#allocate raise ArgumentError when invalid strategy is provided" do
-      expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
+      expect {
+ new_allocator(0.03).allocate([0.5, 0.5],
+:bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
     end
 
     specify "#allocate does not raise ArgumentError when invalid splits types are provided" do
@@ -77,13 +81,15 @@ RSpec.describe "Allocator" do
   end
 
   describe 'allocate_max_amounts' do
-    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder" do
+    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room " \
+    "for the remainder" do
       expect(
         new_allocator(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
       ).to eq([Money.new(26), Money.new(4.75)])
     end
 
-    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room for the remainder with currency" do
+    specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room " \
+    "for the remainder with currency" do
       expect(
         new_allocator(3075, 'JPY').allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')]),
       ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
@@ -105,7 +111,8 @@ RSpec.describe "Allocator" do
       }.to raise_error(ArgumentError)
     end
 
-    specify "#allocate_max_amounts drops the remainder when returning the weighted allocation without exceeding the maxima when there is no room for the remainder" do
+    specify "#allocate_max_amounts drops the remainder when returning the weighted allocation without exceeding the " \
+    "maxima when there is no room for the remainder" do
       expect(
         new_allocator(30.75).allocate_max_amounts([Money.new(26), Money.new(4.74)]),
       ).to eq([Money.new(26), Money.new(4.74)])
@@ -131,13 +138,16 @@ RSpec.describe "Allocator" do
 
     specify "#allocate_max_amounts supports all-zero maxima" do
       expect(
-        new_allocator(3).allocate_max_amounts([Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY)]),
-      ).to eq([Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY)])
+        new_allocator(3).allocate_max_amounts([Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY),
+Money.new(0, Money::NULL_CURRENCY)]),
+      ).to eq([Money.new(0, Money::NULL_CURRENCY), Money.new(0, Money::NULL_CURRENCY),
+Money.new(0, Money::NULL_CURRENCY)])
     end
 
     specify "#allocate_max_amounts allocates the right amount without rounding error" do
       expect(
-        new_allocator(24.2).allocate_max_amounts([Money.new(46), Money.new(46), Money.new(50), Money.new(50),Money.new(50)]),
+        new_allocator(24.2).allocate_max_amounts([Money.new(46), Money.new(46), Money.new(50), Money.new(50),
+Money.new(50)]),
         ).to eq([Money.new(4.6), Money.new(4.6), Money.new(5), Money.new(5), Money.new(5)])
     end
   end

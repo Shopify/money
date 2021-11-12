@@ -30,7 +30,8 @@ class Money
     #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33])
     #     #=> [#<Money value:33.34 currency:USD>, #<Money value:33.33 currency:USD>, #<Money value:33.33 currency:USD>]
 
-    # @example left over cents distributed to first party due to rounding, and two solutions for a more natural distribution
+    # @example left over cents distributed to first party due to rounding, and two solutions for a more natural
+    #   distribution
     #   Money.new(30, "USD").allocate([0.667, 0.333])
     #     #=> [#<Money value:20.01 currency:USD>, #<Money value:9.99 currency:USD>]
     #   Money.new(30, "USD").allocate([0.333, 0.667])
@@ -107,9 +108,11 @@ class Money
     private
 
     def extract_currency(money_array)
-      currencies = money_array.lazy.select { |money| money.is_a?(Money) }.reject(&:no_currency?).map(&:currency).to_a.uniq
+      currencies = money_array.lazy.select { |money|
+ money.is_a?(Money) }.reject(&:no_currency?).map(&:currency).to_a.uniq
       if currencies.size > 1
-        raise ArgumentError, "operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
+        raise ArgumentError,
+"operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
       end
       currencies.first || NULL_CURRENCY
     end

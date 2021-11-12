@@ -109,8 +109,10 @@ module MoneyColumn
       private
 
       def normalize_money_column_options(options)
-        raise ArgumentError, 'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
-        raise ArgumentError, 'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
+        raise ArgumentError, 
+'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
+        raise ArgumentError, 
+'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
 
         if options[:currency]
           options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze

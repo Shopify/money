@@ -368,7 +368,8 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'class inheritance' do
     it 'shares money columns declared on the parent class' do
-      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq('currency')
+      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', 
+:currency_column)).to eq('currency')
       expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency)).to eq(nil)
       expect(MoneyClassInheritance.new(price: Money.new(1, 'USD')).price).to eq(Money.new(2, 'USD'))
     end
@@ -381,7 +382,8 @@ RSpec.describe 'MoneyColumn' do
 
     it 'subclass can redefine money columns from parent' do
       expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', :currency)).to eq('CAD')
-      expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq(nil)
+      expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).dig('price', 
+:currency_column)).to eq(nil)
       expect(MoneyClassInheritance2.instance_variable_get(:@money_column_options).keys).to_not include('prix')
     end
   end
