@@ -32,7 +32,7 @@ class Money
           return decimal if decimal
 
           Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in " \
-          "the next major release")
+            "the next major release")
           DECIMAL_ZERO
         else
           raise ArgumentError, "could not parse as decimal #{num.inspect}"

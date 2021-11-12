@@ -112,7 +112,7 @@ class Money
  money.is_a?(Money) }.reject(&:no_currency?).map(&:currency).to_a.uniq
       if currencies.size > 1
         raise ArgumentError,
-"operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
+          "operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
       end
       currencies.first || NULL_CURRENCY
     end

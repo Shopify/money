@@ -70,7 +70,7 @@ Money.new(0, Money::NULL_CURRENCY)])
     specify "#allocate raise ArgumentError when invalid strategy is provided" do
       expect {
  new_allocator(0.03).allocate([0.5, 0.5],
-:bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
+   :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
     end
 
     specify "#allocate does not raise ArgumentError when invalid splits types are provided" do
@@ -82,14 +82,14 @@ Money.new(0, Money::NULL_CURRENCY)])
 
   describe 'allocate_max_amounts' do
     specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room " \
-    "for the remainder" do
+      "for the remainder" do
       expect(
         new_allocator(30.75).allocate_max_amounts([Money.new(26), Money.new(4.75)]),
       ).to eq([Money.new(26), Money.new(4.75)])
     end
 
     specify "#allocate_max_amounts returns the weighted allocation without exceeding the maxima when there is room " \
-    "for the remainder with currency" do
+      "for the remainder with currency" do
       expect(
         new_allocator(3075, 'JPY').allocate_max_amounts([Money.new(2600, 'JPY'), Money.new(475, 'JPY')]),
       ).to eq([Money.new(2600, 'JPY'), Money.new(475, 'JPY')])
@@ -112,7 +112,7 @@ Money.new(0, Money::NULL_CURRENCY)])
     end
 
     specify "#allocate_max_amounts drops the remainder when returning the weighted allocation without exceeding the " \
-    "maxima when there is no room for the remainder" do
+      "maxima when there is no room for the remainder" do
       expect(
         new_allocator(30.75).allocate_max_amounts([Money.new(26), Money.new(4.74)]),
       ).to eq([Money.new(26), Money.new(4.74)])
