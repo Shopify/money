@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe "NullCurrency" do
-  let (:null_currency) {Money::NULL_CURRENCY}
+  let (:null_currency) { Money::NULL_CURRENCY }
 
   it 'exposes the same public interface as Currency' do
     expect(Money::NullCurrency).to quack_like Money::Currency

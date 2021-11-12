@@ -691,8 +691,8 @@ RSpec.describe "Money" do
 
   describe "split" do
     specify "#split needs at least one party" do
-      expect {Money.new(1).split(0)}.to raise_error(ArgumentError)
-      expect {Money.new(1).split(-1)}.to raise_error(ArgumentError)
+      expect { Money.new(1).split(0) }.to raise_error(ArgumentError)
+      expect { Money.new(1).split(-1) }.to raise_error(ArgumentError)
     end
 
     specify "#gives 1 cent to both people if we start with 2" do
@@ -747,7 +747,7 @@ RSpec.describe "Money" do
 
   describe "fraction" do
     specify "#fraction needs a positive rate" do
-      expect {Money.new(1).fraction(-0.5)}.to raise_error(ArgumentError)
+      expect { Money.new(1).fraction(-0.5) }.to raise_error(ArgumentError)
     end
 
     specify "#fraction returns the amount minus a fraction" do
@@ -766,7 +766,7 @@ RSpec.describe "Money" do
   end
 
   describe "parser dependency injection" do
-    around(:each) { |test| configure(parser: AccountingMoneyParser, default_currency: 'CAD') { test.run }}
+    around(:each) { |test| configure(parser: AccountingMoneyParser, default_currency: 'CAD') { test.run } }
 
     it "keeps AccountingMoneyParser class on new money objects" do
       expect(Money.new.class.parser).to eq(AccountingMoneyParser)
@@ -932,7 +932,7 @@ RSpec.describe "Money" do
     end
 
     context "with .default_currency set" do
-      around(:each) { |test| configure(default_currency: Money::Currency.new('EUR')) { test.run }}
+      around(:each) { |test| configure(default_currency: Money::Currency.new('EUR')) { test.run } }
 
       it "can be nested and falls back to default_currency outside of the blocks" do
         money2, money3 = nil
