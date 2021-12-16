@@ -222,14 +222,14 @@ class Money
     value
   end
 
-  def to_s(style = nil)
+  def to_formatted_s(style = nil)
     units = case style
     when :legacy_dollars
       2
     when :amount, nil
       currency.minor_units
     else
-      raise ArgumentError, "Unexpected style: #{style}"
+      raise ArgumentError, "Unexpected format: #{style}"
     end
 
     rounded_value = value.round(units)
@@ -241,6 +241,7 @@ class Money
       sprintf("%s%d.%0#{units}d", sign, rounded_value.truncate, rounded_value.frac * (10 ** units))
     end
   end
+  alias_method :to_s, :to_formatted_s
 
   def to_json(options = nil)
     if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format

@@ -71,14 +71,14 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s).to eq("1")
   end
 
-  it "to_s with a legacy_dollars style" do
-    expect(amount_money.to_s(:legacy_dollars)).to eq("1.23")
-    expect(non_fractional_money.to_s(:legacy_dollars)).to eq("1.00")
+  it "to_formatted_s with a legacy_dollars style" do
+    expect(amount_money.to_formatted_s(:legacy_dollars)).to eq("1.23")
+    expect(non_fractional_money.to_formatted_s(:legacy_dollars)).to eq("1.00")
   end
 
-  it "to_s with a amount style" do
-    expect(amount_money.to_s(:amount)).to eq("1.23")
-    expect(non_fractional_money.to_s(:amount)).to eq("1")
+  it "to_formatted_s with a amount style" do
+    expect(amount_money.to_formatted_s(:amount)).to eq("1.23")
+    expect(non_fractional_money.to_formatted_s(:amount)).to eq("1")
   end
 
   it "to_s correctly displays negative numbers" do
@@ -104,8 +104,8 @@ RSpec.describe "Money" do
     expect(Money.new("999999999999999999.99", "USD").to_s).to eq("999999999999999999.99")
   end
 
-  it "to_s raises ArgumentError on unsupported style" do
-    expect{ money.to_s(:some_weird_style) }.to raise_error(ArgumentError)
+  it "to_formatted_s raises ArgumentError on unsupported style" do
+    expect{ money.to_formatted_s(:some_weird_style) }.to raise_error(ArgumentError)
   end
 
   it "legacy_json_format makes as_json return the legacy format" do
