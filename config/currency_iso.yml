@@ -2029,9 +2029,9 @@ ssp:
   thousands_separator: ","
   iso_numeric: '728'
   smallest_denomination: 5
-std:
+stn:
   priority: 100
-  iso_code: STD
+  iso_code: STN
   name: São Tomé and Príncipe Dobra
   symbol: Db
   alternate_symbols: []
@@ -2041,8 +2041,8 @@ std:
   html_entity: ''
   decimal_mark: "."
   thousands_separator: ","
-  iso_numeric: '678'
-  smallest_denomination: 10000
+  iso_numeric: '930'
+  smallest_denomination: 1
 svc:
   priority: 100
   iso_code: SVC
@@ -2304,6 +2304,24 @@ uzs:
   thousands_separator: ","
   iso_numeric: '860'
   smallest_denomination: 100
+ved:
+  priority: 100
+  iso_code: VED
+  name: Venezuelan Bolívar soberano
+  symbol: Bs.D.
+  alternate_symbols: []
+  subunit: Céntimo
+  subunit_to_unit: 100
+  symbol_first: true
+  html_entity: ''
+  decimal_mark: ","
+  thousands_separator: "."
+  iso_numeric: '926'
+  # "On 1 Oct 2021, [...] another (redenomination) happened, but called 'Nueva expresión monetaria', 
+  # or new monetary expression, which removed 6 zeroes from the currency without affecting its denomination."
+  # The VED has banknotes in denominations of 5, 10, 20, 50, and 100, and coins in 50 céntimos and 1 Bs.D.
+  # Source: https://en.wikipedia.org/wiki/Venezuelan_bol%C3%ADvar
+  smallest_denomination: 1
 ves:
   priority: 100
   iso_code: VES
