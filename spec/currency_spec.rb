@@ -80,7 +80,7 @@ RSpec.describe "Currency" do
   describe "#hash" do
     specify "equal currencies from different loaders have the same hash" do
       currency_1 = Money::Currency.find('USD')
-      currency_2 = YAML.load(Money::Currency.find('USD').to_yaml)
+      currency_2 = yaml_load(Money::Currency.find('USD').to_yaml)
 
       expect(currency_1.eql?(currency_2)).to eq(true)
       expect(currency_1.hash).to eq(currency_2.hash)

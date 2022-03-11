@@ -854,17 +854,17 @@ RSpec.describe "Money" do
 
   describe "YAML deserialization" do
     it "accepts values with currencies" do
-      money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
+      money = yaml_load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: USD\n")
       expect(money).to eq(Money.new(750, 'usd'))
     end
 
     it "accepts values with null currencies" do
-      money = YAML.load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: XXX\n")
+      money = yaml_load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: XXX\n")
       expect(money).to eq(Money.new(750))
     end
 
     it "accepts serialized NullCurrency objects" do
-      money = YAML.load(<<~EOS)
+      money = yaml_load(<<~EOS)
         ---
         !ruby/object:Money
           currency: !ruby/object:Money::NullCurrency
@@ -887,7 +887,7 @@ RSpec.describe "Money" do
     end
 
     it "accepts BigDecimal values" do
-      money = YAML.load(<<~EOS)
+      money = yaml_load(<<~EOS)
         ---
         !ruby/object:Money
           value: !ruby/object:BigDecimal 18:0.75E3
@@ -898,7 +898,7 @@ RSpec.describe "Money" do
     end
 
     it "accepts old float values..." do
-      money = YAML.load(<<~EOS)
+      money = yaml_load(<<~EOS)
         ---
         !ruby/object:Money
           value: 750.00
