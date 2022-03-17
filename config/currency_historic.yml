@@ -73,6 +73,20 @@ mtl:
   thousands_separator: ","
   iso_numeric: '470'
   smallest_denomination: 1
+std:
+  priority: 100
+  iso_code: STD
+  name: São Tomé and Príncipe Dobra
+  symbol: Db
+  alternate_symbols: []
+  subunit: Cêntimo
+  subunit_to_unit: 100
+  symbol_first: false
+  html_entity: ''
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: '678'
+  smallest_denomination: 10000
 tmm:
   priority: 100
   iso_code: TMM
