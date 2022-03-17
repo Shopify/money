@@ -222,7 +222,7 @@ class Money
     value
   end
 
-  def to_formatted_s(style = nil)
+  def to_fs(style = nil)
     units = case style
     when :legacy_dollars
       2
@@ -241,8 +241,8 @@ class Money
       sprintf("%s%d.%0#{units}d", sign, rounded_value.truncate, rounded_value.frac * (10 ** units))
     end
   end
-  alias_method :to_s, :to_formatted_s
-  alias_method :to_fs, :to_formatted_s
+  alias_method :to_s, :to_fs
+  alias_method :to_formatted_s, :to_fs
 
   def to_json(options = nil)
     if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format
