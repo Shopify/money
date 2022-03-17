@@ -112,6 +112,10 @@ RSpec.describe "Money" do
     expect(money.method(:to_s)).to eq(money.method(:to_formatted_s))
   end
 
+  it "to_formatted_s is aliased as to_fs for forward compatibility" do
+    expect(money.method(:to_fs)).to eq(money.method(:to_formatted_s))
+  end
+
   it "legacy_json_format makes as_json return the legacy format" do
     configure(legacy_json_format: true) do
       expect(Money.new(1, 'CAD').as_json).to eq("1.00")

@@ -242,6 +242,7 @@ class Money
     end
   end
   alias_method :to_s, :to_formatted_s
+  alias_method :to_fs, :to_formatted_s
 
   def to_json(options = nil)
     if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format
