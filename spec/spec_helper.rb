@@ -3,6 +3,7 @@ require 'simplecov'
 SimpleCov.minimum_coverage 100
 SimpleCov.start do
   add_filter "/spec/"
+  add_filter "/lib/money/railtie"
 end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
@@ -70,11 +71,10 @@ RSpec::Matchers.define :quack_like do
 end
 
 
-def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil, parser: nil)
+def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil)
   old_config = Money.config
   Money.config = Money::Config.new.tap do |config|
     config.default_currency = default_currency if default_currency
-    config.parser = parser if parser
     config.legacy_json_format! if legacy_json_format
     config.legacy_deprecations! if legacy_deprecations
     config.legacy_default_currency! if legacy_default_currency

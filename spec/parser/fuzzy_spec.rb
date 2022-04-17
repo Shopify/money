@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe MoneyParser do
+RSpec.describe Money::Parser::Fuzzy do
   before(:each) do
-    @parser = MoneyParser
+    @parser = described_class
   end
 
   describe "parsing of amounts with period decimal separator" do
@@ -20,8 +20,8 @@ RSpec.describe MoneyParser do
     end
 
     it "parses raise with an invalid string and strict option" do
-      expect { @parser.parse("no money", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
-      expect { @parser.parse("1..1", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
+      expect { @parser.parse("no money", strict: true) }.to raise_error(described_class::MoneyFormatError)
+      expect { @parser.parse("1..1", strict: true) }.to raise_error(described_class::MoneyFormatError)
     end
 
     it "parses raise with an invalid when a currency is missing" do
@@ -159,7 +159,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses raises with multiple inconsistent thousands delimiters and strict option" do
-      expect { @parser.parse("1.1.11.111", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
+      expect { @parser.parse("1.1.11.111", strict: true) }.to raise_error(described_class::MoneyFormatError)
     end
   end
 
@@ -233,7 +233,7 @@ RSpec.describe MoneyParser do
     end
 
     it "parses raises with multiple inconsistent thousands delimiters and strict option" do
-      expect { @parser.parse("1,1,11,111", strict: true) }.to raise_error(MoneyParser::MoneyFormatError)
+      expect { @parser.parse("1,1,11,111", strict: true) }.to raise_error(described_class::MoneyFormatError)
     end
   end
 

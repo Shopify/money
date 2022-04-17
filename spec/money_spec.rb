@@ -794,22 +794,6 @@ RSpec.describe "Money" do
     end
   end
 
-  describe "parser dependency injection" do
-    around(:each) { |test| configure(parser: AccountingMoneyParser, default_currency: 'CAD') { test.run }}
-
-    it "keeps AccountingMoneyParser class on new money objects" do
-      expect(Money.new.class.parser).to eq(AccountingMoneyParser)
-    end
-
-    it "supports parenthesis from AccountingMoneyParser" do
-      expect(Money.parse("($5.00)")).to eq(Money.new(-5))
-    end
-
-    it "supports parenthesis from AccountingMoneyParser for .to_money" do
-      expect("($5.00)".to_money).to eq(Money.new(-5))
-    end
-  end
-
   describe "round" do
 
     it "rounds to 0 decimal places by default" do

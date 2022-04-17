@@ -12,6 +12,8 @@ end
 
 Remove each legacy setting making sure your app functions as expected.
 
+Replace `Money.parse` with `Money::Parser::Fuzzy.parse`.
+
 ### Legacy support
 
 #### legacy_default_currency!
