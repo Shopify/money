@@ -83,3 +83,9 @@ def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecation
 ensure
   Money.config = old_config
 end
+
+def yaml_load(yaml)
+  return YAML.load(yaml) if Psych::VERSION < '4.0'
+
+  YAML.safe_load(yaml, permitted_classes: [BigDecimal, Money, Money::Currency, Money::NullCurrency])
+end
