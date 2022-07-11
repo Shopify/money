@@ -4,7 +4,7 @@ layout: index
 
 [![Build Status](https://circleci.com/gh/Shopify/money.png?circle-token=88060f61185838446bb65723d96658bdd74ebb3c)](https://circleci.com/gh/Shopify/money)
 
-money_column expects a decimal 8,2 database field.
+money_column expects a DECIMAL(21,3) database field.
 
 ## Contributing
 
