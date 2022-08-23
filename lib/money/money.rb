@@ -124,14 +124,14 @@ class Money
 
   def +(other)
     arithmetic(other) do |money|
-      return self if money.value == 0 && !no_currency?
+      return self if money.value.zero? && !no_currency?
       Money.new(value + money.value, calculated_currency(money.currency))
     end
   end
 
   def -(other)
     arithmetic(other) do |money|
-      return self if money.value == 0 && !no_currency?
+      return self if money.value.zero? && !no_currency?
       Money.new(value - money.value, calculated_currency(money.currency))
     end
   end
