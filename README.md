@@ -115,8 +115,8 @@ Money::Currency.new("MGA").minor_units  # => 1
 ## Money column
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column
-(or `money` for PostgreSQL) for your database. The `money_column` method can
-generate methods for use with ActiveRecord:
+for your database. The `money_column` method can generate methods for use with
+ActiveRecord:
 
 ```ruby
 create_table :orders do |t|
