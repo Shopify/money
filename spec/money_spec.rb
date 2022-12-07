@@ -43,6 +43,10 @@ RSpec.describe "Money" do
     end
   end
 
+  it "#to_money with three decimal places matches Money.new" do
+    expect("29.000".to_money("USD")).to eq(Money.new("29.000", "USD"))
+  end
+
   it "#to_money raises when changing currency" do
     expect{ Money.new(1, 'USD').to_money('CAD') }.to raise_error(Money::IncompatibleCurrencyError)
   end
