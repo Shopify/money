@@ -22,7 +22,9 @@ money_column expects a DECIMAL(21,3) database field.
 
 ## Upgrading to v1.0
 
-see instructions and breaking changes: https://github.com/Shopify/money/blob/master/UPGRADING.md
+See instructions and breaking changes: https://github.com/Shopify/money/blob/master/UPGRADING.md
+
+Note that this README contains instructions for the `master` branch. For the last 0.x release, see [`v0.16.0`](https://github.com/Shopify/money/tree/v0.16.0).
 
 ## Usage
 
