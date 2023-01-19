@@ -9,7 +9,7 @@ RSpec.describe Money::Rails::JobArgumentSerializer do
     serialized_job = job.serialize
     serialized_value = serialized_job["arguments"][0]["value"]
     expect(serialized_value["_aj_serialized"]).to eq("Money::Rails::JobArgumentSerializer")
-    expect(serialized_value["value"]).to eq(BigDecimal("10.21"))
+    expect(serialized_value["value"]).to eq("10.21")
     expect(serialized_value["currency"]).to eq("BRL")
 
     job2 = MoneyTestJob.deserialize(serialized_job)

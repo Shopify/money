@@ -4,7 +4,7 @@ class Money
   module Rails
     class JobArgumentSerializer < ::ActiveJob::Serializers::ObjectSerializer
       def serialize(money)
-        super("value" => money.value, "currency" => money.currency.iso_code)
+        super("value" => money.value.to_s, "currency" => money.currency.iso_code)
       end
 
       def deserialize(hash)
