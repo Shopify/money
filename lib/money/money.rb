@@ -232,9 +232,12 @@ class Money
     if units == 0
       sprintf("%d", rounded_value)
     else
-      sign = rounded_value < 0 ? '-' : ''
-      rounded_value = rounded_value.abs
-      sprintf("%s%d.%0#{units}d", sign, rounded_value.truncate, rounded_value.frac * (10 ** units))
+      formatted = rounded_value.to_s("F")
+      decimal_digits = formatted.size - formatted.index(".") - 1
+      (units - decimal_digits).times do
+        formatted << '0'
+      end
+      formatted
     end
   end
   alias_method :to_s, :to_fs
