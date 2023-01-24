@@ -32,7 +32,8 @@ module RuboCop
         PATTERN
 
         def on_send(node)
-          money_new(node) do |_amount, currency_arg|
+          money_new(node) do |amount, currency_arg|
+            return if amount&.splat_type?
             return if currency_arg
 
             add_offense(node, message: 'Money is missing currency argument')

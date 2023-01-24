@@ -26,6 +26,13 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
       RUBY
     end
 
+    it 'does not register an offense for Money.new with splat argument' do
+      expect_no_offenses(<<~RUBY)
+        value_and_currency = [1, 'CAD']
+        Money.new(*value_and_currency)
+      RUBY
+    end
+
     it 'registers an offense and corrects for Money.new without a currency argument' do
       expect_offense(<<~RUBY)
         Money.new
