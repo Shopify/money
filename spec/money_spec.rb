@@ -376,6 +376,10 @@ RSpec.describe "Money" do
         expect(Money.from_subunits(100, 'ISK', format: :stripe)).to eq(Money.new(1, 'ISK'))
       end
 
+      it 'overrides the subunit_to_unit amount for UGX' do
+        expect(Money.from_subunits(100, 'UGX', format: :stripe)).to eq(Money.new(1, 'UGX'))
+      end
+
       it 'fallbacks to the default subunit_to_unit amount if no override is specified' do
         expect(Money.from_subunits(100, 'USD', format: :stripe)).to eq(Money.new(1, 'USD'))
       end
@@ -620,6 +624,10 @@ RSpec.describe "Money" do
     describe 'with format specified' do
       it 'overrides the subunit_to_unit amount' do
         expect(Money.new(1, 'ISK').subunits(format: :stripe)).to eq(100)
+      end
+
+      it 'overrides the subunit_to_unit amount for UGX' do
+        expect(Money.new(1, 'UGX').subunits(format: :stripe)).to eq(100)
       end
 
       it 'fallbacks to the default subunit_to_unit amount if no override is specified' do

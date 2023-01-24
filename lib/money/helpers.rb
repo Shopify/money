@@ -10,6 +10,7 @@ class Money
 
     STRIPE_SUBUNIT_OVERRIDE = {
       'ISK' => 100,
+      'UGX' => 100,
     }.freeze
 
     def value_to_decimal(num)
