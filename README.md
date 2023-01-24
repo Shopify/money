@@ -3,7 +3,7 @@
 [![tests](https://github.com/Shopify/money/workflows/tests/badge.svg)](https://github.com/Shopify/money/actions?query=workflow%3Atests+branch%3Amain)
 
 
-money_column expects a DECIMAL(21,3) database field.
+`money_column` expects a `DECIMAL(21,3)` database field.
 
 ### Features
 
