@@ -24,7 +24,7 @@ RSpec.describe RuboCop::Cop::Money::UnsafeToMoney do
     it 'registers an offense and corrects for Money.new without a currency argument' do
       expect_offense(<<~RUBY)
         '2.000'.to_money
-                ^^^^^^^^ `to_money` has inconsistent behaviour. Use `Money.new` instead.
+                ^^^^^^^^ #{described_class::MSG}
       RUBY
 
       expect_correction(<<~RUBY)
@@ -35,7 +35,7 @@ RSpec.describe RuboCop::Cop::Money::UnsafeToMoney do
     it 'registers an offense and corrects for Money.new with a currency argument' do
       expect_offense(<<~RUBY)
         '2.000'.to_money('USD')
-                ^^^^^^^^ `to_money` has inconsistent behaviour. Use `Money.new` instead.
+                ^^^^^^^^ #{described_class::MSG}
       RUBY
 
       expect_correction(<<~RUBY)
@@ -46,7 +46,7 @@ RSpec.describe RuboCop::Cop::Money::UnsafeToMoney do
     it 'registers an offense and corrects for Money.new with a complex receiver' do
       expect_offense(<<~RUBY)
         obj.money.to_money('USD')
-                  ^^^^^^^^ `to_money` has inconsistent behaviour. Use `Money.new` instead.
+                  ^^^^^^^^ #{described_class::MSG}
       RUBY
 
       expect_correction(<<~RUBY)
