@@ -1,6 +1,6 @@
 # money
 
-[![tests](https://github.com/Shopify/money/workflows/tests/badge.svg)](https://github.com/Shopify/money/actions?query=workflow%3Atests+branch%3Amaster)
+[![tests](https://github.com/Shopify/money/workflows/tests/badge.svg)](https://github.com/Shopify/money/actions?query=workflow%3Atests+branch%3Amain)
 
 
 money_column expects a DECIMAL(21,3) database field.
@@ -22,7 +22,7 @@ money_column expects a DECIMAL(21,3) database field.
 
 ## Upgrading to v1.0
 
-see instructions and breaking changes: https://github.com/Shopify/money/blob/master/UPGRADING.md
+see instructions and breaking changes: https://github.com/Shopify/money/blob/main/UPGRADING.md
 
 ## Usage
 
@@ -171,7 +171,7 @@ Money/UnsafeToMoney:
 
 ## Contributing to money
 
-- Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
+- Check out the latest main to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 - Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 - Fork the project
 - Start a feature/bugfix branch
