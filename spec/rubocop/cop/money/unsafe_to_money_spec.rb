@@ -53,5 +53,11 @@ RSpec.describe RuboCop::Cop::Money::UnsafeToMoney do
         Money.new(obj.money, 'USD')
       RUBY
     end
+
+    it 'does not register an offense for receiver-less calls' do
+      expect_no_offenses(<<~RUBY)
+        a = to_money
+      RUBY
+    end
   end
 end

@@ -16,7 +16,7 @@ module RuboCop
 
         def on_send(node)
           return unless node.method?(:to_money)
-          return if node.receiver.is_a?(AST::NumericNode)
+          return if node.receiver.nil? || node.receiver.is_a?(AST::NumericNode)
 
           add_offense(node, location: :selector)
         end
