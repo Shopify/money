@@ -12,7 +12,7 @@ money_column expects a DECIMAL(21,3) database field.
   amount of money, such as its value and its currency.
 - Provides a `Money::Currency` class which encapsulates all information about
   a monetary unit.
-- Does NOT provides APIs for exchanging money from one currency to another.
+- Does NOT provide APIs for exchanging money from one currency to another.
 - wont lose pennies during division!
 - Money::NullCurrency for no currency support
 
