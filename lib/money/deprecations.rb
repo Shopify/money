@@ -3,7 +3,10 @@ Money.class_eval do
   ACTIVE_SUPPORT_DEFINED = defined?(ActiveSupport)
 
   def self.active_support_deprecator
-    @active_support_deprecator ||= ActiveSupport::Deprecation.new('1.0.0', 'Shopify/Money')
+    @active_support_deprecator ||= begin
+      next_major_version = Money::VERSION.split(".").first.to_i + 1
+      ActiveSupport::Deprecation.new("#{next_major_version}.0.0", "Shopify/Money")
+    end
   end
 
   def self.deprecate(message)
