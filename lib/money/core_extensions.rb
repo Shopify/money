@@ -14,6 +14,11 @@ end
 #   '100.37'.to_money => #<Money @cents=10037>
 class String
   def to_money(currency = nil)
-    Money::Parser::Fuzzy.parse(self, currency)
+    if Money.config.legacy_deprecations
+      Money.deprecate("`#{self}.to_money` will raise an ArgumentError in the next major release")
+      Money::Parser::Fuzzy.parse(self, currency)
+    else
+      Money.new(self, currency)
+    end
   end
 end

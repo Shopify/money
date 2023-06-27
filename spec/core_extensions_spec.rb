@@ -43,8 +43,15 @@ RSpec.describe String do
   it_should_behave_like "an object supporting to_money"
 
   it "parses an empty string to Money.zero" do
-    expect(''.to_money).to eq(Money.new(0, Money::NULL_CURRENCY))
-    expect(' '.to_money).to eq(Money.new(0, Money::NULL_CURRENCY))
+    configure(legacy_deprecations: true) do
+      expect(Money).to receive(:deprecate).twice
+      expect("".to_money("USD")).to eq(Money.new(0, "USD"))
+      expect(" ".to_money("CAD")).to eq(Money.new(0, "CAD"))
+    end
+  end
+
+  it "#to_money should behave like Money.new with three decimal places amounts" do
+    expect("29.000".to_money("USD")).to eq(Money.new("29.000", "USD"))
   end
 end
 
