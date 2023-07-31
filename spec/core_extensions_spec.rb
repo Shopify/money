@@ -43,15 +43,26 @@ RSpec.describe String do
   it_should_behave_like "an object supporting to_money"
 
   it "parses an empty string to Money.zero" do
+    expect("".to_money("USD")).to eq(Money.new(0, "USD"))
+
     configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).twice
-      expect("".to_money("USD")).to eq(Money.new(0, "USD"))
+      expect(Money).to receive(:deprecate).once
       expect(" ".to_money("CAD")).to eq(Money.new(0, "CAD"))
     end
   end
 
+  it "#to_money to handle thousands delimiters" do
+    configure(legacy_deprecations: true) do
+      expect(Money).to receive(:deprecate).at_least(4).times
+      expect("29.000".to_money("USD")).to eq(Money.new("29000", "USD"))
+      expect("29.000,00".to_money("USD")).to eq(Money.new("29000", "USD"))
+      expect("29,000".to_money("USD")).to eq(Money.new("29000", "USD"))
+      expect("29,000.00".to_money("USD")).to eq(Money.new("29000", "USD"))
+    end
+  end
+
   it "#to_money should behave like Money.new with three decimal places amounts" do
-    expect("29.000".to_money("USD")).to eq(Money.new("29.000", "USD"))
+    expect("29.000".to_money("USD")).to eq(Money.new("29.00", "USD"))
   end
 end
 
