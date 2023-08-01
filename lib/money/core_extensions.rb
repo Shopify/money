@@ -16,8 +16,9 @@ class String
   def to_money(currency = nil)
     if Money.config.legacy_deprecations
       Money::Parser::Fuzzy.parse(self, currency).tap do |money|
-        message = "`#{self}.to_money` will raise an ArgumentError in the next major release. Use `Money.new` instead."
-        Money.deprecate(message) if money != Money.new(self, currency)
+        message = "`#{self}.to_money` will behave like `Money.new` and raise on the next release. " \
+          "To parse user input, do so on the browser and use the user's locale."
+        Money.deprecate(message) if money.value != BigDecimal(self, exception: false)
       end
     else
       Money.new(self, currency)
