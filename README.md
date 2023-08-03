@@ -29,7 +29,7 @@ require 'money'
 # 10.00 USD
 money = Money.new(10.00, "USD")
 money.subunits     #=> 1000
-money.currency  #=> Currency.new("USD")
+money.currency     #=> Money::Currency.new("USD")
 
 # Comparisons
 Money.new(1000, "USD") == Money.new(1000, "USD")   #=> true
@@ -40,13 +40,29 @@ Money.new(1000, "USD") != Money.new(1000, "EUR")   #=> true
 # Arithmetic
 Money.new(1000, "USD") + Money.new(500, "USD") == Money.new(1500, "USD")
 Money.new(1000, "USD") - Money.new(200, "USD") == Money.new(800, "USD")
-Money.new(1000, "USD") / 5                     == Money.new(200, "USD")
 Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 
+# Splitting money evenly
+Money.new(1000, "USD").split(2)            == [Money.new(500, "USD"), Money.new(500, "USD")]
+Money.new(1000, "USD").split(3)            == [Money.new(333.34, "USD"), Money.new(333.33, "USD"), Money.new(333.33, "USD")]
+Money.new(1000, "USD").calculate_splits(2) == { Money.new(500, "USD") => 2 }
+Money.new(1000, "USD").calculate_splits(3) == { Money.new(333.34, "USD") => 1, Money.new(333.33, "USD") =>2 }
+
+# Allocating money proportionally
+Money.new(1000, "USD").allocate([0.50, 0.25, 0.25])               == [Money.new(500, "USD"), Money.new(250, "USD"), Money.new(250, "USD")]
+Money.new(1000, "USD").allocate([Rational(2, 3), Rational(1, 3)]) == [Money.new(666.67, "USD"), Money.new(333.33, "USD")]
+
+## Allocating up to a cutoff
+Money.new(1000, "USD").allocate_max_amounts([50, 30, 30])    == [Money.new(50, "USD"), Money.new(30, "USD"), Money.new(30, "USD")]
+Money.new(1000, "USD").allocate_max_amounts([500, 300, 300]) == [Money.new(454.55, "USD"), Money.new(272.73, "USD"), Money.new(272.72, "USD")]
+
+# Clamp
+Money.new(50, "USD").clamp(1, 100) == Money.new(50, "USD")
+
 # Unit to subunit conversions
-Money.from_subunits(500, "USD") == Money.new(5, "USD")  # 5 USD
-Money.from_subunits(5, "JPY") == Money.new(5, "JPY")    # 5 JPY
-Money.from_subunits(5000, "TND") == Money.new(5, "TND") # 5 TND
+Money.from_subunits(500, "USD")  == Money.new(5, "USD")   # 5 USD
+Money.from_subunits(5, "JPY")    == Money.new(5, "JPY")   # 5 JPY
+Money.from_subunits(5000, "TND") == Money.new(5, "TND")   # 5 TND
 ```
 
 ## Currency
