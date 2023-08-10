@@ -42,19 +42,20 @@ Money.new(1000, "USD") + Money.new(500, "USD") == Money.new(1500, "USD")
 Money.new(1000, "USD") - Money.new(200, "USD") == Money.new(800, "USD")
 Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 
+m = Money.new(1000, "USD")
 # Splitting money evenly
-Money.new(1000, "USD").split(2)            == [Money.new(500, "USD"), Money.new(500, "USD")]
-Money.new(1000, "USD").split(3)            == [Money.new(333.34, "USD"), Money.new(333.33, "USD"), Money.new(333.33, "USD")]
-Money.new(1000, "USD").calculate_splits(2) == { Money.new(500, "USD") => 2 }
-Money.new(1000, "USD").calculate_splits(3) == { Money.new(333.34, "USD") => 1, Money.new(333.33, "USD") =>2 }
+m.split(2)              == [Money.new(500, "USD"), Money.new(500, "USD")]
+m.split(3).map(&:value) == [333.34, 333.33, 333.33]
+m.calculate_splits(2)   == { Money.new(500, "USD") => 2 }
+m.calculate_splits(3)   == { Money.new(333.34, "USD") => 1, Money.new(333.33, "USD") =>2 }
 
 # Allocating money proportionally
-Money.new(1000, "USD").allocate([0.50, 0.25, 0.25])               == [Money.new(500, "USD"), Money.new(250, "USD"), Money.new(250, "USD")]
-Money.new(1000, "USD").allocate([Rational(2, 3), Rational(1, 3)]) == [Money.new(666.67, "USD"), Money.new(333.33, "USD")]
+m.allocate([0.50, 0.25, 0.25]).map(&:value)               == [500, 250, 250]
+m.allocate([Rational(2, 3), Rational(1, 3)]).map(&:value) == [666.67, 333.33]
 
 ## Allocating up to a cutoff
-Money.new(1000, "USD").allocate_max_amounts([50, 30, 30])    == [Money.new(50, "USD"), Money.new(30, "USD"), Money.new(30, "USD")]
-Money.new(1000, "USD").allocate_max_amounts([500, 300, 300]) == [Money.new(454.55, "USD"), Money.new(272.73, "USD"), Money.new(272.72, "USD")]
+m.allocate_max_amounts([50, 30, 30]).map(&:value)    == [50, 30, 30]
+m.allocate_max_amounts([500, 300, 300]).map(&:value) == [454.55, 272.73, 272.72]
 
 # Clamp
 Money.new(50, "USD").clamp(1, 100) == Money.new(50, "USD")
