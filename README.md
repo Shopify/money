@@ -54,7 +54,7 @@ m.allocate([0.50, 0.25, 0.25]).map(&:value)               == [500, 250, 250]
 m.allocate([Rational(2, 3), Rational(1, 3)]).map(&:value) == [666.67, 333.33]
 
 ## Allocating up to a cutoff
-m.allocate_max_amounts([50, 30, 30]).map(&:value)    == [50, 30, 30]
+m.allocate_max_amounts([500, 300, 200]).map(&:value) == [500, 300, 200]
 m.allocate_max_amounts([500, 300, 300]).map(&:value) == [454.55, 272.73, 272.72]
 
 # Clamp
