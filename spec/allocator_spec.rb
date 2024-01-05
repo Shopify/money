@@ -36,6 +36,10 @@ RSpec.describe "Allocator" do
       expect { new_allocator(0.05).allocate([0.5,0.6]) }.to raise_error(ArgumentError)
     end
 
+    specify "#allocate requires at least one split" do
+      expect { new_allocator(0.05).allocate([]) }.to raise_error(ArgumentError)
+    end
+
     specify "#allocate will use rationals if provided" do
       splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
       expect(new_allocator(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])

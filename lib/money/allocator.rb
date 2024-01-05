@@ -42,6 +42,10 @@ class Money
     #   Money.new(10.01, "USD").allocate([0.5, 0.5], :roundrobin_reverse)
     #     #=> [#<Money value:5.00 currency:USD>, #<Money value:5.01 currency:USD>]
     def allocate(splits, strategy = :roundrobin)
+      if splits.empty?
+        raise ArgumentError, 'at least one split must be provided'
+      end
+
       splits.map!(&:to_r)
       allocations = splits.inject(0, :+)
 
