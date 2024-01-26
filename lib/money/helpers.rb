@@ -16,8 +16,6 @@ class Money
     def value_to_decimal(num)
       value =
         case num
-        when Money
-          num.value
         when BigDecimal
           num
         when nil, 0, ''
