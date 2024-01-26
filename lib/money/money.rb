@@ -137,13 +137,8 @@ class Money
   end
 
   def *(numeric)
-    unless numeric.is_a?(Numeric)
-      if Money.config.legacy_deprecations
-        Money.deprecate("Multiplying Money with #{numeric.class.name} is deprecated and will be removed in the next major release.")
-      else
-        raise ArgumentError, "Money objects can only be multiplied by a Numeric"
-      end
-    end
+    raise ArgumentError, "Money objects can only be multiplied by a Numeric" unless numeric.is_a?(Numeric)
+
     return self if numeric == 1
     Money.new(value.to_r * numeric, currency)
   end
