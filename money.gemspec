@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("database_cleaner", "~> 1.6")
   s.add_development_dependency("sqlite3", "~> 1.4.2")
 
-  s.required_ruby_version = '>= 2.6'
+  s.required_ruby_version = '>= 3.0'
 
   s.files = `git ls-files`.split($/)
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
