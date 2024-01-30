@@ -290,13 +290,6 @@ RSpec.describe "Money" do
     expect(((1.0 / 12) * Money.new(3.3))).to eq(Money.new(0.28))
   end
 
-  it "legacy_deprecations is multipliable by a money object" do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
-      expect((Money.new(3.3, 'USD') * Money.new(1, 'USD'))).to eq(Money.new(3.3, 'USD'))
-    end
-  end
-
   it "raises when multiplied by a money object" do
     expect{ (Money.new(3.3) * Money.new(1)) }.to raise_error(ArgumentError)
   end
