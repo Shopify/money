@@ -3,7 +3,7 @@
 [![tests](https://github.com/Shopify/money/workflows/tests/badge.svg)](https://github.com/Shopify/money/actions?query=workflow%3Atests+branch%3Amain)
 
 
-money_column expects a DECIMAL(21,3) database field.
+`money_column` expects a `DECIMAL(21,3)` database field.
 
 ### Features
 
@@ -192,6 +192,24 @@ Money/UnsafeToMoney:
 - Commit and push until you are happy with your contribution
 - Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 - Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+
+### Releasing
+
+To release a new version of the gem, follow these steps:
+
+- Audit what has changed since the last version of the gem was released.
+- Determine what the next version number should be, according to [Semantic Versioning](https://semver.org/).
+- Update the version accordingly in `lib/money/version`.
+- Commit the change to a new branch, and open a PR.
+- [**Draft** a release in Github](https://github.com/Shopify/money/releases/new):
+  - Target the `master` branch with a tag matching the new version, prefixed with `v` (e.g. `v1.2.3`).
+  - Include **all consumer facing changes** in the release notes. Omit changes that do not impact consumers.
+  - **Do not publish the release yet.**
+- After getting approval, merge the PR.
+- Deploy the new version to Rubygems using [ShipIt](https://shipit.shopify.io/shopify/money/production).
+- Upon successful deploy, publish the release on GitHub.
+
+Publishing the release should be deferred until successful deployment to Rubygems, to ensure that the commit that is tagged as a particular version matches the code in Rubygems. If something goes wrong during the release process, defer publishing the release until it is fixed.
 
 ## Copyright
 
