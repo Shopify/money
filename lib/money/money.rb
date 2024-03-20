@@ -10,6 +10,30 @@ class Money
   attr_reader :value, :currency
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
+  class ReverseOperationProxy
+    include Comparable
+
+    def initialize(value)
+      @value = value
+    end
+
+    def <=>(other)
+      -(other <=> @value)
+    end
+
+    def +(other)
+      other + @value
+    end
+
+    def -(other)
+      -(other - @value)
+    end
+
+    def *(other)
+      other * @value
+    end
+  end
+
   class << self
     extend Forwardable
     attr_accessor :config
@@ -160,30 +184,6 @@ class Money
     return false unless other.is_a?(Money)
     return false unless currency.compatible?(other.currency)
     value == other.value
-  end
-
-  class ReverseOperationProxy
-    include Comparable
-
-    def initialize(value)
-      @value = value
-    end
-
-    def <=>(other)
-      -(other <=> @value)
-    end
-
-    def +(other)
-      other + @value
-    end
-
-    def -(other)
-      -(other - @value)
-    end
-
-    def *(other)
-      other * @value
-    end
   end
 
   def coerce(other)
