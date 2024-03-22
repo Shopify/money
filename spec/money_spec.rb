@@ -30,15 +30,20 @@ RSpec.describe "Money" do
 
   it "returns itself with to_money" do
     expect(money.to_money).to eq(money)
+    expect(amount_money.to_money).to eq(amount_money)
   end
 
   it "#to_money uses the provided currency when it doesn't already have one" do
     expect(Money.new(1).to_money('CAD')).to eq(Money.new(1, 'CAD'))
   end
 
+  it "#to_money works with money objects of the same currency" do
+    expect(Money.new(1, 'CAD').to_money('CAD')).to eq(Money.new(1, 'CAD'))
+  end
+
   it "legacy_deprecations #to_money doesn't overwrite the money object's currency" do
     configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
+      expect(Money).to receive(:deprecate).with(match(/to_money is attempting to change currency of an existing money object/)).once
       expect(Money.new(1, 'USD').to_money('CAD')).to eq(Money.new(1, 'USD'))
     end
   end
@@ -192,7 +197,7 @@ RSpec.describe "Money" do
 
   it "logs a deprecation warning when adding across currencies" do
     configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate)
+      expect(Money).to receive(:deprecate).with(match(/mathematical operation not permitted for Money objects with different currencies/))
       expect(Money.new(10, 'USD') - Money.new(1, 'JPY')).to eq(Money.new(9, 'USD'))
     end
   end

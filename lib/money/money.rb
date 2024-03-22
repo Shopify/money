@@ -191,14 +191,17 @@ class Money
     [ReverseOperationProxy.new(other), self]
   end
 
-  def to_money(curr = nil)
-    if !curr.nil? && no_currency?
-      return Money.new(value, curr)
+  def to_money(new_currency = nil)
+    if new_currency.nil?
+      return self
     end
 
-    curr = Helpers.value_to_currency(curr)
-    unless currency.compatible?(curr)
-      msg = "mathematical operation not permitted for Money objects with different currencies #{curr} and #{currency}"
+    if no_currency?
+      return Money.new(value, new_currency)
+    end
+
+    unless currency.compatible?(Helpers.value_to_currency(new_currency))
+      msg = "to_money is attempting to change currency of an existing money object from #{currency} to #{new_currency}"
       if Money.config.legacy_deprecations
         Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
       else
@@ -350,10 +353,24 @@ class Money
   private
 
   def arithmetic(money_or_numeric)
-    raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money" unless money_or_numeric.respond_to?(:to_money)
-    other = money_or_numeric.to_money(currency)
+    case money_or_numeric
+    when Money
+      unless currency.compatible?(money_or_numeric.currency)
+        msg = "mathematical operation not permitted for Money objects with different currencies #{money_or_numeric.currency} and #{currency}."
+        if Money.config.legacy_deprecations
+          Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
+        else
+          raise Money::IncompatibleCurrencyError, msg
+        end
+      end
+      yield(money_or_numeric)
 
-    yield(other)
+    when Numeric
+      yield(Money.new(money_or_numeric, currency))
+
+    else
+      raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money"
+    end
   end
 
   def calculated_currency(other)
