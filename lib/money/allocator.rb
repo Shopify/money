@@ -12,7 +12,7 @@ class Money
     # Allocates money between different parties without losing pennies.
     # After the mathematically split has been performed, left over pennies will
     # be distributed round-robin amongst the parties. This means that parties
-    # listed first will likely receive more pennies than ones that are listed later
+    # listed first will likely receive more pennn ones that are listed later
     #
     # @param splits [Array<Numeric>]
     # @param strategy Symbol
@@ -51,8 +51,17 @@ class Money
 
       amounts, left_over = amounts_from_splits(allocations, splits)
 
-      left_over.to_i.times do |i|
-        amounts[allocation_index_for(strategy, amounts.length, i)] += 1
+      case strategy
+      when :roundrobin, :roundrobin_reverse
+        left_over.to_i.times do |i|
+          amounts[allocation_index_for(strategy, amounts.length, i)] += 1
+        end
+      when :nearest
+        left_over.to_i.times do |i|
+          # NEAREST
+        end
+      else
+        raise ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse, :nearest"
       end
 
       amounts.collect { |subunits| Money.from_subunits(subunits, currency) }
@@ -141,6 +150,11 @@ class Money
       else
         raise ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse"
       end
+    end
+
+    # new strategy implementation
+    def allocate_to_nearest(amounts, left_over)
+      nil
     end
   end
 end
