@@ -8,28 +8,28 @@ RSpec.describe "Allocator" do
     end
 
     specify "#allocate does not lose pennies" do
-      moneys = new_allocator(0.05).allocate([0.3,0.7])
-      expect(moneys[0]).to eq(Money.new(0.02))
-      expect(moneys[1]).to eq(Money.new(0.03))
+      monies = new_allocator(0.05).allocate([0.3,0.7])
+      expect(monies[0]).to eq(Money.new(0.02))
+      expect(monies[1]).to eq(Money.new(0.03))
     end
 
     specify "#allocate does not lose dollars with non-decimal currency" do
-      moneys = new_allocator(5, 'JPY').allocate([0.3,0.7])
-      expect(moneys[0]).to eq(Money.new(2, 'JPY'))
-      expect(moneys[1]).to eq(Money.new(3, 'JPY'))
+      monies = new_allocator(5, 'JPY').allocate([0.3,0.7])
+      expect(monies[0]).to eq(Money.new(2, 'JPY'))
+      expect(monies[1]).to eq(Money.new(3, 'JPY'))
     end
 
     specify "#allocate does not lose dollars with three decimal currency" do
-      moneys = new_allocator(0.005, 'JOD').allocate([0.3,0.7])
-      expect(moneys[0]).to eq(Money.new(0.002, 'JOD'))
-      expect(moneys[1]).to eq(Money.new(0.003, 'JOD'))
+      monies = new_allocator(0.005, 'JOD').allocate([0.3,0.7])
+      expect(monies[0]).to eq(Money.new(0.002, 'JOD'))
+      expect(monies[1]).to eq(Money.new(0.003, 'JOD'))
     end
 
     specify "#allocate does not lose pennies even when given a lossy split" do
-      moneys = new_allocator(1).allocate([0.333,0.333, 0.333])
-      expect(moneys[0].subunits).to eq(34)
-      expect(moneys[1].subunits).to eq(33)
-      expect(moneys[2].subunits).to eq(33)
+      monies = new_allocator(1).allocate([0.333,0.333, 0.333])
+      expect(monies[0].subunits).to eq(34)
+      expect(monies[1].subunits).to eq(33)
+      expect(monies[2].subunits).to eq(33)
     end
 
     specify "#allocate requires total to be less than 1" do
@@ -53,27 +53,173 @@ RSpec.describe "Allocator" do
       expect { new_allocator(1).allocate([rate, 1 - rate]) }.not_to raise_error
     end
 
+    specify "#allocate raise ArgumentError when invalid strategy is provided" do
+      expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse, :nearest")
+    end
+
+    specify "#allocate raises an error when splits exceed 100%" do
+      expect { new_allocator(0.03).allocate([0.5, 0.6]) }.to raise_error(ArgumentError, "allocations add to more than 100%")
+    end
+
+    specify "#allocate scales up allocations less than 100%, preserving the relative magnitude of each chunk" do
+      # Allocations sum to 0.3
+      # This is analogous to new_allocator(12).allocate([1/3, 2/3])
+      monies = new_allocator(12).allocate([0.1, 0.2])
+      expect(monies[0]).to eq(Money.new(4))
+      expect(monies[1]).to eq(Money.new(8))
+
+      # Allocations sum to .661
+      monies = new_allocator(488.51).allocate([0.111, 0.05, 0.5])
+      expect(monies[0]).to eq(Money.new(82.04)) # <-- leftover penny
+      expect(monies[1]).to eq(Money.new(36.95))
+      expect(monies[2]).to eq(Money.new(369.52))
+
+      monies = new_allocator(488.51).allocate([0.111, 0.05, 0.5], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(82.03))
+      expect(monies[1]).to eq(Money.new(36.95))
+      expect(monies[2]).to eq(Money.new(369.53)) # <-- leftover penny
+
+      monies = new_allocator(488.51).allocate([0.05, 0.111, 0.5], :nearest)
+      expect(monies[0]).to eq(Money.new(36.95))
+      expect(monies[1]).to eq(Money.new(82.04)) # <-- leftover penny
+      expect(monies[2]).to eq(Money.new(369.52))
+    end
+
     specify "#allocate fills pennies from beginning to end with roundrobin strategy" do
-      moneys = new_allocator(0.05).allocate([0.3,0.7], :roundrobin)
-      expect(moneys[0]).to eq(Money.new(0.02))
-      expect(moneys[1]).to eq(Money.new(0.03))
+      #round robin for 1 penny
+      monies = new_allocator(0.03).allocate([0.5, 0.5], :roundrobin)
+      expect(monies[0]).to eq(Money.new(0.02)) # <-- gets 1 penny
+      expect(monies[1]).to eq(Money.new(0.01)) # <-- gets no penny
+
+      #round robin for 2 pennies
+      monies = new_allocator(10.55).allocate([0.25, 0.5, 0.25], :roundrobin)
+      expect(monies[0]).to eq(Money.new(2.64)) # <-- gets 1 penny
+      expect(monies[1]).to eq(Money.new(5.28)) # <-- gets 1 penny
+      expect(monies[2]).to eq(Money.new(2.63)) # <-- gets no penny
+
+      #round robin for 3 pennies
+      monies = new_allocator(195.35).allocate([0.025, 0.025, 0.125, 0.125, 0.4, 0.3], :roundrobin)
+      expect(monies[0]).to eq(Money.new(4.89)) # <-- gets 1 penny
+      expect(monies[1]).to eq(Money.new(4.89)) # <-- gets 1 penny
+      expect(monies[2]).to eq(Money.new(24.42)) # <-- gets 1 penny
+      expect(monies[3]).to eq(Money.new(24.41)) # <-- gets no penny
+      expect(monies[4]).to eq(Money.new(78.14)) # <-- gets no penny
+      expect(monies[5]).to eq(Money.new(58.60)) # <-- gets no penny
+
+      #round robin for 0 pennies
+      monies = new_allocator(101).allocate([0.25, 0.25, 0.25, 0.25], :roundrobin)
+      expect(monies[0]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[1]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[2]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[3]).to eq(Money.new(25.25)) # <-- gets no penny
     end
 
     specify "#allocate fills pennies from end to beginning with roundrobin_reverse strategy" do
-      moneys = new_allocator(0.05).allocate([0.3,0.7], :roundrobin_reverse)
-      expect(moneys[0]).to eq(Money.new(0.01))
-      expect(moneys[1]).to eq(Money.new(0.04))
+      #round robin reverse for 1 penny
+      monies = new_allocator(0.05).allocate([0.3,0.7], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(0.01)) # <-- gets no penny
+      expect(monies[1]).to eq(Money.new(0.04)) # <-- gets 1 penny
+
+      #round robin reverse for 2 pennies
+      monies = new_allocator(10.55).allocate([0.25, 0.5, 0.25], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(2.63)) # <-- gets no penny
+      expect(monies[1]).to eq(Money.new(5.28)) # <-- gets 1 penny
+      expect(monies[2]).to eq(Money.new(2.64)) # <-- gets 1 penny
+
+      #round robin reverse for 3 pennies
+      monies = new_allocator(195.35).allocate([0.025, 0.025, 0.125, 0.125, 0.4, 0.3], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(4.88)) #  <-- gets no penny
+      expect(monies[1]).to eq(Money.new(4.88)) #  <-- gets no penny
+      expect(monies[2]).to eq(Money.new(24.41)) # <-- gets no penny
+      expect(monies[3]).to eq(Money.new(24.42)) # <-- gets 1 penny
+      expect(monies[4]).to eq(Money.new(78.15)) # <-- gets 1 penny
+      expect(monies[5]).to eq(Money.new(58.61)) # <-- gets 1 penny
+
+      #round robin reverse for 0 pennies
+      monies = new_allocator(101).allocate([0.25, 0.25, 0.25, 0.25], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[1]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[2]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[3]).to eq(Money.new(25.25)) # <-- gets no penny
     end
 
-    specify "#allocate raise ArgumentError when invalid strategy is provided" do
-      expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse")
+    specify "#allocate :nearest strategy distributes pennies first to the number which is nearest to the next whole cent" do
+      #nearest for 1 penny
+      monies = new_allocator(0.03).allocate([0.5, 0.5], :nearest)
+      expect(monies[0]).to eq(Money.new(0.02)) # <-- gets 1 penny
+      expect(monies[1]).to eq(Money.new(0.01)) # <-- gets no penny
+
+      #Nearest for 2 pennies
+      monies = new_allocator(10.55).allocate([0.25, 0.5, 0.25], :nearest)
+      expect(monies[0]).to eq(Money.new(2.64)) # <-- gets 1 penny
+      expect(monies[1]).to eq(Money.new(5.27)) # <-- gets no penny
+      expect(monies[2]).to eq(Money.new(2.64)) # <-- gets 1 penny
+
+      #Nearest for 3 pennies
+      monies = new_allocator(195.35).allocate([0.025, 0.025, 0.125, 0.125, 0.4, 0.3], :nearest)
+      expect(monies[0]).to eq(Money.new(4.88)) #  <-- gets no penny
+      expect(monies[1]).to eq(Money.new(4.88)) #  <-- gets no penny
+      expect(monies[2]).to eq(Money.new(24.42)) # <-- gets 1 penny
+      expect(monies[3]).to eq(Money.new(24.42)) # <-- gets 1 penny
+      expect(monies[4]).to eq(Money.new(78.14)) # <-- gets no penny
+      expect(monies[5]).to eq(Money.new(58.61)) # <-- gets 1 penny
+
+      #Nearest for 0 pennies
+      monies = new_allocator(101).allocate([0.25, 0.25, 0.25, 0.25], :nearest)
+      expect(monies[0]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[1]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[2]).to eq(Money.new(25.25)) # <-- gets no penny
+      expect(monies[3]).to eq(Money.new(25.25)) # <-- gets no penny
     end
 
-    specify "#allocate does not raise ArgumentError when invalid splits types are provided" do
-      moneys = new_allocator(0.03).allocate([0.5, 0.5], :roundrobin)
-      expect(moneys[0]).to eq(Money.new(0.02))
-      expect(moneys[1]).to eq(Money.new(0.01))
+    specify "#allocate :roundrobin strategy distributes leftovers from left to right when the currency does not use two decimal places (e.g. `JPY`)" do
+      #Roundrobin for 1 yen
+      monies = new_allocator(31, 'JPY').allocate([0.5,0.5], :roundrobin)
+      expect(monies[0]).to eq(Money.new(16, 'JPY'))
+      expect(monies[1]).to eq(Money.new(15, 'JPY'))
+
+      #Roundrobin for 3 yen
+      monies = new_allocator(19535, "JPY").allocate([0.025, 0.025, 0.125, 0.125, 0.4, 0.3], :roundrobin)
+      expect(monies[0]).to eq(Money.new(489, "JPY")) #  <-- gets 1 yen
+      expect(monies[1]).to eq(Money.new(489, "JPY")) #  <-- gets 1 yen
+      expect(monies[2]).to eq(Money.new(2442, "JPY")) # <-- gets 1 yen
+      expect(monies[3]).to eq(Money.new(2441, "JPY")) # <-- gets no yen
+      expect(monies[4]).to eq(Money.new(7814, "JPY")) # <-- gets no yen
+      expect(monies[5]).to eq(Money.new(5860, "JPY")) # <-- gets no yen
     end
+
+    specify "#allocate :roundrobin_reverse strategy distributes leftovers from right to left when the currency does not use two decimal places (e.g. `JPY`)" do
+      #Roundrobin for 1 yen
+      monies = new_allocator(31, 'JPY').allocate([0.5,0.5], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(15, 'JPY'))
+      expect(monies[1]).to eq(Money.new(16, 'JPY'))
+
+      #Roundrobin for 3 yen
+      monies = new_allocator(19535, "JPY").allocate([0.025, 0.025, 0.125, 0.125, 0.4, 0.3], :roundrobin_reverse)
+      expect(monies[0]).to eq(Money.new(488, "JPY")) #  <-- gets no yen
+      expect(monies[1]).to eq(Money.new(488, "JPY")) #  <-- gets no yen
+      expect(monies[2]).to eq(Money.new(2441, "JPY")) # <-- gets no yen
+      expect(monies[3]).to eq(Money.new(2442, "JPY")) # <-- gets 1 yen
+      expect(monies[4]).to eq(Money.new(7815, "JPY")) # <-- gets 1 yen
+      expect(monies[5]).to eq(Money.new(5861, "JPY")) # <-- gets 1 yen
+    end
+
+    specify "#allocate :nearest strategy distributes leftovers to the nearest whole subunity when the currency does not use two decimal places (e.g. `JPY`)" do
+      #Nearest for 1 yen
+      monies = new_allocator(31, 'JPY').allocate([0.5,0.5], :nearest)
+      expect(monies[0]).to eq(Money.new(16, 'JPY'))
+      expect(monies[1]).to eq(Money.new(15, 'JPY'))
+
+      #Nearest for 3 yen
+      monies = new_allocator(19535, "JPY").allocate([0.025, 0.025, 0.125, 0.125, 0.4, 0.3], :nearest)
+      expect(monies[0]).to eq(Money.new(488, "JPY")) #  <-- gets no yen
+      expect(monies[1]).to eq(Money.new(488, "JPY")) #  <-- gets no yen
+      expect(monies[2]).to eq(Money.new(2442, "JPY")) # <-- gets 1 yen
+      expect(monies[3]).to eq(Money.new(2442, "JPY")) # <-- gets 1 yen
+      expect(monies[4]).to eq(Money.new(7814, "JPY")) # <-- gets no yen
+      expect(monies[5]).to eq(Money.new(5861, "JPY")) # <-- gets 1 yen
+    end
+
   end
 
   describe 'allocate_max_amounts' do

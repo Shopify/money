@@ -11,7 +11,8 @@ money_column expects a DECIMAL(21,3) database field.
 - Provides a `Money::Currency` class which encapsulates all information about a monetary unit.
 - Represents monetary values as decimals. No need to convert your amounts every time you use them. Easily understand the data in your DB.
 - Does NOT provide APIs for exchanging money from one currency to another.
-- Will not lose pennies during divisions
+- Will not lose pennies during divisions. For instance, given $1 / 3 the resulting chunks will be .34, .33, and .33. Notice that one chunk is larger than the others, so the result still adds to $1.
+- Allows callers to select a rounding strategy when dividing, to determine the order in which leftover pennies are given out.
 
 ## Installation
 
@@ -56,6 +57,30 @@ m.allocate([Rational(2, 3), Rational(1, 3)]).map(&:value) == [666.67, 333.33]
 ## Allocating up to a cutoff
 m.allocate_max_amounts([500, 300, 200]).map(&:value) == [500, 300, 200]
 m.allocate_max_amounts([500, 300, 300]).map(&:value) == [454.55, 272.73, 272.72]
+
+## Selectable rounding strategies during division
+
+# Assigns leftover subunits left to right
+m = Money::Allocator.new(Money.new(10.55, "USD"))
+monies = m.allocate([0.25, 0.5, 0.25], :roundrobin)
+#monies[0] == 2.64  <-- gets 1 penny
+#monies[1] == 5.28  <-- gets 1 penny
+#monies[2] == 2.63  <-- gets no penny
+
+# Assigns leftover subunits right to left
+m = Money::Allocator.new(Money.new(10.55, "USD"))
+monies = m.allocate([0.25, 0.5, 0.25], :roundrobin_reverse)
+#monies[0] == 2.63  <-- gets no penny
+#monies[1] == 5.28  <-- gets 1 penny
+#monies[2] == 2.64  <-- gets 1 penny
+
+# Assigns leftover subunits to the nearest whole subunit
+m = Money::Allocator.new(Money.new(10.55, "USD"))
+monies = m.allocate([0.25, 0.5, 0.25], :nearest)
+#monies[0] == 2.64  <-- gets 1 penny
+#monies[1] == 5.27  <-- gets no penny
+#monies[2] == 2.64  <-- gets 1 penny
+# $2.6375 is closer to the next whole penny than $5.275
 
 # Clamp
 Money.new(50, "USD").clamp(1, 100) == Money.new(50, "USD")
