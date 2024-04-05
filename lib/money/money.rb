@@ -10,6 +10,96 @@ class Money
   attr_reader :value, :currency
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
+  class SplitList
+    include Enumerable
+
+    def initialize(split)
+      @split = split
+    end
+
+    alias_method :to_ary, :to_a
+
+    def first(count = (count_undefined = true))
+      if count_undefined
+        each do |money|
+          return money
+        end
+      else
+        if count >= size
+          to_a
+        else
+          result = Array.new(count)
+          index = 0
+          each do |money|
+            result[index] = money
+            index += 1
+            break if index == count
+          end
+          result
+        end
+      end
+    end
+
+    def last(count = (count_undefined = true))
+      if count_undefined
+        reverse_each do |money|
+          return money
+        end
+      else
+        if count >= size
+          to_a
+        else
+          result = Array.new(count)
+          index = 0
+          reverse_each do |money|
+            result[index] = money
+            index += 1
+            break if index == count
+          end
+          result.reverse!
+          result
+        end
+      end
+    end
+
+    def [](index)
+      offset = 0
+      @split.each do |money, count|
+        offset += count
+        if index < offset
+          return money
+        end
+      end
+      nil
+    end
+
+    def reverse_each(&block)
+      @split.reverse_each do |money, count|
+        count.times do
+          yield money
+        end
+      end
+    end
+
+    def each(&block)
+      @split.each do |money, count|
+        count.times do
+          yield money
+        end
+      end
+    end
+
+    def reverse
+      SplitList.new(@split.reverse_each.to_h)
+    end
+
+    def size
+      count = 0
+      @split.each_value { |c| count += c }
+      count
+    end
+  end
+
   class << self
     extend Forwardable
     attr_accessor :config
@@ -298,12 +388,12 @@ class Money
   #
   # @param [2] number of parties.
   #
-  # @return [Array<Money, Money, Money>]
+  # @return [Enumerable<Money, Money, Money>]
   #
   # @example
-  #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
+  #   Money.new(100, "USD").split(3).to_a #=> [Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
-    calculate_splits(num).sum([]) { |value, count| Array.new(count, value) }
+    SplitList.new(calculate_splits(num))
   end
 
   # Calculate the splits evenly without losing pennies.
@@ -318,6 +408,7 @@ class Money
   # @example
   #   Money.new(100, "USD").calculate_splits(3) #=> {Money.new(34) => 1, Money.new(33) => 2}
   def calculate_splits(num)
+    num = Integer(num)
     raise ArgumentError, "need at least one party" if num < 1
     subunits = self.subunits
     low = Money.from_subunits(subunits / num, currency)
