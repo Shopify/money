@@ -296,12 +296,12 @@ class Money
   #
   # @param [2] number of parties.
   #
-  # @return [Array<Money, Money, Money>]
+  # @return [Enumerable<Money, Money, Money>]
   #
   # @example
-  #   Money.new(100, "USD").split(3) #=> [Money.new(34), Money.new(33), Money.new(33)]
+  #   Money.new(100, "USD").split(3) #=> Enumerable[Money.new(34), Money.new(33), Money.new(33)]
   def split(num)
-    calculate_splits(num).sum([]) { |value, count| Array.new(count, value) }
+    Splitter.new(self, num)
   end
 
   # Calculate the splits evenly without losing pennies.
@@ -316,17 +316,7 @@ class Money
   # @example
   #   Money.new(100, "USD").calculate_splits(3) #=> {Money.new(34) => 1, Money.new(33) => 2}
   def calculate_splits(num)
-    raise ArgumentError, "need at least one party" if num < 1
-    subunits = self.subunits
-    low = Money.from_subunits(subunits / num, currency)
-    high = Money.from_subunits(low.subunits + 1, currency)
-
-    num_high = subunits % num
-
-    {}.tap do |result|
-      result[high] = num_high if num_high > 0
-      result[low] = num - num_high
-    end
+    Splitter.new(self, num).split.dup
   end
 
   # Clamps the value to be within the specified minimum and maximum. Returns
