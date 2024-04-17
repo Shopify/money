@@ -45,6 +45,8 @@ class Money
     end
 
     def new(value = 0, currency = nil)
+      return new_from_money(value, currency) if value.is_a?(Money)
+
       value = Helpers.value_to_decimal(value)
       currency = Helpers.value_to_currency(currency)
 
@@ -98,6 +100,20 @@ class Money
         yield
       ensure
         Money.current_currency = old_currency
+      end
+    end
+
+    private
+
+    def new_from_money(amount, currency)
+      return amount if amount.currency.compatible?(Helpers.value_to_currency(currency))
+
+      msg = "Money.new is attempting to change currency of an existing money object"
+      if Money.config.legacy_deprecations
+        Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
+        return Money.new(amount.value, currency)
+      else
+        raise Money::IncompatibleCurrencyError, msg
       end
     end
   end

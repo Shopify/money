@@ -7,8 +7,8 @@ RSpec.describe Money::Helpers do
     let (:amount) { BigDecimal('1.23') }
     let (:money) { Money.new(amount) }
 
-    it 'raises when provided with a money object' do
-      expect { subject.value_to_decimal(money) }.to raise_error(ArgumentError)
+    it 'returns the value of a money object' do
+      expect(subject.value_to_decimal(money)).to eq(amount)
     end
 
     it 'returns itself if it is already a big decimal' do

@@ -60,6 +60,29 @@ RSpec.describe "Money" do
     expect(Money.new('')).to eq(Money.new(0))
   end
 
+  it "can be constructed with a string" do
+    expect(Money.new('1')).to eq(Money.new(1))
+  end
+
+  it "can be constructed with a numeric" do
+    expect(Money.new(1.00)).to eq(Money.new(1))
+  end
+
+  it "can be constructed with a money object" do
+    expect(Money.new(Money.new(1))).to eq(Money.new(1))
+  end
+
+  it "constructor raises when changing currency" do
+    expect { Money.new(Money.new(1, 'USD'), 'CAD') }.to raise_error(Money::IncompatibleCurrencyError)
+  end
+
+  it "legacy_deprecations constructor with money used the constructor currency" do
+    configure(legacy_deprecations: true) do
+     expect(Money).to receive(:deprecate).with(match(/Money.new is attempting to change currency of an existing money object/)).once
+      expect(Money.new(Money.new(1, 'USD'), 'CAD')).to eq(Money.new(1, 'CAD'))
+    end
+  end
+
   it "legacy_deprecations defaults to 0 when constructed with an invalid string" do
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
