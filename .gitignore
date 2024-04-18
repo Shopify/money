@@ -48,4 +48,3 @@ pkg
 #*.rbc
 
 .rspec_status
-Gemfile.lock
