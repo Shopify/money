@@ -195,17 +195,11 @@ require:
 
 Money/MissingCurrency:
   Enabled: true
-  # If your application is currently handling only one currency,
-  # it can autocorrect this by specifying a default currency.
-  ReplacementCurrency: CAD
+  # ReplacementCurrency: CAD
 
 Money/ZeroMoney:
   Enabled: true
-  # Same here:
   # ReplacementCurrency: CAD
-
-Money/UnsafeToMoney:
-  Enabled: true
 ```
 
 ## Contributing to money
