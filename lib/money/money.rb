@@ -106,7 +106,15 @@ class Money
     private
 
     def new_from_money(amount, currency)
-      return amount if amount.currency.compatible?(Helpers.value_to_currency(currency))
+      currency = Helpers.value_to_currency(currency)
+
+      if amount.no_currency?
+        return Money.new(amount.value, currency)
+      end
+
+      if amount.currency.compatible?(currency)
+        return amount
+      end
 
       msg = "Money.new is attempting to change currency of an existing money object"
       if Money.config.legacy_deprecations

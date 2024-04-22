@@ -41,6 +41,16 @@ RSpec.describe "Money" do
     expect(Money.new(1, 'CAD').to_money('CAD')).to eq(Money.new(1, 'CAD'))
   end
 
+  it "#to_money works with money objects that doesn't have a currency" do
+    money = Money.new(1, Money::NULL_CURRENCY).to_money('USD')
+    expect(money.value).to eq(1)
+    expect(money.currency.to_s).to eq('USD')
+
+    money = Money.new(1, 'USD').to_money(Money::NULL_CURRENCY)
+    expect(money.value).to eq(1)
+    expect(money.currency.to_s).to eq('USD')
+  end
+
   it "legacy_deprecations #to_money doesn't overwrite the money object's currency" do
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).with(match(/to_money is attempting to change currency of an existing money object/)).once
@@ -70,6 +80,17 @@ RSpec.describe "Money" do
 
   it "can be constructed with a money object" do
     expect(Money.new(Money.new(1))).to eq(Money.new(1))
+    expect(Money.new(Money.new(1, "USD"), "USD")).to eq(Money.new(1, "USD"))
+  end
+
+  it "can be constructed with a money object with a null currency" do
+    money = Money.new(Money.new(1, Money::NULL_CURRENCY), 'USD')
+    expect(money.value).to eq(1)
+    expect(money.currency.to_s).to eq('USD')
+
+    money = Money.new(Money.new(1, 'USD'), Money::NULL_CURRENCY)
+    expect(money.value).to eq(1)
+    expect(money.currency.to_s).to eq('USD')
   end
 
   it "constructor raises when changing currency" do
