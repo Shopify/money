@@ -556,13 +556,19 @@ RSpec.describe "Money" do
         it { expect(cad_10 == usd_10).to(eq(false)) }
       end
 
-      describe('to_money types') do
+      describe('to_money coerced types') do
         it { expect(cad_10 <=> 10.00).to(eq(0)) }
         it { expect(cad_10 >   10.00).to(eq(false)) }
         it { expect(cad_10 >=  10.00).to(eq(true)) }
         it { expect(cad_10 ==  10.00).to(eq(false)) }
         it { expect(cad_10 <=  10.00).to(eq(true)) }
         it { expect(cad_10 <   10.00).to(eq(false)) }
+        it { expect(cad_10 <=>'10.00').to(eq(0)) }
+        it { expect(cad_10 >  '10.00').to(eq(false)) }
+        it { expect(cad_10 >= '10.00').to(eq(true)) }
+        it { expect(cad_10 == '10.00').to(eq(false)) }
+        it { expect(cad_10 <= '10.00').to(eq(true)) }
+        it { expect(cad_10 <  '10.00').to(eq(false)) }
       end
     end
 
