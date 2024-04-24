@@ -366,26 +366,26 @@ class Money
 
   private
 
-  def arithmetic(money_or_numeric)
-    case money_or_numeric
+  def arithmetic(other)
+    case other
     when Money
-      unless currency.compatible?(money_or_numeric.currency)
-        msg = "mathematical operation not permitted for Money objects with different currencies #{money_or_numeric.currency} and #{currency}."
+      unless currency.compatible?(other.currency)
+        msg = "mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}."
         if Money.config.legacy_deprecations
           Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
         else
           raise Money::IncompatibleCurrencyError, msg
         end
       end
-      yield(money_or_numeric)
+      yield(other)
     when Numeric, String
-      yield(Money.new(money_or_numeric, currency))
+      yield(Money.new(other, currency))
     else
-      if Money.config.legacy_deprecations && money_or_numeric.respond_to?(:to_money)
-        Money.deprecate("#{money_or_numeric.inspect} is being implicitly coerced into a Money object. Call `to_money` on this object to transform it into a money explicitly. An TypeError will raise in the next major release")
-        yield(money_or_numeric.to_money(currency))
+      if Money.config.legacy_deprecations && other.respond_to?(:to_money)
+        Money.deprecate("#{other.inspect} is being implicitly coerced into a Money object. Call `to_money` on this object to transform it into a money explicitly. An TypeError will raise in the next major release")
+        yield(other.to_money(currency))
       else
-        raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money"
+        raise TypeError, "#{other.class.name} can't be coerced into Money"
       end
     end
   end
