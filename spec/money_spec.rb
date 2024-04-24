@@ -577,13 +577,7 @@ RSpec.describe "Money" do
         it { expect(cad_10 == usd_10).to(eq(false)) }
       end
 
-      describe('to_money coerced types') do
-        let(:coercible_object) do
-          double("coercible_object").tap do |mock|
-            allow(mock).to receive(:to_money).with(any_args) { |currency| Money.new(10, currency) }
-          end
-        end
-
+      describe('coerced types') do
         it { expect(cad_10 <=> 10.00).to(eq(0)) }
         it { expect(cad_10 >   10.00).to(eq(false)) }
         it { expect(cad_10 >=  10.00).to(eq(true)) }
@@ -596,12 +590,36 @@ RSpec.describe "Money" do
         it { expect(cad_10 == '10.00').to(eq(false)) }
         it { expect(cad_10 <= '10.00').to(eq(true)) }
         it { expect(cad_10 <  '10.00').to(eq(false)) }
-        it { expect(cad_10 <=> coercible_object).to(eq(0)) }
-        it { expect(cad_10 >   coercible_object).to(eq(false)) }
-        it { expect(cad_10 >=  coercible_object).to(eq(true)) }
-        it { expect(cad_10 ==  coercible_object).to(eq(false)) }
-        it { expect(cad_10 <=  coercible_object).to(eq(true)) }
-        it { expect(cad_10 <   coercible_object).to(eq(false)) }
+      end
+
+      describe('to_money coerced types') do
+        let(:coercible_object) do
+          double("coercible_object").tap do |mock|
+            allow(mock).to receive(:to_money).with(any_args) { |currency| Money.new(10, currency) }
+          end
+        end
+
+        it { expect { cad_10 <=> coercible_object }.to(raise_error(TypeError)) }
+        it { expect { cad_10 >   coercible_object }.to(raise_error(TypeError)) }
+        it { expect { cad_10 >=  coercible_object }.to(raise_error(TypeError)) }
+        it { expect { cad_10 <=  coercible_object }.to(raise_error(TypeError)) }
+        it { expect { cad_10 <   coercible_object }.to(raise_error(TypeError)) }
+        it { expect { cad_10 +   coercible_object }.to(raise_error(TypeError)) }
+        it { expect { cad_10 -   coercible_object }.to(raise_error(TypeError)) }
+
+        describe('with legacy_deprecations') do
+          around(:each) do |test|
+            configure(legacy_deprecations: true) { test.run }
+          end
+
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=> coercible_object).to(eq(0)) }
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >   coercible_object).to(eq(false)) }
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >=  coercible_object).to(eq(true)) }
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=  coercible_object).to(eq(true)) }
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <   coercible_object).to(eq(false)) }
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 +   coercible_object).to(eq(Money.new(20, 'CAD'))) }
+          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 -   coercible_object).to(eq(Money.new(0, 'CAD'))) }
+        end
       end
     end
 

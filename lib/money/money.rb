@@ -378,11 +378,15 @@ class Money
         end
       end
       yield(money_or_numeric)
+    when Numeric, String
+      yield(Money.new(money_or_numeric, currency))
     else
-      unless money_or_numeric.respond_to?(:to_money)
+      if Money.config.legacy_deprecations && money_or_numeric.respond_to?(:to_money)
+        Money.deprecate("#{money_or_numeric.inspect} is being implicitly coerced into a Money object. Call `to_money` on this object to transform it into a money explicitly. An TypeError will raise in the next major release")
+        yield(money_or_numeric.to_money(currency))
+      else
         raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money"
       end
-      yield(money_or_numeric.to_money(currency))
     end
   end
 
