@@ -378,12 +378,11 @@ class Money
         end
       end
       yield(money_or_numeric)
-
-    when Numeric, String
-      yield(Money.new(money_or_numeric, currency))
-
     else
-      raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money"
+      unless money_or_numeric.respond_to?(:to_money)
+        raise TypeError, "#{money_or_numeric.class.name} can't be coerced into Money"
+      end
+      yield(money_or_numeric.to_money(currency))
     end
   end
 

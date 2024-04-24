@@ -578,6 +578,12 @@ RSpec.describe "Money" do
       end
 
       describe('to_money coerced types') do
+        let(:coercible_object) do
+          double("coercible_object").tap do |mock|
+            allow(mock).to receive(:to_money).with(any_args) { |currency| Money.new(10, currency) }
+          end
+        end
+
         it { expect(cad_10 <=> 10.00).to(eq(0)) }
         it { expect(cad_10 >   10.00).to(eq(false)) }
         it { expect(cad_10 >=  10.00).to(eq(true)) }
@@ -590,6 +596,12 @@ RSpec.describe "Money" do
         it { expect(cad_10 == '10.00').to(eq(false)) }
         it { expect(cad_10 <= '10.00').to(eq(true)) }
         it { expect(cad_10 <  '10.00').to(eq(false)) }
+        it { expect(cad_10 <=> coercible_object).to(eq(0)) }
+        it { expect(cad_10 >   coercible_object).to(eq(false)) }
+        it { expect(cad_10 >=  coercible_object).to(eq(true)) }
+        it { expect(cad_10 ==  coercible_object).to(eq(false)) }
+        it { expect(cad_10 <=  coercible_object).to(eq(true)) }
+        it { expect(cad_10 <   coercible_object).to(eq(false)) }
       end
     end
 
