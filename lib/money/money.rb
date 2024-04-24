@@ -379,7 +379,7 @@ class Money
       end
       yield(money_or_numeric)
 
-    when Numeric
+    when Numeric, String
       yield(Money.new(money_or_numeric, currency))
 
     else
