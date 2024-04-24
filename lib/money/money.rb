@@ -224,14 +224,8 @@ class Money
       return Money.new(value, new_currency)
     end
 
-    unless currency.compatible?(Helpers.value_to_currency(new_currency))
-      msg = "to_money is attempting to change currency of an existing money object from #{currency} to #{new_currency}"
-      if Money.config.legacy_deprecations
-        Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
-      else
-        raise Money::IncompatibleCurrencyError, msg
-      end
-    end
+    ensure_compatible_currency(Helpers.value_to_currency(new_currency),
+      "to_money is attempting to change currency of an existing money object from #{currency} to #{new_currency}")
 
     self
   end
@@ -369,17 +363,13 @@ class Money
   def arithmetic(other)
     case other
     when Money
-      unless currency.compatible?(other.currency)
-        msg = "mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}."
-        if Money.config.legacy_deprecations
-          Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
-        else
-          raise Money::IncompatibleCurrencyError, msg
-        end
-      end
+      ensure_compatible_currency(other.currency,
+        "mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}.")
       yield(other)
+
     when Numeric, String
       yield(Money.new(other, currency))
+
     else
       if Money.config.legacy_deprecations && other.respond_to?(:to_money)
         Money.deprecate("#{other.inspect} is being implicitly coerced into a Money object. Call `to_money` on this object to transform it into a money explicitly. An TypeError will raise in the next major release")
@@ -387,6 +377,16 @@ class Money
       else
         raise TypeError, "#{other.class.name} can't be coerced into Money"
       end
+    end
+  end
+
+  def ensure_compatible_currency(other_currency, msg)
+    return if currency.compatible?(other_currency)
+
+    if Money.config.legacy_deprecations
+      Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
+    else
+      raise Money::IncompatibleCurrencyError, msg
     end
   end
 
