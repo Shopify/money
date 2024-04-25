@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    shopify-money (2.2.0)
+    shopify-money (2.2.1)
 
 GEM
   remote: https://rubygems.org/
