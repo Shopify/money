@@ -116,7 +116,7 @@ class Money
         return amount
       end
 
-      msg = "Money.new is attempting to change currency of an existing money object"
+      msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) is changing the currency of an existing money object"
       if Money.config.legacy_deprecations
         Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
         return Money.new(amount.value, currency)
