@@ -61,6 +61,14 @@ RSpec.describe String do
     end
   end
 
+  it "#to_money does not warn when it already behaves like Money.new" do
+  configure(legacy_deprecations: true) do
+    expect(Money).to receive(:deprecate).never
+    expect("71.94999999999999".to_money("USD")).to eq(Money.new("71.95", "USD"))
+    expect("0.001".to_money("USD")).to eq(Money.new("0", "USD"))
+  end
+end
+
   it "#to_money should behave like Money.new with three decimal places amounts" do
     expect("29.000".to_money("USD")).to eq(Money.new("29.00", "USD"))
   end
