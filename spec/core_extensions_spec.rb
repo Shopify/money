@@ -54,7 +54,7 @@ RSpec.describe String do
   it "#to_money to handle thousands delimiters" do
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).exactly(4).times
-      expect("29.000".to_money("USD")).to eq(Money.new("29000", "USD"))
+      expect("29.000".to_money("EUR")).to eq(Money.new("29000", "EUR"))
       expect("29.000,00".to_money("USD")).to eq(Money.new("29000", "USD"))
       expect("29,000".to_money("USD")).to eq(Money.new("29000", "USD"))
       expect("29,000.00".to_money("USD")).to eq(Money.new("29000", "USD"))

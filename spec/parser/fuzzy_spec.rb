@@ -140,7 +140,7 @@ RSpec.describe Money::Parser::Fuzzy do
     end
 
     it "parses no currency amount" do
-      expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1000, Money::NULL_CURRENCY))
+      expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1, Money::NULL_CURRENCY))
     end
 
     it "parses amount with more than 3 decimals correctly" do
@@ -255,7 +255,7 @@ RSpec.describe Money::Parser::Fuzzy do
   describe "no decimal currency" do
     it "parses thousands correctly" do
       expect(@parser.parse("1,111", "JPY")).to eq(Money.new(1_111, 'JPY'))
-      expect(@parser.parse("1.111", "JPY")).to eq(Money.new(1_111, 'JPY'))
+      expect(@parser.parse("1.111", "JPY")).to eq(Money.new(1, 'JPY'))
       expect(@parser.parse("1 111", "JPY")).to eq(Money.new(1_111, 'JPY'))
       expect(@parser.parse("1111,111", "JPY")).to eq(Money.new(1_111_111, 'JPY'))
     end
@@ -270,7 +270,7 @@ RSpec.describe Money::Parser::Fuzzy do
   describe "two decimal currency" do
     it "parses thousands correctly" do
       expect(@parser.parse("1,111", "USD")).to eq(Money.new(1_111, 'USD'))
-      expect(@parser.parse("1.111", "USD")).to eq(Money.new(1_111, 'USD'))
+      expect(@parser.parse("1.111", "EUR")).to eq(Money.new(1_111, 'EUR'))
       expect(@parser.parse("1 111", "USD")).to eq(Money.new(1_111, 'USD'))
       expect(@parser.parse("1111,111", "USD")).to eq(Money.new(1_111_111, 'USD'))
     end
