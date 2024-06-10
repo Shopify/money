@@ -140,7 +140,7 @@ RSpec.describe Money::Parser::Fuzzy do
     end
 
     it "parses no currency amount" do
-      expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1000, Money::NULL_CURRENCY))
+      expect(@parser.parse("1.000", Money::NULL_CURRENCY)).to eq(Money.new(1.000, Money::NULL_CURRENCY))
     end
 
     it "parses amount with more than 3 decimals correctly" do

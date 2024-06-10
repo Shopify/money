@@ -44,8 +44,8 @@ class Money
       @iso_numeric           = '999'
       @name                  = 'No Currency'
       @smallest_denomination = 1
-      @subunit_to_unit       = 100
-      @minor_units           = 2
+      @subunit_to_unit       = 10000
+      @minor_units           = 4
       @decimal_mark          = '.'
       freeze
     end

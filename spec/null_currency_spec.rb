@@ -15,12 +15,19 @@ RSpec.describe "NullCurrency" do
 
     it "quacks like USD" do
       expect(null_currency.symbol).to eq('$')
-      expect(null_currency.subunit_to_unit).to eq(100)
       expect(null_currency.smallest_denomination).to eq(1)
     end
 
     it "has the name No Currency" do
       expect(null_currency.name).to eq('No Currency')
+    end
+
+    it "has 10000 subunits to units" do
+      expect(null_currency.subunit_to_unit).to eq(10000)
+    end
+
+    it "has 4 minor units" do
+      expect(null_currency.minor_units).to eq(4)
     end
   end
 
