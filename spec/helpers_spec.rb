@@ -89,11 +89,8 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_currency('usd')).to eq(Money::Currency.new('USD'))
     end
 
-    it 'returns the null currency when invalid iso is passed' do
-      configure(legacy_deprecations: true) do
-        expect(Money).to receive(:deprecate).once
-        expect(subject.value_to_currency('invalid')).to eq(Money::NULL_CURRENCY)
-      end
+    it 'raises error when invalid iso is passed' do
+      expect { subject.value_to_currency('invalid') }.to raise_error(Money::Currency::UnknownCurrency)
     end
 
     it 'raises on invalid object' do
