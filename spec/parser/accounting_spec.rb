@@ -20,10 +20,7 @@ RSpec.describe Money::Parser::Accounting do
     end
 
     it "parses an invalid string to $0" do
-      configure(legacy_deprecations: true) do
-        expect(Money).to receive(:deprecate).once
-        expect(@parser.parse("no money", 'USD')).to eq(Money.new(0, 'USD'))
-      end
+      expect(@parser.parse("no money", 'USD')).to eq(Money.new(0, 'USD'))
     end
 
     it "parses a single digit integer string" do

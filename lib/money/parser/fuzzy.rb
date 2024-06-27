@@ -92,8 +92,7 @@ class Money
         number = number.to_s.strip
 
         if number.empty?
-          if Money.config.legacy_deprecations && !strict
-            Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
+          if !strict
             return '0'
           else
             raise MoneyFormatError, "invalid money string: #{input}"
@@ -120,9 +119,7 @@ class Money
           return amount.tr(ESCAPED_NON_COMMA_MARKS, '').sub(',', '.')
         end
 
-        if Money.config.legacy_deprecations && !strict
-          Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
-        else
+        if strict
           raise MoneyFormatError, "invalid money string: #{input}"
         end
 
