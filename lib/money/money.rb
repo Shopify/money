@@ -215,6 +215,10 @@ class Money
     [ReverseOperationProxy.new(other), self]
   end
 
+  def convert_currency(exchange_rate, new_currency)
+    Money.new(value * exchange_rate, new_currency)
+  end
+
   def to_money(new_currency = nil)
     if new_currency.nil?
       return self
