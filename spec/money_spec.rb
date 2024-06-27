@@ -612,13 +612,13 @@ RSpec.describe "Money" do
             configure(legacy_deprecations: true) { test.run }
           end
 
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=> coercible_object).to(eq(0)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >   coercible_object).to(eq(false)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >=  coercible_object).to(eq(true)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=  coercible_object).to(eq(true)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <   coercible_object).to(eq(false)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 +   coercible_object).to(eq(Money.new(20, 'CAD'))) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 -   coercible_object).to(eq(Money.new(0, 'CAD'))) }
+          it { expect { cad_10 <=> coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 >   coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 >=  coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 <=  coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 <   coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 +   coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 -   coercible_object }.to(raise_error(TypeError)) }
         end
       end
     end
