@@ -52,16 +52,7 @@ class Money
       when 'xxx', 'XXX'
         Money::NULL_CURRENCY
       when String
-        begin
-          Currency.find!(currency)
-        rescue Money::Currency::UnknownCurrency => error
-          if Money.config.legacy_deprecations
-            Money.deprecate(error.message)
-            Money::NULL_CURRENCY
-          else
-            raise error
-          end
-        end
+        Currency.find!(currency)
       else
         raise ArgumentError, "could not parse as currency #{currency.inspect}"
       end
