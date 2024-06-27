@@ -108,13 +108,6 @@ RSpec.describe "Money" do
     end
   end
 
-  it "legacy_deprecations defaults to 0 when constructed with an invalid string" do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
-      expect(Money.new('invalid', 'USD')).to eq(Money.new(0.00, 'USD'))
-    end
-  end
-
   it "raises when constructed with an invalid string" do
     expect{ Money.new('invalid') }.to raise_error(ArgumentError)
   end
