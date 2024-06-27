@@ -20,6 +20,8 @@ class String
       return Money.new(self, currency)
     end
 
+    return Money.new(0, currency) if self.empty?
+
     Money::Parser::Fuzzy.parse(self, currency).tap do |money|
       new_value = BigDecimal(self, exception: false)&.round(currency.minor_units)
       old_value = money.value

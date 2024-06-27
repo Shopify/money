@@ -48,6 +48,9 @@ RSpec.describe String do
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
       expect(" ".to_money("CAD")).to eq(Money.new(0, "CAD"))
+
+      # empty should not show a deprecation
+      expect("".to_money("USD")).to eq(Money.new(0, "USD"))
     end
   end
 
