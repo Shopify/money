@@ -28,6 +28,10 @@ RSpec.describe "Money" do
     expect(Money.new(0, Money::NULL_CURRENCY)).to eq(Money.new(0))
   end
 
+  it "converts to a new currency" do
+    expect(Money.new(10, "USD").convert_currency(150, "JPY")).to eq(Money.new(1500, "JPY"))
+  end
+
   it "returns itself with to_money" do
     expect(money.to_money).to eq(money)
     expect(amount_money.to_money).to eq(amount_money)

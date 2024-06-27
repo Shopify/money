@@ -151,6 +151,16 @@ Money::Currency.new("JPY").minor_units  # => 0
 Money::Currency.new("MGA").minor_units  # => 1
 ```
 
+### Convert Currency
+
+`Money.new(money * exchange_rate, "JPY")` will raise an exception. The valid alternatives are:
+
+```ruby
+Money.new(money.value * exchange_rate, "JPY")
+# Or
+money.convert_currency(exchange_rate, "JPY")
+```
+
 ## Money column
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column
