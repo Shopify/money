@@ -383,11 +383,7 @@ class Money
   def ensure_compatible_currency(other_currency, msg)
     return if currency.compatible?(other_currency)
 
-    if Money.config.legacy_deprecations
-      Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
-    else
-      raise Money::IncompatibleCurrencyError, msg
-    end
+    raise Money::IncompatibleCurrencyError, msg
   end
 
   def calculated_currency(other)
