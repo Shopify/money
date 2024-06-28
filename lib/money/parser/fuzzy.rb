@@ -74,7 +74,9 @@ class Money
       def parse(input, currency = nil, strict: false)
         currency = Money::Helpers.value_to_currency(currency)
         amount = extract_amount_from_string(input, currency, strict)
-        Money.new(amount, currency)
+        if amount
+          Money.new(amount, currency)
+        end
       end
 
       private
@@ -93,7 +95,7 @@ class Money
 
         if number.empty?
           if !strict
-            return '0'
+            return nil
           else
             raise MoneyFormatError, "invalid money string: #{input}"
           end
