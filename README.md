@@ -218,14 +218,16 @@ To release a new version of the gem, follow these steps:
 
 - Audit what has changed since the last version of the gem was released.
 - Determine what the next version number should be, according to [Semantic Versioning](https://semver.org/).
-- Open a PR to update the version accordingly in `lib/money/version`.
-- After getting approval, merge the PR.
+- Open a PR "Bump version vx.y.z" to update the version accordingly in `lib/money/version`.
+- **BEFORE** merging, also open a PR in CORE bumping the gem using this branch
+- Make sure all the tests pass in core. Do not merge it yet
+- Get approvals and then merge the bump PR in Shopify/Money
 - [**Publish** a release in Github](https://github.com/Shopify/money/releases/new):
   - Target the `main` branch with a tag matching the new version, prefixed with `v` (e.g. `v1.2.3`).
   - Use the "Generate Release Notes" button to help generate the copy for the release. Include **consumer facing changes** in the release notes.
 - Deploy the new version to Rubygems using [ShipIt](https://shipit.shopify.io/shopify/money/production).
+- Update your PR in core to use the new version, and merge that PR
 - For more information see [the publish a gem vault page](https://vault.shopify.io/page/Publish-a-new-version-of-an-internal-gem~dhbc57d.md)
-- You are now responsible to [merge the bump PR in core](https://github.com/Shopify/shopify/pulls?q=is%3Aopen+is%3Apr+author%3Aapp%2Fdependabot+shopify-money+)
 
 ## Copyright
 
