@@ -19,8 +19,8 @@ RSpec.describe Money::Parser::Accounting do
       expect(@parser.parse("")).to eq(Money.new)
     end
 
-    it "parses an invalid string to $0" do
-      expect(@parser.parse("no money", 'USD')).to eq(Money.new(0, 'USD'))
+    it "parses an invalid string when not strict to nil" do
+      expect(@parser.parse("no money", 'USD')).to eq(nil)
     end
 
     it "parses a single digit integer string" do

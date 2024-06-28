@@ -11,9 +11,15 @@ RSpec.describe Money::Parser::Fuzzy do
       expect(@parser.parse("")).to eq(Money.new(0, Money::NULL_CURRENCY))
     end
 
-    it "parses an invalid string when not strict" do
-      expect(@parser.parse("no money", 'USD')).to eq(Money.new(0, 'USD'))
+    it "parses an invalid string when not strict to nil" do
+      expect(@parser.parse("no money", 'USD')).to eq(nil)
+    end
+
+    it "parses a badly formatted numeric string when not strict to the closest approximation" do
       expect(@parser.parse("1..", 'USD')).to eq(Money.new(1, 'USD'))
+      expect(@parser.parse("1.000", 'USD')).to eq(Money.new(1, 'USD'))
+      expect(@parser.parse("1.1.1", 'USD')).to eq(Money.new(111, 'USD'))
+      expect(@parser.parse("1,1.11", 'USD')).to eq(Money.new(11.11, 'USD'))
     end
 
     it "parses raise with an invalid string and strict option" do
