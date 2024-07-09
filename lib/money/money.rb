@@ -74,6 +74,11 @@ class Money
       new(value, currency)
     end
 
+    def from_money_string(ms)
+      currency, value = ms.split(' ', 2)
+      new(value, currency)
+    end
+
     def rational(money1, money2)
       money1.send(:arithmetic, money2) do
         factor = money1.currency.subunit_to_unit * money2.currency.subunit_to_unit
@@ -258,6 +263,10 @@ class Money
   end
   alias_method :to_s, :to_fs
   alias_method :to_formatted_s, :to_fs
+
+  def to_money_string
+    "#{currency.to_s} #{to_s(:amount)}"
+  end
 
   def to_json(options = nil)
     if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format

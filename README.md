@@ -89,6 +89,12 @@ Money.new(50, "USD").clamp(1, 100) == Money.new(50, "USD")
 Money.from_subunits(500, "USD")  == Money.new(5, "USD")   # 5 USD
 Money.from_subunits(5, "JPY")    == Money.new(5, "JPY")   # 5 JPY
 Money.from_subunits(5000, "TND") == Money.new(5, "TND")   # 5 TND
+
+# String formatting
+m = Money.new(12.34, "CAD")
+m.to_s                                #=> "12.34"
+m.to_money_string                     #=> "CAD 12.34"
+Money.from_money_string("CAD 12.34")  #=> #<Money value:12.34 currency:CAD>
 ```
 
 ## Currency

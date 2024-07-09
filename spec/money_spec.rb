@@ -62,6 +62,14 @@ RSpec.describe "Money" do
     expect{ Money.new(1, 'USD').to_money('CAD') }.to raise_error(Money::IncompatibleCurrencyError)
   end
 
+  it ".from_money_string" do
+    expect(Money.from_money_string("CAD 12.34")).to eq(Money.new(12.34, 'CAD'))
+  end
+
+  it "#to_money_string" do
+    expect(Money.new(12.34, 'CAD').to_money_string).to eq("CAD 12.34")
+  end
+
   it "defaults to 0 when constructed with no arguments" do
     expect(Money.new).to eq(Money.new(0))
   end
