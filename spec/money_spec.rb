@@ -66,8 +66,16 @@ RSpec.describe "Money" do
     expect(Money.from_money_string("CAD 12.34")).to eq(Money.new(12.34, 'CAD'))
   end
 
+  it ".from_money_string with commas raises" do
+    expect{ Money.from_money_string("SEK 56,78") }.to raise_error(ArgumentError)
+  end
+
   it "#to_money_string" do
     expect(Money.new(12.34, 'CAD').to_money_string).to eq("CAD 12.34")
+  end
+
+  it ".to_money_string for currency that uses commas serializes with decimal" do
+    expect(Money.new(56.78, 'SEK').to_money_string).to eq("SEK 56.78")
   end
 
   it "defaults to 0 when constructed with no arguments" do
