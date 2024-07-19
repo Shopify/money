@@ -74,7 +74,9 @@ class Money
       def parse(input, currency = nil, strict: false)
         currency = Money::Helpers.value_to_currency(currency)
         amount = extract_amount_from_string(input, currency, strict)
-        Money.new(amount, currency)
+        if amount
+          Money.new(amount, currency)
+        end
       end
 
       private
@@ -93,7 +95,7 @@ class Money
 
         if number.empty?
           if !strict
-            return '0'
+            return nil
           else
             raise MoneyFormatError, "invalid money string: #{input}"
           end
@@ -156,11 +158,6 @@ class Money
         # Example: 0,23
         if digits.first.to_i.zero?
           return true
-        end
-
-        # legacy support for 1.000 USD
-        if digits.last.size == 3 && digits.first.size <= 3 && currency.minor_units < 3
-          return false
         end
 
         # The last mark matches the one used by the provided currency to delimiter decimals
