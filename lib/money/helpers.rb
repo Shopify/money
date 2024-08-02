@@ -29,11 +29,7 @@ class Money
         when Rational
           BigDecimal(num, MAX_DECIMAL)
         when String
-          decimal = BigDecimal(num, exception: !Money.config.legacy_deprecations)
-          return decimal if decimal
-
-          Money.deprecate("using Money.new('#{num}') is deprecated and will raise an ArgumentError in the next major release")
-          DECIMAL_ZERO
+          BigDecimal(num)
         else
           raise ArgumentError, "could not parse as decimal #{num.inspect}"
         end
