@@ -18,10 +18,6 @@
 
     gem 'shopify-money'
 
-## Upgrading to v1.0
-
-see instructions and breaking changes: https://github.com/Shopify/money/blob/main/UPGRADING.md
-
 ## Usage
 
 ``` ruby
