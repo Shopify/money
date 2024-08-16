@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("simplecov", ">= 0")
   s.add_development_dependency("rails", "~> 6.0")
   s.add_development_dependency("rspec", "~> 3.2")
-  s.add_development_dependency("database_cleaner", "~> 1.6")
+  s.add_development_dependency("database_cleaner", "~> 2.0")
   s.add_development_dependency("sqlite3")
 
   s.required_ruby_version = '>= 3.0'

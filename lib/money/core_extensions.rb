@@ -25,6 +25,8 @@ class String
       return Money.new(self, currency)
     end
 
+    return Money.new(0, currency) if self.empty?
+
     Money::Parser::Fuzzy.parse(self, currency).tap do |money|
       old_value = money.value
 
