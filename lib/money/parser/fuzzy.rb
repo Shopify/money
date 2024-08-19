@@ -158,11 +158,6 @@ class Money
           return true
         end
 
-        # legacy support for 1.000 USD
-        if digits.last.size == 3 && digits.first.size <= 3 && currency.minor_units < 3
-          return false
-        end
-
         # The last mark matches the one used by the provided currency to delimiter decimals
         currency.decimal_mark == last_mark
       end
