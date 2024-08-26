@@ -280,6 +280,7 @@ class Money
       { value: to_s(:amount), currency: currency.to_s }
     end
   end
+  alias_method :to_h, :as_json
 
   def abs
     abs = value.abs
