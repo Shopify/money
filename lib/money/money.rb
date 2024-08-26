@@ -80,6 +80,11 @@ class Money
       Money.new(hash.fetch(:value), hash.fetch(:currency))
     end
 
+    def from_hash(hash)
+      hash = hash.transform_keys(&:to_sym)
+      Money.new(hash.fetch(:value), hash.fetch(:currency))
+    end
+
     def rational(money1, money2)
       money1.send(:arithmetic, money2) do
         factor = money1.currency.subunit_to_unit * money2.currency.subunit_to_unit

@@ -388,6 +388,21 @@ RSpec.describe "Money" do
     expect(JSON.dump(Money.new(1.00, "CAD"))).to eq('{"value":"1.00","currency":"CAD"}')
   end
 
+  describe ".from_hash" do
+    it "is the inverse operation of #to_h" do
+      one_cad = Money.new(1, "CAD")
+      expect(Money.from_hash(one_cad.to_h)).to eq(one_cad)
+    end
+
+    it "creates Money object from hash with expected keys" do
+      expect(Money.from_hash({ value: 1.01, currency: "CAD" })).to eq(Money.new(1.01, "CAD"))
+    end
+
+    it "raises if Hash does not have the expected keys" do
+      expect { Money.from_hash({ "val": 1.0 }) }.to raise_error(KeyError)
+    end
+  end
+
   describe ".from_json" do
     it "is the inverse operation of #to_json" do
       one_cad = Money.new(1, "CAD")
