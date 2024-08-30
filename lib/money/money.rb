@@ -215,6 +215,10 @@ class Money
     [ReverseOperationProxy.new(other), self]
   end
 
+  def convert_currency(exchange_rate, new_currency)
+    Money.new(value * exchange_rate, new_currency)
+  end
+
   def to_money(new_currency = nil)
     if new_currency.nil?
       return self
@@ -371,12 +375,7 @@ class Money
       yield(Money.new(other, currency))
 
     else
-      if Money.config.legacy_deprecations && other.respond_to?(:to_money)
-        Money.deprecate("#{other.inspect} is being implicitly coerced into a Money object. Call `to_money` on this object to transform it into a money explicitly. An TypeError will raise in the next major release")
-        yield(other.to_money(currency))
-      else
-        raise TypeError, "#{other.class.name} can't be coerced into Money"
-      end
+      raise TypeError, "#{other.class.name} can't be coerced into a Money object"
     end
   end
 

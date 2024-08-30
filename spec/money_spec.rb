@@ -28,6 +28,10 @@ RSpec.describe "Money" do
     expect(Money.new(0, Money::NULL_CURRENCY)).to eq(Money.new(0))
   end
 
+  it "converts to a new currency" do
+    expect(Money.new(10, "USD").convert_currency(150, "JPY")).to eq(Money.new(1500, "JPY"))
+  end
+
   it "returns itself with to_money" do
     expect(money.to_money).to eq(money)
     expect(amount_money.to_money).to eq(amount_money)
@@ -101,13 +105,6 @@ RSpec.describe "Money" do
     configure(legacy_deprecations: true) do
      expect(Money).to receive(:deprecate).with(match(/Money.new\(Money.new\(amount, USD\), CAD\) is changing the currency of an existing money object/)).once
       expect(Money.new(Money.new(1, 'USD'), 'CAD')).to eq(Money.new(1, 'CAD'))
-    end
-  end
-
-  it "legacy_deprecations defaults to 0 when constructed with an invalid string" do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
-      expect(Money.new('invalid', 'USD')).to eq(Money.new(0.00, 'USD'))
     end
   end
 
@@ -612,13 +609,13 @@ RSpec.describe "Money" do
             configure(legacy_deprecations: true) { test.run }
           end
 
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=> coercible_object).to(eq(0)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >   coercible_object).to(eq(false)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >=  coercible_object).to(eq(true)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=  coercible_object).to(eq(true)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <   coercible_object).to(eq(false)) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 +   coercible_object).to(eq(Money.new(20, 'CAD'))) }
-          it { expect(Money).to(receive(:deprecate).once); expect(cad_10 -   coercible_object).to(eq(Money.new(0, 'CAD'))) }
+          it { expect { cad_10 <=> coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 >   coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 >=  coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 <=  coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 <   coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 +   coercible_object }.to(raise_error(TypeError)) }
+          it { expect { cad_10 -   coercible_object }.to(raise_error(TypeError)) }
         end
       end
     end

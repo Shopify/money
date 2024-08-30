@@ -92,8 +92,7 @@ class Money
         number = number.to_s.strip
 
         if number.empty?
-          if Money.config.legacy_deprecations && !strict
-            Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
+          if !strict
             return '0'
           else
             raise MoneyFormatError, "invalid money string: #{input}"
@@ -120,9 +119,7 @@ class Money
           return amount.tr(ESCAPED_NON_COMMA_MARKS, '').sub(',', '.')
         end
 
-        if Money.config.legacy_deprecations && !strict
-          Money.deprecate("invalid money strings will raise in the next major release \"#{input}\"")
-        else
+        if strict
           raise MoneyFormatError, "invalid money string: #{input}"
         end
 
@@ -159,11 +156,6 @@ class Money
         # Example: 0,23
         if digits.first.to_i.zero?
           return true
-        end
-
-        # legacy support for 1.000 USD
-        if digits.last.size == 3 && digits.first.size <= 3 && currency.minor_units < 3
-          return false
         end
 
         # The last mark matches the one used by the provided currency to delimiter decimals
