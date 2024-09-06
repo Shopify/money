@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'forwardable'
+require 'json'
 
 class Money
   include Comparable
@@ -72,6 +73,16 @@ class Money
 
       value = Helpers.value_to_decimal(subunits) / subunit_to_unit_value
       new(value, currency)
+    end
+
+    def from_json(string)
+      hash = JSON.parse(string, symbolize_names: true)
+      Money.new(hash.fetch(:value), hash.fetch(:currency))
+    end
+
+    def from_hash(hash)
+      hash = hash.transform_keys(&:to_sym)
+      Money.new(hash.fetch(:value), hash.fetch(:currency))
     end
 
     def rational(money1, money2)
@@ -278,6 +289,7 @@ class Money
       { value: to_s(:amount), currency: currency.to_s }
     end
   end
+  alias_method :to_h, :as_json
 
   def abs
     abs = value.abs
