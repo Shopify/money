@@ -12,7 +12,7 @@ RSpec.describe RuboCop::Cop::Money::ZeroMoney do
     it 'registers an offense and corrects Money.zero without currency' do
       expect_offense(<<~RUBY)
         Money.zero
-        ^^^^^^^^^^ Money.zero is removed, use `Money.new(0, Money::NULL_CURRENCY)`.
+        ^^^^^^^^^^ Money/ZeroMoney: Money.zero is removed, use `Money.new(0, Money::NULL_CURRENCY)`.
       RUBY
 
       expect_correction(<<~RUBY)
@@ -23,7 +23,7 @@ RSpec.describe RuboCop::Cop::Money::ZeroMoney do
     it 'registers an offense and corrects Money.zero with currency' do
       expect_offense(<<~RUBY)
         Money.zero('CAD')
-        ^^^^^^^^^^^^^^^^^ Money.zero is removed, use `Money.new(0, 'CAD')`.
+        ^^^^^^^^^^^^^^^^^ Money/ZeroMoney: Money.zero is removed, use `Money.new(0, 'CAD')`.
       RUBY
 
       expect_correction(<<~RUBY)

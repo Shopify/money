@@ -12,7 +12,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for Money.new without a currency argument' do
       expect_offense(<<~RUBY)
         Money.new(1)
-        ^^^^^^^^^^^^ Money is missing currency argument
+        ^^^^^^^^^^^^ Money/MissingCurrency: Money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
@@ -36,7 +36,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for Money.new without a currency argument' do
       expect_offense(<<~RUBY)
         Money.new
-        ^^^^^^^^^ Money is missing currency argument
+        ^^^^^^^^^ Money/MissingCurrency: Money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
@@ -47,7 +47,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for Money.from_amount without a currency argument' do
       expect_offense(<<~RUBY)
         Money.from_amount(1)
-        ^^^^^^^^^^^^^^^^^^^^ Money is missing currency argument
+        ^^^^^^^^^^^^^^^^^^^^ Money/MissingCurrency: Money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
@@ -64,7 +64,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for Money.from_cents without a currency argument' do
       expect_offense(<<~RUBY)
         Money.from_cents(1)
-        ^^^^^^^^^^^^^^^^^^^ Money is missing currency argument
+        ^^^^^^^^^^^^^^^^^^^ Money/MissingCurrency: Money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
@@ -81,7 +81,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for to_money without a currency argument' do
       expect_offense(<<~RUBY)
         '1'.to_money
-        ^^^^^^^^^^^^ to_money is missing currency argument
+        ^^^^^^^^^^^^ Money/MissingCurrency: to_money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
@@ -92,7 +92,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for safe navigation to_money without a currency argument' do
       expect_offense(<<~RUBY)
         item&.to_money
-        ^^^^^^^^^^^^^^ to_money is missing currency argument
+        ^^^^^^^^^^^^^^ Money/MissingCurrency: to_money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
@@ -109,7 +109,7 @@ RSpec.describe RuboCop::Cop::Money::MissingCurrency do
     it 'registers an offense and corrects for to_money block pass form' do
       expect_offense(<<~RUBY)
         ['1'].map(&:to_money)
-        ^^^^^^^^^^^^^^^^^^^^^ to_money is missing currency argument
+        ^^^^^^^^^^^^^^^^^^^^^ Money/MissingCurrency: to_money is missing currency argument
       RUBY
 
       expect_correction(<<~RUBY)
