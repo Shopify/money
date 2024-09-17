@@ -275,7 +275,7 @@ class Money
   alias_method :to_formatted_s, :to_fs
 
   def to_json(options = nil)
-    if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format
+    if (options.is_a?(Hash) && options[:legacy_format]) || Money.config.legacy_json_format
       to_s
     else
       as_json(options).to_json
@@ -283,7 +283,7 @@ class Money
   end
 
   def as_json(options = nil)
-    if (options.is_a?(Hash) && options.delete(:legacy_format)) || Money.config.legacy_json_format
+    if (options.is_a?(Hash) && options[:legacy_format]) || Money.config.legacy_json_format
       to_s
     else
       { value: to_s(:amount), currency: currency.to_s }
