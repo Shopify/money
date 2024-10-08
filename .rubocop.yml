@@ -7,6 +7,7 @@ inherit_gem:
 AllCops:
   Exclude:
     - 'spec/**/*'
+  SuggestExtensions: false
 
 Style/MethodCallWithoutArgsParentheses:
   Enabled: false
@@ -17,7 +18,7 @@ Style/StringLiterals:
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
   AllowedPatterns:
     - '^\s*#'
@@ -29,4 +30,7 @@ Style/ClassMethodsDefinitions:
   Enabled: false
 
 Naming/FileName:
+  Enabled: false
+
+Style/SpecialGlobalVars:
   Enabled: false

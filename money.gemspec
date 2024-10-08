@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 # frozen_string_literal: true
 
-require 'English'
-
 require_relative "lib/money/version"
 
 Gem::Specification.new do |s|
@@ -27,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.0'
 
-  s.files = %x(git ls-files).split($INPUT_RECORD_SEPARATOR)
+  s.files = %x(git ls-files).split($/)
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.require_paths = ["lib"]
 end
