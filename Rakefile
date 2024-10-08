@@ -15,7 +15,7 @@ begin
 rescue Bundler::BundlerError => e
   $stderr.puts e.message
   $stderr.puts "Run `bundle install` to install missing gems"
-  exit e.status_code
+  exit(e.status_code)
 end
 require 'rake'
 
@@ -30,7 +30,7 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
-task :default => :spec
+task default: :spec
 
 require 'rake/task'
 RDoc::Task.new do |rdoc|

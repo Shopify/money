@@ -1,43 +1,44 @@
 # frozen_string_literal: true
+
 class Money
   module Parser
     class Fuzzy
       class MoneyFormatError < ArgumentError; end
 
-      MARKS = %w[. , · ’ ˙ '] + [' ']
+      MARKS = ['.', ',', '·', '’', '˙', "'", ' '].freeze
 
       ESCAPED_MARKS = Regexp.escape(MARKS.join)
       ESCAPED_NON_SPACE_MARKS = Regexp.escape((MARKS - [' ']).join)
       ESCAPED_NON_DOT_MARKS = Regexp.escape((MARKS - ['.']).join)
       ESCAPED_NON_COMMA_MARKS = Regexp.escape((MARKS - [',']).join)
 
-      NUMERIC_REGEX = /(
+      NUMERIC_REGEX = %r{(
         [\+\-]?
         [\d#{ESCAPED_NON_SPACE_MARKS}][\d#{ESCAPED_MARKS}]*
-      )/ix
+      )}ix
 
       # 1,234,567.89
-      DOT_DECIMAL_REGEX = /\A
+      DOT_DECIMAL_REGEX = %r{\A
         [\+\-]?
         (?:
           (?:\d+)
           (?:[#{ESCAPED_NON_DOT_MARKS}]\d{3})+
           (?:\.\d{2,})?
         )
-      \z/ix
+      \z}ix
 
       # 1.234.567,89
-      COMMA_DECIMAL_REGEX = /\A
+      COMMA_DECIMAL_REGEX = %r{\A
         [\+\-]?
         (?:
           (?:\d+)
           (?:[#{ESCAPED_NON_COMMA_MARKS}]\d{3})+
           (?:\,\d{2,})?
         )
-      \z/ix
+      \z}ix
 
       # 12,34,567.89
-      INDIAN_NUMERIC_REGEX = /\A
+      INDIAN_NUMERIC_REGEX = %r{\A
         [\+\-]?
         (?:
           (?:\d+)
@@ -45,17 +46,17 @@ class Money
           (?:\,\d{3})
           (?:\.\d{2})?
         )
-      \z/ix
+      \z}ix
 
       # 1,1123,4567.89
-      CHINESE_NUMERIC_REGEX = /\A
+      CHINESE_NUMERIC_REGEX = %r{\A
         [\+\-]?
         (?:
           (?:\d+)
           (?:\,\d{4})+
           (?:\.\d{2})?
         )
-      \z/ix
+      \z}ix
 
       def self.parse(input, currency = nil, **options)
         new.parse(input, currency, **options)
@@ -111,11 +112,11 @@ class Money
         # remove end of string mark
         number.sub!(/[#{ESCAPED_MARKS}]\z/, '')
 
-        if amount = number[DOT_DECIMAL_REGEX] || number[INDIAN_NUMERIC_REGEX] || number[CHINESE_NUMERIC_REGEX]
+        if (amount = number[DOT_DECIMAL_REGEX] || number[INDIAN_NUMERIC_REGEX] || number[CHINESE_NUMERIC_REGEX])
           return amount.tr(ESCAPED_NON_DOT_MARKS, '')
         end
 
-        if amount = number[COMMA_DECIMAL_REGEX]
+        if (amount = number[COMMA_DECIMAL_REGEX])
           return amount.tr(ESCAPED_NON_COMMA_MARKS, '').sub(',', '.')
         end
 

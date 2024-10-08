@@ -43,7 +43,7 @@ module RuboCop
             add_offense(node, message: 'to_money is missing currency argument')
           end
         end
-        alias on_csend on_send
+        alias_method :on_csend, :on_send
 
         def autocorrect(node)
           receiver, method, _ = *node
@@ -54,7 +54,7 @@ module RuboCop
 
               corrector.replace(
                 node.loc.expression,
-                "#{receiver.source}.#{method}(#{amount&.source || 0}, #{replacement_currency})"
+                "#{receiver.source}.#{method}(#{amount&.source || 0}, #{replacement_currency})",
               )
             end
 
@@ -63,7 +63,7 @@ module RuboCop
             elsif to_money_block?(node)
               corrector.replace(
                 node.loc.expression,
-                "#{receiver.source}.#{method} { |x| x.to_money(#{replacement_currency}) }"
+                "#{receiver.source}.#{method} { |x| x.to_money(#{replacement_currency}) }",
               )
             end
           end
@@ -73,7 +73,7 @@ module RuboCop
 
         def replacement_currency
           if cop_config['ReplacementCurrency']
-            "'#{cop_config['ReplacementCurrency']}'"
+            "'#{cop_config["ReplacementCurrency"]}'"
           else
             'Money::NULL_CURRENCY'
           end

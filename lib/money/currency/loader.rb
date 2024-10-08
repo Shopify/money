@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'yaml'
 
 class Money
@@ -9,9 +10,9 @@ class Money
           currency_data_path = File.expand_path("../../../../config", __FILE__)
 
           currencies = {}
-          currencies.merge! YAML.load_file("#{currency_data_path}/currency_historic.yml")
-          currencies.merge! YAML.load_file("#{currency_data_path}/currency_non_iso.yml")
-          currencies.merge! YAML.load_file("#{currency_data_path}/currency_iso.yml")
+          currencies.merge!(YAML.load_file("#{currency_data_path}/currency_historic.yml"))
+          currencies.merge!(YAML.load_file("#{currency_data_path}/currency_non_iso.yml"))
+          currencies.merge!(YAML.load_file("#{currency_data_path}/currency_iso.yml"))
           deep_deduplicate!(currencies)
         end
 

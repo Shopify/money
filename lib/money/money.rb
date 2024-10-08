@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'forwardable'
 require 'json'
 
@@ -9,6 +10,7 @@ class Money
   NULL_CURRENCY = NullCurrency.new.freeze
 
   attr_reader :value, :currency
+
   def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
 
   class ReverseOperationProxy
@@ -38,6 +40,7 @@ class Money
   class << self
     extend Forwardable
     attr_accessor :config
+
     def_delegators :@config, :default_currency, :default_currency=
 
     def configure
@@ -105,13 +108,11 @@ class Money
     # I18n.with_locale and ActiveSupport's Time.use_zone. This won't affect
     # instances being created with explicitly set currency.
     def with_currency(new_currency)
-      begin
-        old_currency = Money.current_currency
-        Money.current_currency = new_currency
-        yield
-      ensure
-        Money.current_currency = old_currency
-      end
+      old_currency = Money.current_currency
+      Money.current_currency = new_currency
+      yield
+    ensure
+      Money.current_currency = old_currency
     end
 
     private
@@ -127,10 +128,12 @@ class Money
         return amount
       end
 
-      msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) is changing the currency of an existing money object"
+      msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) " \
+        "is changing the currency of an existing money object"
+
       if Money.config.legacy_deprecations
         Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
-        return Money.new(amount.value, currency)
+        Money.new(amount.value, currency)
       else
         raise Money::IncompatibleCurrencyError, msg
       end
@@ -195,19 +198,19 @@ class Money
     end
   end
 
-  def *(numeric)
-    raise ArgumentError, "Money objects can only be multiplied by a Numeric" unless numeric.is_a?(Numeric)
+  def *(other)
+    raise ArgumentError, "Money objects can only be multiplied by a Numeric" unless other.is_a?(Numeric)
 
-    return self if numeric == 1
-    Money.new(value.to_r * numeric, currency)
+    return self if other == 1
+    Money.new(value.to_r * other, currency)
   end
 
-  def /(numeric)
+  def /(other)
     raise "[Money] Dividing money objects can lose pennies. Use #split instead"
   end
 
   def inspect
-    "#<#{self.class} value:#{self} currency:#{self.currency}>"
+    "#<#{self.class} value:#{self} currency:#{currency}>"
   end
 
   def ==(other)
@@ -239,8 +242,10 @@ class Money
       return Money.new(value, new_currency)
     end
 
-    ensure_compatible_currency(Helpers.value_to_currency(new_currency),
-      "to_money is attempting to change currency of an existing money object from #{currency} to #{new_currency}")
+    ensure_compatible_currency(
+      Helpers.value_to_currency(new_currency),
+      "to_money is attempting to change currency of an existing money object from #{currency} to #{new_currency}",
+    )
 
     self
   end
@@ -261,7 +266,7 @@ class Money
 
     rounded_value = value.round(units)
     if units == 0
-      sprintf("%d", rounded_value)
+      format("%d", rounded_value)
     else
       formatted = rounded_value.to_s("F")
       decimal_digits = formatted.size - formatted.index(".") - 1
@@ -303,7 +308,7 @@ class Money
     Money.new(floor, currency)
   end
 
-  def round(ndigits=0)
+  def round(ndigits = 0)
     round = value.round(ndigits)
     return self if round == value
     Money.new(round, currency)
@@ -364,13 +369,13 @@ class Money
   def clamp(min, max)
     raise ArgumentError, 'min cannot be greater than max' if min > max
 
-    clamped_value = min if self.value < min
-    clamped_value = max if self.value > max
+    clamped_value = min if value < min
+    clamped_value = max if value > max
 
     if clamped_value.nil?
       self
     else
-      Money.new(clamped_value, self.currency)
+      Money.new(clamped_value, currency)
     end
   end
 
@@ -379,8 +384,10 @@ class Money
   def arithmetic(other)
     case other
     when Money
-      ensure_compatible_currency(other.currency,
-        "mathematical operation not permitted for Money objects with different currencies #{other.currency} and #{currency}.")
+      desc = "mathematical operation not permitted for Money objects with different currencies " \
+        "#{other.currency} and #{currency}."
+
+      ensure_compatible_currency(other.currency, desc)
       yield(other)
 
     when Numeric, String

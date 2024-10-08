@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'delegate'
 
 class Money
@@ -107,7 +108,7 @@ class Money
     #   Money.new(100).allocate_max_amounts([Money.new(5), Money.new(2)])
     #     #=> [Money.new(5), Money.new(2)]
     def allocate_max_amounts(maximums)
-      allocation_currency = extract_currency(maximums + [self.__getobj__])
+      allocation_currency = extract_currency(maximums + [__getobj__])
       maximums = maximums.map { |max| max.to_money(allocation_currency) }
       maximums_total = maximums.reduce(Money.new(0, allocation_currency), :+)
 
@@ -116,16 +117,16 @@ class Money
         Money.rational(max_amount, maximums_total)
       end
 
-      total_allocatable = [maximums_total.subunits, self.subunits].min
+      total_allocatable = [maximums_total.subunits, subunits].min
 
       subunits_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
       subunits_amounts.map! { |amount| amount[:whole_subunits] }
 
       subunits_amounts.each_with_index do |amount, index|
-        break unless left_over > 0
+        break if left_over <= 0
 
         max_amount = maximums[index].value * allocation_currency.subunit_to_unit
-        next unless amount < max_amount
+        next if amount >= max_amount
 
         left_over -= 1
         subunits_amounts[index] += 1
@@ -137,9 +138,12 @@ class Money
     private
 
     def extract_currency(money_array)
-      currencies = money_array.lazy.select { |money| money.is_a?(Money) }.reject(&:no_currency?).map(&:currency).to_a.uniq
+      currencies = money_array.lazy.select do |money|
+        money.is_a?(Money)
+      end.reject(&:no_currency?).map(&:currency).to_a.uniq
       if currencies.size > 1
-        raise ArgumentError, "operation not permitted for Money objects with different currencies #{currencies.join(', ')}"
+        raise ArgumentError,
+          "operation not permitted for Money objects with different currencies #{currencies.join(", ")}"
       end
       currencies.first || NULL_CURRENCY
     end
@@ -154,8 +158,8 @@ class Money
         fractional_subunits = (subunits_to_split * ratio / allocations.to_r).to_f - whole_subunits
         left_over -= whole_subunits
         {
-          :whole_subunits => whole_subunits,
-          :fractional_subunits => fractional_subunits
+          whole_subunits: whole_subunits,
+          fractional_subunits: fractional_subunits,
         }
       end
 
@@ -172,7 +176,7 @@ class Money
     # the next whole number. Similarly, given the input [9.1, 5.5, 3.9] the correct ranking is *still* 2, 1, 0. This
     # is because 3.9 is nearer to 4 than 9.1 is to 10.
     def rank_by_nearest(amounts)
-      amounts.each_with_index.sort_by{ |amount, i| 1 - amount[:fractional_subunits] }.map(&:last)
+      amounts.each_with_index.sort_by { |amount, _i| 1 - amount[:fractional_subunits] }.map(&:last)
     end
   end
 end

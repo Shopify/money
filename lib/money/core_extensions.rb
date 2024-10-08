@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # Allows Writing of 100.to_money for +Numeric+ types
 #   100.to_money => #<Money @cents=10000>
 #   100.37.to_money => #<Money @cents=10037>
@@ -25,7 +26,7 @@ class String
       return Money.new(self, currency)
     end
 
-    return Money.new(0, currency) if self.empty?
+    return Money.new(0, currency) if empty?
 
     Money::Parser::Fuzzy.parse(self, currency).tap do |money|
       old_value = money.value
