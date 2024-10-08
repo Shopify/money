@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'money/version'
 require_relative 'money/parser/fuzzy'
 require_relative 'money/helpers'

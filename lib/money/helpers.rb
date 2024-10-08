@@ -1,9 +1,10 @@
 # frozen_string_literal: true
+
 require 'bigdecimal'
 
 class Money
   module Helpers
-    module_function
+    extend self
 
     DECIMAL_ZERO = BigDecimal(0).freeze
     MAX_DECIMAL = 21

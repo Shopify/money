@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Money
   module Parser
     class LocaleAware
@@ -7,18 +8,14 @@ class Money
       class << self
         # The +Proc+ called to get the current locale decimal separator. In Rails apps this defaults to the same lookup
         # ActionView's +number_to_currency+ helper will use to format the monetary amount for display.
-        def decimal_separator_resolver
-          @decimal_separator_resolver
-        end
+        attr_reader :decimal_separator_resolver
 
         # Set the default +Proc+ to determine the current locale decimal separator.
         #
         # @example
         #   Money::Parser::LocaleAware.decimal_separator_resolver =
         #     ->() { MyFormattingLibrary.current_locale.decimal.separator }
-        def decimal_separator_resolver=(proc)
-          @decimal_separator_resolver = proc
-        end
+        attr_writer :decimal_separator_resolver
 
         # Parses an input string, normalizing some non-ASCII characters to their equivalent ASCII, then discarding any
         # character that is not a digit, hyphen-minus or the decimal separator. To prevent user confusion, make sure

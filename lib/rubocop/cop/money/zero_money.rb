@@ -45,7 +45,7 @@ module RuboCop
 
               corrector.replace(
                 node.loc.expression,
-                "#{receiver.source}.new(0, #{replacement_currency})"
+                "#{receiver.source}.new(0, #{replacement_currency})",
               )
             end
           end
@@ -55,7 +55,7 @@ module RuboCop
 
         def replacement_currency(currency_arg)
           return currency_arg.first.source unless currency_arg.empty?
-          return "'#{cop_config['ReplacementCurrency']}'" if cop_config['ReplacementCurrency']
+          return "'#{cop_config["ReplacementCurrency"]}'" if cop_config['ReplacementCurrency']
 
           'Money::NULL_CURRENCY'
         end

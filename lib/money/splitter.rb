@@ -11,7 +11,7 @@ class Money
       @split = nil
     end
 
-    protected attr_writer :split
+    protected attr_writer(:split)
 
     def split
       @split ||= begin
@@ -35,19 +35,17 @@ class Money
         each do |money|
           return money
         end
+      elsif count >= size
+        to_a
       else
-        if count >= size
-          to_a
-        else
-          result = Array.new(count)
-          index = 0
-          each do |money|
-            result[index] = money
-            index += 1
-            break if index == count
-          end
-          result
+        result = Array.new(count)
+        index = 0
+        each do |money|
+          result[index] = money
+          index += 1
+          break if index == count
         end
+        result
       end
     end
 
@@ -56,20 +54,18 @@ class Money
         reverse_each do |money|
           return money
         end
+      elsif count >= size
+        to_a
       else
-        if count >= size
-          to_a
-        else
-          result = Array.new(count)
-          index = 0
-          reverse_each do |money|
-            result[index] = money
-            index += 1
-            break if index == count
-          end
-          result.reverse!
-          result
+        result = Array.new(count)
+        index = 0
+        reverse_each do |money|
+          result[index] = money
+          index += 1
+          break if index == count
         end
+        result.reverse!
+        result
       end
     end
 

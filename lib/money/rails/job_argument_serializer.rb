@@ -19,4 +19,3 @@ class Money
     end
   end
 end
-

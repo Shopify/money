@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "money/currency/loader"
 
 class Money
@@ -27,8 +28,16 @@ class Money
       end
     end
 
-    attr_reader :iso_code, :iso_numeric, :name, :smallest_denomination, :subunit_symbol,
-                :subunit_to_unit, :minor_units, :symbol, :disambiguate_symbol, :decimal_mark
+    attr_reader :iso_code,
+      :iso_numeric,
+      :name,
+      :smallest_denomination,
+      :subunit_symbol,
+      :subunit_to_unit,
+      :minor_units,
+      :symbol,
+      :disambiguate_symbol,
+      :decimal_mark
 
     def initialize(currency_iso)
       data = self.class.currencies[currency_iso]
@@ -51,7 +60,7 @@ class Money
     end
 
     def hash
-      [ self.class, iso_code ].hash
+      [self.class, iso_code].hash
     end
 
     def compatible?(other)

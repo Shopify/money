@@ -1,8 +1,9 @@
 # frozen_string_literal: true
+
 class Money
   module Parser
     class Simple
-      SIGNED_DECIMAL_MATCHER = /\A-?\d*(?:\.\d*)?\z/.freeze
+      SIGNED_DECIMAL_MATCHER = /\A-?\d*(?:\.\d*)?\z/
 
       class << self
         # Parses an input string using BigDecimal, it always expects a dot character as a decimal separator and

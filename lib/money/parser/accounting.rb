@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Money
   module Parser
     class Accounting < Fuzzy

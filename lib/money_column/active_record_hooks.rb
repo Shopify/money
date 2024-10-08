@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module MoneyColumn
   class CurrencyReadOnlyError < StandardError; end
 
@@ -82,7 +83,7 @@ module MoneyColumn
           currency_column: currency_column,
           currency: currency,
           currency_read_only: currency_read_only,
-          coerce_null: coerce_null
+          coerce_null: coerce_null,
         )
 
         if options[:currency_column]
@@ -96,11 +97,11 @@ module MoneyColumn
 
           attribute(column_string, MoneyColumn::ActiveRecordType.new)
 
-          define_method column do
+          define_method(column) do
             read_money_attribute(column_string)
           end
 
-          define_method "#{column}=" do |money|
+          define_method("#{column}=") do |money|
             write_money_attribute(column_string, money)
           end
         end
@@ -109,8 +110,10 @@ module MoneyColumn
       private
 
       def normalize_money_column_options(options)
-        raise ArgumentError, 'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
-        raise ArgumentError, 'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
+        raise ArgumentError,
+          'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
+        raise ArgumentError,
+          'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
 
         if options[:currency]
           options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze
@@ -126,7 +129,7 @@ module MoneyColumn
       def clear_cache_on_currency_change(currency_column)
         return if money_column_options.any? { |_, opt| opt[:currency_column] == currency_column }
 
-        define_method "#{currency_column}=" do |value|
+        define_method("#{currency_column}=") do |value|
           clear_money_column_cache
           super(value)
         end
