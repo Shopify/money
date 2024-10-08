@@ -1,0 +1,32 @@
+require:
+  - rubocop-performance
+
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
+AllCops:
+  Exclude:
+    - 'spec/**/*'
+
+Style/MethodCallWithoutArgsParentheses:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 120
+  AllowedPatterns:
+    - '^\s*#'
+
+Style/ClassVars:
+  Enabled: false
+
+Style/ClassMethodsDefinitions:
+  Enabled: false
+
+Naming/FileName:
+  Enabled: false
