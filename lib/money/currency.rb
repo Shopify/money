@@ -4,27 +4,74 @@ require "money/currency/loader"
 
 class Money
   class Currency
-    @@mutex = Mutex.new
-    @@loaded_currencies = {}
-
     class UnknownCurrency < ArgumentError; end
 
-    class << self
-      def new(currency_iso)
-        raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
-        iso = currency_iso.to_s.downcase
-        @@loaded_currencies[iso] || @@mutex.synchronize { @@loaded_currencies[iso] = super(iso) }
-      end
-      alias_method :find!, :new
+    @mutex = Mutex.new
 
-      def find(currency_iso)
-        new(currency_iso)
-      rescue UnknownCurrency
-        nil
+    class << self
+      alias_method :original_new, :new
+
+      def find!(currency_iso, match_symbols: false)
+        find(currency_iso, match_symbols: match_symbols).tap do |currency|
+          unless currency
+            raise UnknownCurrency, "Unknown currency '#{currency_iso}'"
+          end
+        end
+      end
+      alias_method :new, :find!
+
+      def find(currency_iso, match_symbols: false)
+        return if currency_iso.nil? || currency_iso.to_s.empty?
+
+        iso_code = currency_iso.to_s.downcase
+
+        currency = find_by_iso_code(iso_code)
+        return currency if currency
+
+        if match_symbols
+          currency = find_by_alternate_symbols(iso_code)
+        end
+
+        currency
+      end
+
+      private
+
+      def find_by_iso_code(iso_code)
+        fetch_cached_currency(iso_code) do
+          data = currencies[iso_code]
+          original_new(data) if data
+        end
+      end
+
+      def find_by_alternate_symbols(symbol)
+        fetch_cached_currency_by_symbol(symbol) do
+          data = currencies.values.find do |data|
+            [
+              data['disambiguate_symbol'],
+              data['alternate_symbols'],
+            ].flatten.compact.map(&:downcase).include?(symbol)
+          end
+          original_new(data) if data
+        end
+      end
+
+      def fetch_cached_currency(iso_code, &block)
+        @cached_currency ||= {}
+        @cached_currency[iso_code] || @mutex.synchronize do
+          @cached_currency[iso_code] = yield
+        end
+      end
+
+      def fetch_cached_currency_by_symbol(symbol, &block)
+        @cached_currency_by_symbol ||= {}
+        @cached_currency_by_symbol[symbol] || @mutex.synchronize do
+          @cached_currency_by_symbol[symbol] = yield
+        end
       end
 
       def currencies
-        @@currencies ||= Loader.load_currencies
+        @currencies ||= Loader.load_currencies
       end
     end
 
@@ -39,9 +86,7 @@ class Money
       :disambiguate_symbol,
       :decimal_mark
 
-    def initialize(currency_iso)
-      data = self.class.currencies[currency_iso]
-      raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
+    def initialize(data)
       @symbol                = data['symbol']
       @disambiguate_symbol   = data['disambiguate_symbol'] || data['symbol']
       @subunit_symbol        = data['subunit_symbol']
@@ -51,7 +96,7 @@ class Money
       @smallest_denomination = data['smallest_denomination']
       @subunit_to_unit       = data['subunit_to_unit']
       @decimal_mark          = data['decimal_mark']
-      @minor_units           = subunit_to_unit == 0 ? 0 : Math.log(subunit_to_unit, 10).round.to_i
+      @minor_units           = subunit_to_unit.zero? ? 0 : Math.log(subunit_to_unit, 10).round.to_i
       freeze
     end
 
