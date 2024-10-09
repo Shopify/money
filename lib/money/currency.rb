@@ -11,8 +11,8 @@ class Money
     class << self
       alias_method :original_new, :new
 
-      def find!(currency_iso, match_symbols: false)
-        find(currency_iso, match_symbols: match_symbols).tap do |currency|
+      def find!(currency_iso)
+        find(currency_iso).tap do |currency|
           unless currency
             raise UnknownCurrency, "Unknown currency '#{currency_iso}'"
           end
@@ -20,24 +20,11 @@ class Money
       end
       alias_method :new, :find!
 
-      def find(currency_iso, match_symbols: false)
+      def find(currency_iso)
         return if currency_iso.nil? || currency_iso.to_s.empty?
 
         iso_code = currency_iso.to_s.downcase
 
-        currency = find_by_iso_code(iso_code)
-        return currency if currency
-
-        if match_symbols
-          currency = find_by_alternate_symbols(iso_code)
-        end
-
-        currency
-      end
-
-      private
-
-      def find_by_iso_code(iso_code)
         fetch_cached_currency(iso_code) do
           data = currencies[iso_code]
           original_new(data) if data
@@ -55,6 +42,8 @@ class Money
           original_new(data) if data
         end
       end
+
+      private
 
       def fetch_cached_currency(iso_code, &block)
         @cached_currency ||= {}
