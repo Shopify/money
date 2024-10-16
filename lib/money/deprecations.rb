@@ -12,8 +12,8 @@ Money.class_eval do
 
   def self.deprecate(message)
     if ACTIVE_SUPPORT_DEFINED
-      external_callstack = caller_locations.reject do |location|
-        location.to_s.include?('gems/shopify-money')
+      external_callstack = caller_locations(1, 10).reject do |location|
+        location.path.include?('gems/shopify-money')
       end
       active_support_deprecator.warn("[Shopify/Money] #{message}\n", external_callstack)
     else
