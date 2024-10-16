@@ -2,6 +2,7 @@
 
 Money.class_eval do
   ACTIVE_SUPPORT_DEFINED = defined?(ActiveSupport)
+  DEPRECATION_STACKTRACE_LENGTH = 5
 
   def self.active_support_deprecator
     @active_support_deprecator ||= begin
@@ -12,12 +13,28 @@ Money.class_eval do
 
   def self.deprecate(message)
     if ACTIVE_SUPPORT_DEFINED
-      external_callstack = caller_locations.reject do |location|
-        location.to_s.include?('gems/shopify-money')
-      end
-      active_support_deprecator.warn("[Shopify/Money] #{message}\n", external_callstack)
+      active_support_deprecator.warn("[Shopify/Money] #{message}\n", caller_stack)
     else
       Kernel.warn("DEPRECATION WARNING: [Shopify/Money] #{message}\n")
     end
   end
+
+  # :nocov:
+  if Thread.respond_to?(:each_caller_location)
+    def self.caller_stack
+      stack = []
+      Thread.each_caller_location do |location|
+        stack << location unless location.path.include?('gems/shopify-money')
+        break if stack.length == DEPRECATION_STACKTRACE_LENGTH
+      end
+      stack
+    end
+  else
+    def self.caller_stack
+      caller_locations.reject do |location|
+        location.path.include?('gems/shopify-money')
+      end
+    end
+  end
+  # :nocov:
 end
