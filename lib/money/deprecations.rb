@@ -31,7 +31,7 @@ Money.class_eval do
     end
   else
     def self.caller_stack
-      caller_locations.reject do |location|
+      caller_locations(2, DEPRECATION_STACKTRACE_LENGTH * 2).reject do |location|
         location.path.include?('gems/shopify-money')
       end
     end
