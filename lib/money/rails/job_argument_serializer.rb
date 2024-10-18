@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+return unless defined?(ActiveJob) && defined?(ActiveJob::Serializers)
+
 class Money
   module Rails
     class JobArgumentSerializer < ::ActiveJob::Serializers::ObjectSerializer
