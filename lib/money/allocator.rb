@@ -139,8 +139,9 @@ class Money
 
     def extract_currency(money_array)
       currencies = money_array.lazy.select do |money|
-        money.is_a?(Money)
-      end.reject(&:no_currency?).map(&:currency).to_a.uniq
+        money.is_a?(Money) && !money.no_currency?
+      end.map(&:currency).uniq.first(2)
+
       if currencies.size > 1
         raise ArgumentError,
           "operation not permitted for Money objects with different currencies #{currencies.join(", ")}"
