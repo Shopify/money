@@ -3,7 +3,8 @@
 module RuboCop
   module Cop
     module Money
-      class MissingCurrency < Cop
+      class MissingCurrency < Base
+        extend RuboCop::Cop::AutoCorrector
         # `Money.new()` without a currency argument cannot guarantee correctness:
         # - no error raised for cross-currency computation (e.g. 5 CAD + 5 USD)
         # - #subunits returns wrong values for 0 and 3 decimals currencies
@@ -32,42 +33,34 @@ module RuboCop
         PATTERN
 
         def on_send(node)
+          receiver, method, _ = *node
+
           money_new(node) do |amount, currency_arg|
             return if amount&.splat_type?
             return if currency_arg
 
-            add_offense(node, message: 'Money is missing currency argument')
-          end
-
-          if to_money_block?(node) || to_money_without_currency?(node)
-            add_offense(node, message: 'to_money is missing currency argument')
-          end
-        end
-        alias_method :on_csend, :on_send
-
-        def autocorrect(node)
-          receiver, method, _ = *node
-
-          lambda do |corrector|
-            money_new(node) do |amount, currency_arg|
-              return if currency_arg
-
+            add_offense(node, message: 'Money is missing currency argument') do |corrector|
               corrector.replace(
                 node.loc.expression,
                 "#{receiver.source}.#{method}(#{amount&.source || 0}, #{replacement_currency})",
               )
             end
+          end
 
-            if to_money_without_currency?(node)
-              corrector.insert_after(node.loc.expression, "(#{replacement_currency})")
-            elsif to_money_block?(node)
+          if to_money_block?(node)
+            add_offense(node, message: 'to_money is missing currency argument') do |corrector|
               corrector.replace(
                 node.loc.expression,
                 "#{receiver.source}.#{method} { |x| x.to_money(#{replacement_currency}) }",
               )
             end
+          elsif to_money_without_currency?(node)
+            add_offense(node, message: 'to_money is missing currency argument') do |corrector|
+              corrector.insert_after(node.loc.expression, "(#{replacement_currency})")
+            end
           end
         end
+        alias_method :on_csend, :on_send
 
         private
 
