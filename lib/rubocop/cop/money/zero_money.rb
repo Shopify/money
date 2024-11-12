@@ -3,7 +3,9 @@
 module RuboCop
   module Cop
     module Money
-      class ZeroMoney < Cop
+      class ZeroMoney < Base
+        extend RuboCop::Cop::AutoCorrector
+
         # `Money.zero` and it's alias `empty`, with or without currency
         # argument is removed in favour of the more explicit Money.new
         # syntax. Supplying it with a real currency is preferred for
@@ -31,21 +33,13 @@ module RuboCop
         PATTERN
 
         def on_send(node)
-          money_zero(node) do |currency_arg|
-            add_offense(node, message: format(MSG, currency: replacement_currency(currency_arg)))
-          end
-        end
-
-        def autocorrect(node)
           receiver, _ = *node
 
-          lambda do |corrector|
-            money_zero(node) do |currency_arg|
-              replacement_currency = replacement_currency(currency_arg)
-
+          money_zero(node) do |currency_arg|
+            add_offense(node, message: format(MSG, currency: replacement_currency(currency_arg))) do |corrector|
               corrector.replace(
                 node.loc.expression,
-                "#{receiver.source}.new(0, #{replacement_currency})",
+                "#{receiver.source}.new(0, #{replacement_currency(currency_arg)})",
               )
             end
           end
