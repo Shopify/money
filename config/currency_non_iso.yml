@@ -94,3 +94,18 @@ gbx:
   thousands_separator: ","
   iso_numeric: ''
   smallest_denomination: 1
+usdc:
+  priority: 100
+  iso_code: USDC
+  name: USD Coin
+  symbol: USDC
+  disambiguate_symbol: USDC
+  alternate_symbols: []
+  subunit: Cent
+  subunit_to_unit: 100
+  symbol_first: false
+  html_entity: "$"
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: ''
+  smallest_denomination: 1
