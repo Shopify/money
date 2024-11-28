@@ -97,5 +97,39 @@ RSpec.describe Money::Helpers do
       expect { subject.value_to_currency(OpenStruct.new(amount: 1)) }.to raise_error(ArgumentError)
       expect { subject.value_to_currency(1) }.to raise_error(ArgumentError)
     end
+
+    describe "with experimental currencies" do
+      it "returns experimental currency when experimental flag is true" do
+        currency = subject.value_to_currency("USDC", experimental: true)
+        expect(currency.iso_code).to eq("USDC")
+      end
+
+      it "raises when accessing experimental currency without the flag" do
+        expect { subject.value_to_currency("USDC") }.to raise_error(Money::Currency::UnknownCurrency)
+      end
+
+      it "allows regular currencies with experimental flag" do
+        currency = subject.value_to_currency("USD", experimental: true)
+        expect(currency.iso_code).to eq("USD")
+      end
+
+      it "handles null currency with experimental flag" do
+        expect(subject.value_to_currency("XXX", experimental: true)).to eq(Money::NULL_CURRENCY)
+      end
+
+      it "handles default currency with experimental flag" do
+        configure(default_currency: "USDC") do
+          expect(subject.value_to_currency(nil, experimental: true).iso_code).to eq("USDC")
+        end
+      end
+
+      it "maintains experimental flag through currency chain" do
+        configure(default_currency: "USDC") do
+          currency1 = subject.value_to_currency("USDC", experimental: true)
+          currency2 = subject.value_to_currency(currency1)
+          expect(currency2.iso_code).to eq("USDC")
+        end
+      end
+    end
   end
 end

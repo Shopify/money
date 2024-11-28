@@ -64,6 +64,11 @@ class MoneyClassInheritance2 < MoneyWithCustomAccessors
   money_column :price_usd, currency: 'USD'
 end
 
+class MoneyWithExperimentalCurrency < ActiveRecord::Base
+  self.table_name = 'money_records'
+  money_column :price, currency_column: 'currency', experimental: true
+end
+
 RSpec.describe 'MoneyColumn' do
   let(:amount) { 1.23 }
   let(:currency) { 'EUR' }
@@ -411,5 +416,27 @@ RSpec.describe 'MoneyColumn' do
       expect(record.price.value).to eq(7)
       expect(record.price.currency.to_s).to eq('GBP')
     end
+  end
+
+  describe "with experimental currencies" do
+    let(:model) { MoneyWithExperimentalCurrency.new}
+
+
+    it "allows setting crypto currency values" do
+      model.price = Money.new(100, "USDC", experimental: true)
+      expect(model.price.currency.iso_code).to eq("USDC")
+      expect(model.price.value).to eq(100)
+    end
+
+    it "loads crypto currency values from database" do
+      instance = MoneyWithExperimentalCurrency.create!(price: Money.new(100, "USDC", experimental: true))
+      reloaded = MoneyWithExperimentalCurrency.find(instance.id)
+      expect(reloaded.price.currency.iso_code).to eq("USDC")
+      expect(reloaded.price.value).to eq(100)
+    end
+
+    # it "raises on currency mismatch" do
+    #   expect { model.price = Money.new(100, "USD") }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
+    # end
   end
 end

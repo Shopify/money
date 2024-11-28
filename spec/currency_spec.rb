@@ -37,6 +37,40 @@ RSpec.describe "Currency" do
     it "raises when the currency is nil" do
       expect { Money::Currency.new(nil) }.to raise_error(Money::Currency::UnknownCurrency)
     end
+
+    it "returns currency object" do
+      expect(Money::Currency.new("usd")).to be_instance_of(Money::Currency)
+    end
+
+    it "raises on unknown currency" do
+      expect { Money::Currency.new("XXX") }.to raise_error(Money::Currency::UnknownCurrency)
+    end
+
+    context "with experimental: true" do
+      it "allows creation of crypto currencies" do
+        currency = Money::Currency.new("USDC", experimental: true)
+        expect(currency.iso_code).to eq("USDC")
+        expect(currency.name).to eq("USD Coin")
+      end
+
+      it "maintains separate cache for experimental currencies" do
+        regular_usd = Money::Currency.new("USD")
+        experimental_usdc = Money::Currency.new("USDC", experimental: true)
+        
+        expect(regular_usd.object_id).not_to eq(experimental_usdc.object_id)
+        expect(Money::Currency.new("USDC", experimental: true).object_id).to eq(experimental_usdc.object_id)
+      end
+
+      it "raises on unknown crypto currency" do
+        expect { Money::Currency.new("UNKNOWN", experimental: true) }.to raise_error(Money::Currency::UnknownCurrency)
+      end
+    end
+
+    context "with experimental: false" do
+      it "raises on crypto currencies" do
+        expect { Money::Currency.new("USDC") }.to raise_error(Money::Currency::UnknownCurrency)
+      end
+    end
   end
 
   describe ".find" do
@@ -46,6 +80,22 @@ RSpec.describe "Currency" do
 
     it "returns a valid currency" do
       expect(Money::Currency.find('usd')).to eq(Money::Currency.new('usd'))
+    end
+
+    context "with experimental: true" do
+      it "finds crypto currencies" do
+        expect(Money::Currency.find("USDC", experimental: true)).to be_a(Money::Currency)
+      end
+
+      it "returns nil for unknown crypto currencies" do
+        expect(Money::Currency.find("UNKNOWN", experimental: true)).to be_nil
+      end
+    end
+
+    context "with experimental: false" do
+      it "returns nil for crypto currencies" do
+        expect(Money::Currency.find("USDC")).to be_nil
+      end
     end
   end
 

@@ -54,11 +54,11 @@ class Money
       yield(@config) if block_given?
     end
 
-    def new(value = 0, currency = nil)
-      return new_from_money(value, currency) if value.is_a?(Money)
+    def new(value = 0, currency = nil, experimental: false)
+      return new_from_money(value, currency, experimental: experimental) if value.is_a?(Money)
 
       value = Helpers.value_to_decimal(value)
-      currency = Helpers.value_to_currency(currency)
+      currency = Helpers.value_to_currency(currency, experimental: experimental)
 
       if value.zero?
         @@zero_money ||= {}
@@ -69,8 +69,8 @@ class Money
     end
     alias_method :from_amount, :new
 
-    def from_subunits(subunits, currency_iso, format: :iso4217)
-      currency = Helpers.value_to_currency(currency_iso)
+    def from_subunits(subunits, currency_iso, format: :iso4217, experimental: false)
+      currency = Helpers.value_to_currency(currency_iso, experimental: experimental)
 
       subunit_to_unit_value = if format == :iso4217
         currency.subunit_to_unit
@@ -81,7 +81,7 @@ class Money
       end
 
       value = Helpers.value_to_decimal(subunits) / subunit_to_unit_value
-      new(value, currency)
+      new(value, currency, experimental: experimental)
     end
 
     def from_json(string)
@@ -123,8 +123,8 @@ class Money
 
     private
 
-    def new_from_money(amount, currency)
-      currency = Helpers.value_to_currency(currency)
+    def new_from_money(amount, currency, experimental: false)
+      currency = Helpers.value_to_currency(currency, experimental: experimental)
 
       if amount.no_currency?
         return Money.new(amount.value, currency)

@@ -6,6 +6,10 @@ RSpec.shared_examples_for "an object supporting to_money" do
     expect(@value.to_money).to eq(@money)
     expect(@value.to_money('CAD').currency).to eq(Money::Currency.find!('CAD'))
   end
+
+  it "supports experimental currencies" do
+    expect(@value.to_money('usdc', experimental: true).currency).to eq(Money::Currency.find!('usdc', experimental: true))
+  end
 end
 
 RSpec.describe Integer do
@@ -19,6 +23,10 @@ RSpec.describe Integer do
   it "parses 0 to Money.zero" do
     expect(0.to_money).to eq(Money.new(0, Money::NULL_CURRENCY))
   end
+
+  it "supports experimental currencies directly" do
+    expect(100.to_money('usdc', experimental: true)).to eq(Money.new(100, 'usdc', experimental: true))
+  end
 end
 
 RSpec.describe Float do
@@ -31,6 +39,10 @@ RSpec.describe Float do
 
   it "parses 0.0 to Money.zero" do
     expect(0.0.to_money).to eq(Money.new(0, Money::NULL_CURRENCY))
+  end
+
+  it "supports experimental currencies directly" do
+    expect(99.99.to_money('usdc', experimental: true)).to eq(Money.new(99.99, 'usdc', experimental: true))
   end
 end
 
@@ -54,6 +66,11 @@ RSpec.describe String do
     end
   end
 
+  it "supports experimental currencies directly" do
+    expect("123.45".to_money('usdc', experimental: true)).to eq(Money.new(123.45, 'usdc', experimental: true))
+    expect("0".to_money('usdc', experimental: true)).to eq(Money.new(0, 'usdc', experimental: true))
+  end
+
   it "#to_money to handle thousands delimiters" do
     configure(legacy_deprecations: true) do
       expect("29.000".to_money("USD")).to eq(Money.new("29.00", "USD"))
@@ -66,12 +83,12 @@ RSpec.describe String do
   end
 
   it "#to_money does not warn when it already behaves like Money.new" do
-  configure(legacy_deprecations: true) do
-    expect(Money).to receive(:deprecate).never
-    expect("71.94999999999999".to_money("USD")).to eq(Money.new("71.95", "USD"))
-    expect("0.001".to_money("USD")).to eq(Money.new("0", "USD"))
+    configure(legacy_deprecations: true) do
+      expect(Money).to receive(:deprecate).never
+      expect("71.94999999999999".to_money("USD")).to eq(Money.new("71.95", "USD"))
+      expect("0.001".to_money("USD")).to eq(Money.new("0", "USD"))
+    end
   end
-end
 
   it "#to_money should behave like Money.new with three decimal places amounts" do
     expect("29.000".to_money("USD")).to eq(Money.new("29.00", "USD"))
@@ -88,5 +105,9 @@ RSpec.describe BigDecimal do
 
   it "parses a zero BigDecimal to Money.zero" do
     expect(BigDecimal("-0.000").to_money).to eq(Money.new(0, Money::NULL_CURRENCY))
+  end
+
+  it "supports experimental currencies directly" do
+    expect(BigDecimal("123.45").to_money('usdc', experimental: true)).to eq(Money.new(123.45, 'usdc', experimental: true))
   end
 end

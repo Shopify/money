@@ -6,13 +6,14 @@ class Money
   class Currency
     module Loader
       class << self
-        def load_currencies
+        def load_currencies(experimental: false)
           currency_data_path = File.expand_path("../../../../config", __FILE__)
 
           currencies = {}
           currencies.merge!(YAML.load_file("#{currency_data_path}/currency_historic.yml"))
           currencies.merge!(YAML.load_file("#{currency_data_path}/currency_non_iso.yml"))
           currencies.merge!(YAML.load_file("#{currency_data_path}/currency_iso.yml"))
+          currencies.merge!(YAML.load_file("#{currency_data_path}/crypto.yml")) if experimental
           deep_deduplicate!(currencies)
         end
 

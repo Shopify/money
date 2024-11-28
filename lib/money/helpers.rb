@@ -38,19 +38,19 @@ class Money
       value
     end
 
-    def value_to_currency(currency)
+    def value_to_currency(currency, experimental: false)
       case currency
       when Money::Currency, Money::NullCurrency
         currency
       when nil, ''
         default = Money.current_currency || Money.default_currency
         raise(Money::Currency::UnknownCurrency, 'missing currency') if default.nil? || default == ''
-        value_to_currency(default)
+        value_to_currency(default, experimental: experimental)
       when 'xxx', 'XXX'
         Money::NULL_CURRENCY
       when String
         begin
-          Currency.find!(currency)
+          Currency.find!(currency, experimental: experimental)
         rescue Money::Currency::UnknownCurrency => error
           if Money.config.legacy_deprecations
             Money.deprecate(error.message)

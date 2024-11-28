@@ -6,25 +6,30 @@ class Money
   class Currency
     @@mutex = Mutex.new
     @@loaded_currencies = {}
+    @@experimental_currencies = {}
 
     class UnknownCurrency < ArgumentError; end
 
     class << self
-      def new(currency_iso)
+      def new(currency_iso, experimental: false)
         raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
         iso = currency_iso.to_s.downcase
-        @@loaded_currencies[iso] || @@mutex.synchronize { @@loaded_currencies[iso] = super(iso) }
+        cache = experimental ? @@experimental_currencies : @@loaded_currencies
+        cache[iso] || @@mutex.synchronize do
+          cache[iso] = super(iso, experimental: experimental)
+        end
       end
       alias_method :find!, :new
 
-      def find(currency_iso)
-        new(currency_iso)
+      def find(currency_iso, experimental: false)
+        new(currency_iso, experimental: experimental)
       rescue UnknownCurrency
         nil
       end
 
-      def currencies
-        @@currencies ||= Loader.load_currencies
+      def currencies(experimental: false)
+        @@currencies ||= {}
+        @@currencies[experimental] ||= Loader.load_currencies(experimental: experimental)
       end
     end
 
@@ -39,9 +44,9 @@ class Money
       :disambiguate_symbol,
       :decimal_mark
 
-    def initialize(currency_iso)
-      data = self.class.currencies[currency_iso]
-      raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
+    def initialize(currency_iso, experimental: false)
+      data = self.class.currencies(experimental: experimental)[currency_iso]
+      raise UnknownCurrency, "Invalid currency '#{currency_iso}'" unless data
       @symbol                = data['symbol']
       @disambiguate_symbol   = data['disambiguate_symbol'] || data['symbol']
       @subunit_symbol        = data['subunit_symbol']

@@ -4,8 +4,8 @@
 #   100.to_money => #<Money @cents=10000>
 #   100.37.to_money => #<Money @cents=10037>
 class Numeric
-  def to_money(currency = nil)
-    Money.new(self, currency)
+  def to_money(currency = nil, **options)
+    Money.new(self, currency, **options)
   end
 end
 
@@ -14,21 +14,21 @@ end
 #   '100'.to_money => #<Money @cents=10000>
 #   '100.37'.to_money => #<Money @cents=10037>
 class String
-  def to_money(currency = nil)
-    currency = Money::Helpers.value_to_currency(currency)
+  def to_money(currency = nil, **options)
+    currency = Money::Helpers.value_to_currency(currency, experimental: options[:experimental])
 
     unless Money.config.legacy_deprecations
-      return Money.new(self, currency)
+      return Money.new(self, currency, **options)
     end
 
     new_value = BigDecimal(self, exception: false)&.round(currency.minor_units)
     unless new_value.nil?
-      return Money.new(self, currency)
+      return Money.new(self, currency, **options)
     end
 
-    return Money.new(0, currency) if empty?
+    return Money.new(0, currency, **options) if empty?
 
-    Money::Parser::Fuzzy.parse(self, currency).tap do |money|
+    Money::Parser::Fuzzy.parse(self, currency, **options).tap do |money|
       old_value = money.value
 
       if new_value != old_value

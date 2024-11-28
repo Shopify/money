@@ -1153,4 +1153,50 @@ RSpec.describe "Money" do
       expect(money.currency.iso_code).to eq('EUR')
     end
   end
+
+  describe ".new" do
+    context "with experimental currencies" do
+      it "creates money objects with crypto currencies" do
+        money = Money.new(100, "USDC", experimental: true)
+        expect(money.currency.iso_code).to eq("USDC")
+        expect(money.value).to eq(100)
+      end
+
+      it "raises on unknown crypto currencies" do
+        expect { Money.new(100, "UNKNOWN", experimental: true) }.to raise_error(Money::Currency::UnknownCurrency)
+      end
+
+      it "maintains currency type when doing calculations" do
+        money1 = Money.new(100, "USDC", experimental: true)
+        money2 = Money.new(50, "USDC", experimental: true)
+        result = money1 + money2
+        
+        expect(result.currency.iso_code).to eq("USDC")
+        expect(result.value).to eq(150)
+      end
+
+      it "raises on currency mismatch with regular currencies" do
+        money1 = Money.new(100, "USDC", experimental: true)
+        money2 = Money.new(50, "USD")
+        
+        expect { money1 + money2 }.to raise_error(Money::IncompatibleCurrencyError)
+      end
+    end
+  end
+
+  describe ".from_subunits" do
+    context "with experimental currencies" do
+      it "creates money objects from subunits" do
+        money = Money.from_subunits(10000, "USDC", experimental: true)
+        expect(money.currency.iso_code).to eq("USDC")
+        expect(money.value).to eq(100)
+      end
+
+      it "respects the currency's subunit_to_unit" do
+        # USDC has subunit_to_unit of 100 (2 decimal places)
+        money = Money.from_subunits(10050, "USDC", experimental: true)
+        expect(money.value).to eq(100.50)
+      end
+    end
+  end
 end

@@ -39,7 +39,8 @@ module MoneyColumn
 
       return if value.nil? && !options[:coerce_null]
 
-      @money_column_cache[column] = Money.new(value, options[:currency] || send(options[:currency_column]))
+      @money_column_cache[column] =
+        Money.new(value, options[:currency] || send(options[:currency_column]), experimental: options[:experimental])
     end
 
     def write_money_attribute(column, money)
@@ -58,7 +59,10 @@ module MoneyColumn
 
       if options[:currency_read_only]
         currency = options[:currency] || try(options[:currency_column])
-        if currency && !money.currency.compatible?(Money::Helpers.value_to_currency(currency))
+        if currency &&
+            !money.currency.compatible?(Money::Helpers.value_to_currency(
+              currency, experimental: options[:experimental]
+            ))
           msg = "[money_column] currency mismatch between #{currency} and #{money.currency} in column #{column}."
           if Money.config.legacy_deprecations
             Money.deprecate(msg)
@@ -76,7 +80,8 @@ module MoneyColumn
     module ClassMethods
       attr_reader :money_column_options
 
-      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false)
+      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false,
+        experimental: false)
         @money_column_options ||= {}
 
         options = normalize_money_column_options(
@@ -84,6 +89,7 @@ module MoneyColumn
           currency: currency,
           currency_read_only: currency_read_only,
           coerce_null: coerce_null,
+          experimental: experimental,
         )
 
         if options[:currency_column]
@@ -116,7 +122,8 @@ module MoneyColumn
           'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
 
         if options[:currency]
-          options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze
+          options[:currency] =
+            Money::Currency.find!(options[:currency], experimental: options[:experimental]).to_s.freeze
           options[:currency_read_only] = true
         end
 
