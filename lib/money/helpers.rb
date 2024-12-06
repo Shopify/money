@@ -50,7 +50,7 @@ class Money
         Money::NULL_CURRENCY
       when String
         begin
-          Currency.find!(currency)
+          Currency.find!(currency.strip)
         rescue Money::Currency::UnknownCurrency => error
           if Money.config.legacy_deprecations
             Money.deprecate(error.message)

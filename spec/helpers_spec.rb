@@ -86,6 +86,10 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_currency('usd')).to eq(Money::Currency.new('USD'))
     end
 
+    it 'trims whitespace' do
+      expect(subject.value_to_currency(' usd ')).to eq(Money::Currency.new('USD'))
+    end
+
     it 'returns the null currency when invalid iso is passed' do
       configure(legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).once
