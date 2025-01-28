@@ -107,12 +107,24 @@ class Money
     # the previous value when done to prevent leaking state. Similar to
     # I18n.with_locale and ActiveSupport's Time.use_zone. This won't affect
     # instances being created with explicitly set currency.
-    def with_currency(new_currency)
+    def with_currency(new_currency, &block)
       old_currency = Money.current_currency
       Money.current_currency = new_currency
       yield
     ensure
       Money.current_currency = old_currency
+    end
+
+    def current_unsafe
+      Thread.current[:money_gem_unsafe]
+    end
+
+    # Used to do cross-currency computations without raising (deprecated)
+    def unsafe(&block)
+      Thread.current[:money_gem_unsafe] = true
+      yield
+    ensure
+      Thread.current[:money_gem_unsafe] = false
     end
 
     private
@@ -131,7 +143,7 @@ class Money
       msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) " \
         "is changing the currency of an existing money object"
 
-      if Money.config.legacy_deprecations
+      if Money.current_unsafe
         Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
         Money.new(amount.value, currency)
       else
@@ -401,7 +413,7 @@ class Money
   def ensure_compatible_currency(other_currency, msg)
     return if currency.compatible?(other_currency)
 
-    if Money.config.legacy_deprecations
+    if Money.current_unsafe
       Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
     else
       raise Money::IncompatibleCurrencyError, msg
