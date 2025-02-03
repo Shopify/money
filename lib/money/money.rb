@@ -115,16 +115,34 @@ class Money
       Money.current_currency = old_currency
     end
 
-    def current_cross_currency_deprecation
-      Thread.current[:money_gem_cross_currency_deprecation]
+    def legacy_deprecations
+      Thread.current[:money_gem_legacy_deprecations] || reset_legacy_deprecations
     end
 
-    def cross_currency_deprecation(&block)
-      # Get cross-currency deprecation instead of exception
-      Thread.current[:money_gem_cross_currency_deprecation] = true
+    def disable_legacy_deprecations
+      Thread.current[:money_gem_legacy_deprecations] = false
+    end
+
+    def enable_legacy_deprecations
+      Thread.current[:money_gem_legacy_deprecations] = true
+    end
+
+    def reset_legacy_deprecations
+      Thread.current[:money_gem_legacy_deprecations] = Money.config.legacy_deprecations
+    end
+
+    def without_legacy_deprecations(&block)
+      disable_legacy_deprecations
       yield
     ensure
-      Thread.current[:money_gem_cross_currency_deprecation] = false
+      reset_legacy_deprecations
+    end
+
+    def with_legacy_deprecations(&block)
+      enable_legacy_deprecations
+      yield
+    ensure
+      reset_legacy_deprecations
     end
 
     private
@@ -143,7 +161,7 @@ class Money
       msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) " \
         "is changing the currency of an existing money object"
 
-      if Money.current_cross_currency_deprecation
+      if Money.legacy_deprecations
         Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
         Money.new(amount.value, currency)
       else
@@ -413,7 +431,7 @@ class Money
   def ensure_compatible_currency(other_currency, msg)
     return if currency.compatible?(other_currency)
 
-    if Money.current_cross_currency_deprecation
+    if Money.legacy_deprecations
       Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
     else
       raise Money::IncompatibleCurrencyError, msg
