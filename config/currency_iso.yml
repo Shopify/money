@@ -771,7 +771,7 @@ gel:
   priority: 100
   iso_code: GEL
   name: Georgian Lari
-  symbol: ლ
+  symbol: "₾"
   alternate_symbols:
   - lari
   subunit: Tetri
