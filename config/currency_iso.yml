@@ -2298,9 +2298,10 @@ ved:
 ves:
   priority: 100
   iso_code: VES
-  name: Venezuelan Bolívar soberano
-  symbol: Bs.S.
-  alternate_symbols: []
+  name: Venezuelan Bolívar Soberano
+  symbol: Bs
+  alternate_symbols:
+  - Bs.S
   subunit: Céntimo
   subunit_to_unit: 100
   symbol_first: true
