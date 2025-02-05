@@ -90,7 +90,7 @@ mro:
   iso_code: MRO
   name: Mauritanian Ouguiya
   symbol: UM
-  disambiguate_symbol: MRO
+  disambiguate_symbol: A-UM
   alternate_symbols: []
   subunit: Khoums
   subunit_to_unit: 5
