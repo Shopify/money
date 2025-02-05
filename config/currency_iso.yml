@@ -1196,7 +1196,7 @@ kzt:
   priority: 100
   iso_code: KZT
   name: Kazakhstani Tenge
-  symbol: "〒"
+  symbol: "₸"
   alternate_symbols: []
   subunit: Tiyn
   subunit_to_unit: 100
@@ -2247,13 +2247,13 @@ uyu:
   priority: 100
   iso_code: UYU
   name: Uruguayan Peso
-  symbol: "$"
+  symbol: "$U"
   alternate_symbols:
   - "$U"
   subunit: Centésimo
   subunit_to_unit: 100
   symbol_first: true
-  html_entity: "&#x20B1;"
+  html_entity: "$U"
   decimal_mark: ","
   thousands_separator: "."
   iso_numeric: '858'
@@ -2262,7 +2262,7 @@ uzs:
   priority: 100
   iso_code: UZS
   name: Uzbekistan Som
-  symbol: ''
+  symbol: so'm
   alternate_symbols:
   - so‘m
   - сўм
@@ -2363,7 +2363,7 @@ xaf:
   priority: 100
   iso_code: XAF
   name: Central African Cfa Franc
-  symbol: Fr
+  symbol: CFA
   disambiguate_symbol: FCFA
   alternate_symbols:
   - FCFA
@@ -2550,7 +2550,7 @@ xpt:
   smallest_denomination: ''
 xts:
   priority: 100
-  iso_code: xts
+  iso_code: XTS
   name: Codes specifically reserved for testing purposes
   symbol: ''
   alternate_symbols: []
@@ -2609,7 +2609,7 @@ zmw:
   priority: 100
   iso_code: ZMW
   name: Zambian Kwacha
-  symbol: ZK
+  symbol: K
   disambiguate_symbol: ZMW
   alternate_symbols: []
   subunit: Ngwee
