@@ -143,7 +143,7 @@ tmm:
   thousands_separator: ","
   iso_numeric: '795'
   smallest_denomination: 1
-VEB:
+veb:
   priority: 100
   iso_code: VEB
   name: Venezuelan Bolívar
