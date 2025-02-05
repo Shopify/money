@@ -1578,11 +1578,12 @@ npr:
   priority: 100
   iso_code: NPR
   name: Nepalese Rupee
-  symbol: "₨"
+  symbol: Rs.
   disambiguate_symbol: NPR
   alternate_symbols:
   - Rs
   - रू
+  - "₨"
   subunit: Paisa
   subunit_to_unit: 100
   symbol_first: true
