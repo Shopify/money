@@ -940,7 +940,7 @@ huf:
   symbol: Ft
   alternate_symbols: []
   subunit: ''
-  subunit_to_unit: 100
+  subunit_to_unit: 1
   symbol_first: false
   html_entity: ''
   decimal_mark: ","
