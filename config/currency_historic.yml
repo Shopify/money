@@ -43,6 +43,20 @@ ghc:
   thousands_separator: ","
   iso_numeric: '288'
   smallest_denomination: 1
+hrk:
+  priority: 100
+  iso_code: HRK
+  name: Croatian Kuna
+  symbol: kn
+  alternate_symbols: []
+  subunit: Lipa
+  subunit_to_unit: 100
+  symbol_first: false
+  html_entity: ''
+  decimal_mark: ","
+  thousands_separator: "."
+  iso_numeric: '191'
+  smallest_denomination: 1
 mro:
   priority: 100
   iso_code: MRO
