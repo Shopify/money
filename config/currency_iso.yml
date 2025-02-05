@@ -1020,7 +1020,7 @@ isk:
   - Íkr
   subunit:
   subunit_to_unit: 1
-  symbol_first: true
+  symbol_first: false
   html_entity: ''
   decimal_mark: ","
   thousands_separator: "."
