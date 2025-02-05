@@ -11,7 +11,6 @@ RSpec.describe "Currency" do
     "minor_units": 2,
     "symbol": '$',
     "disambiguate_symbol": "US$",
-    "subunit_symbol": "¢",
     "decimal_mark": ".",
   }
 
