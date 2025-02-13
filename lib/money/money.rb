@@ -39,12 +39,17 @@ class Money
 
   class << self
     extend Forwardable
-    attr_accessor :config
+    def_delegators :config, :default_currency, :default_currency=
 
-    def_delegators :@config, :default_currency, :default_currency=
+    def config
+      Thread.current[:shopify_money__config] ||= Config.new
+    end
+
+    def config=(config)
+      Thread.current[:shopify_money__config] = config
+    end
 
     def configure
-      self.config ||= Config.new
       yield(config) if block_given?
     end
 
