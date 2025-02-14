@@ -105,7 +105,7 @@ ars:
   subunit: Centavo
   subunit_to_unit: 100
   symbol_first: true
-  html_entity: "&#x20B1;"
+  html_entity: "$"
   decimal_mark: ","
   thousands_separator: "."
   iso_numeric: '032'
@@ -225,7 +225,7 @@ bhd:
   priority: 100
   iso_code: BHD
   name: Bahraini Dinar
-  symbol: ب.د
+  symbol: د.ب
   alternate_symbols:
   - BD
   subunit: Fils
@@ -458,7 +458,7 @@ chf:
   symbol_first: true
   html_entity: ''
   decimal_mark: "."
-  thousands_separator: ","
+  thousands_separator: "'"
   iso_numeric: '756'
   smallest_denomination: 5
 clf:
@@ -715,7 +715,7 @@ eur:
   subunit: Cent
   subunit_to_unit: 100
   symbol_first: true
-  html_entity: "&#x20AC;"
+  html_entity: "€"
   decimal_mark: ","
   thousands_separator: "."
   iso_numeric: '978'
@@ -771,7 +771,7 @@ gel:
   priority: 100
   iso_code: GEL
   name: Georgian Lari
-  symbol: ლ
+  symbol: "₾"
   alternate_symbols:
   - lari
   subunit: Tetri
@@ -905,20 +905,6 @@ hnl:
   thousands_separator: ","
   iso_numeric: '340'
   smallest_denomination: 5
-hrk:
-  priority: 100
-  iso_code: HRK
-  name: Croatian Kuna
-  symbol: kn
-  alternate_symbols: []
-  subunit: Lipa
-  subunit_to_unit: 100
-  symbol_first: false
-  html_entity: ''
-  decimal_mark: ","
-  thousands_separator: "."
-  iso_numeric: '191'
-  smallest_denomination: 1
 htg:
   priority: 100
   iso_code: HTG
@@ -964,7 +950,7 @@ idr:
 ils:
   priority: 100
   iso_code: ILS
-  name: Israeli New Sheqel
+  name: Israeli New Shekel
   symbol: "₪"
   alternate_symbols:
   - ש״ח
@@ -1034,7 +1020,7 @@ isk:
   - Íkr
   subunit:
   subunit_to_unit: 1
-  symbol_first: true
+  symbol_first: false
   html_entity: ''
   decimal_mark: ","
   thousands_separator: "."
@@ -1210,7 +1196,7 @@ kzt:
   priority: 100
   iso_code: KZT
   name: Kazakhstani Tenge
-  symbol: "〒"
+  symbol: "₸"
   alternate_symbols: []
   subunit: Tiyn
   subunit_to_unit: 100
@@ -1301,34 +1287,6 @@ lsl:
   decimal_mark: "."
   thousands_separator: ","
   iso_numeric: '426'
-  smallest_denomination: 1
-ltl:
-  priority: 100
-  iso_code: LTL
-  name: Lithuanian Litas
-  symbol: Lt
-  alternate_symbols: []
-  subunit: Centas
-  subunit_to_unit: 100
-  symbol_first: false
-  html_entity: ''
-  decimal_mark: "."
-  thousands_separator: ","
-  iso_numeric: '440'
-  smallest_denomination: 1
-lvl:
-  priority: 100
-  iso_code: LVL
-  name: Latvian Lats
-  symbol: Ls
-  alternate_symbols: []
-  subunit: Santīms
-  subunit_to_unit: 100
-  symbol_first: true
-  html_entity: ''
-  decimal_mark: "."
-  thousands_separator: ","
-  iso_numeric: '428'
   smallest_denomination: 1
 lyd:
   priority: 100
@@ -1620,11 +1578,12 @@ npr:
   priority: 100
   iso_code: NPR
   name: Nepalese Rupee
-  symbol: "₨"
+  symbol: Rs.
   disambiguate_symbol: NPR
   alternate_symbols:
   - Rs
   - रू
+  - "₨"
   subunit: Paisa
   subunit_to_unit: 100
   symbol_first: true
@@ -1681,14 +1640,14 @@ pen:
   priority: 100
   iso_code: PEN
   name: Peruvian Sol
-  symbol: S/.
+  symbol: S/
   alternate_symbols: []
   subunit: Céntimo
   subunit_to_unit: 100
   symbol_first: true
-  html_entity: S/.
   decimal_mark: "."
   thousands_separator: ","
+  html_entity: S/
   iso_numeric: '604'
   smallest_denomination: 1
 pgk:
@@ -1970,6 +1929,20 @@ skk:
   thousands_separator: ","
   iso_numeric: '703'
   smallest_denomination: 50
+sle:
+  priority: 100
+  iso_code: SLE
+  name: New Leone
+  symbol: Le
+  alternate_symbols: []
+  subunit: Cent
+  subunit_to_unit: 100
+  symbol_first: false
+  html_entity: ''
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: '925'
+  smallest_denomination: 1000
 sll:
   priority: 100
   iso_code: SLL
@@ -2274,13 +2247,13 @@ uyu:
   priority: 100
   iso_code: UYU
   name: Uruguayan Peso
-  symbol: "$"
+  symbol: "$U"
   alternate_symbols:
   - "$U"
   subunit: Centésimo
   subunit_to_unit: 100
   symbol_first: true
-  html_entity: "&#x20B1;"
+  html_entity: "$U"
   decimal_mark: ","
   thousands_separator: "."
   iso_numeric: '858'
@@ -2289,7 +2262,7 @@ uzs:
   priority: 100
   iso_code: UZS
   name: Uzbekistan Som
-  symbol: ''
+  symbol: so'm
   alternate_symbols:
   - so‘m
   - сўм
@@ -2325,9 +2298,10 @@ ved:
 ves:
   priority: 100
   iso_code: VES
-  name: Venezuelan Bolívar soberano
-  symbol: Bs.S.
-  alternate_symbols: []
+  name: Venezuelan Bolívar Soberano
+  symbol: Bs
+  alternate_symbols:
+  - Bs.S
   subunit: Céntimo
   subunit_to_unit: 100
   symbol_first: true
@@ -2389,7 +2363,7 @@ xaf:
   priority: 100
   iso_code: XAF
   name: Central African Cfa Franc
-  symbol: Fr
+  symbol: CFA
   disambiguate_symbol: FCFA
   alternate_symbols:
   - FCFA
@@ -2576,7 +2550,7 @@ xpt:
   smallest_denomination: ''
 xts:
   priority: 100
-  iso_code: xts
+  iso_code: XTS
   name: Codes specifically reserved for testing purposes
   symbol: ''
   alternate_symbols: []
@@ -2612,8 +2586,8 @@ zar:
   subunit_to_unit: 100
   symbol_first: true
   html_entity: "&#x0052;"
-  decimal_mark: "."
-  thousands_separator: ","
+  decimal_mark: ","
+  thousands_separator: " "
   iso_numeric: '710'
   smallest_denomination: 10
 zmk:
@@ -2635,7 +2609,7 @@ zmw:
   priority: 100
   iso_code: ZMW
   name: Zambian Kwacha
-  symbol: ZK
+  symbol: K
   disambiguate_symbol: ZMW
   alternate_symbols: []
   subunit: Ngwee

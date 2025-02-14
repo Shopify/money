@@ -43,12 +43,54 @@ ghc:
   thousands_separator: ","
   iso_numeric: '288'
   smallest_denomination: 1
+hrk:
+  priority: 100
+  iso_code: HRK
+  name: Croatian Kuna
+  symbol: kn
+  alternate_symbols: []
+  subunit: Lipa
+  subunit_to_unit: 100
+  symbol_first: false
+  html_entity: ''
+  decimal_mark: ","
+  thousands_separator: "."
+  iso_numeric: '191'
+  smallest_denomination: 1
+ltl:
+  priority: 100
+  iso_code: LTL
+  name: Lithuanian Litas
+  symbol: Lt
+  alternate_symbols: []
+  subunit: Centas
+  subunit_to_unit: 100
+  symbol_first: false
+  html_entity: ''
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: '440'
+  smallest_denomination: 1
+lvl:
+  priority: 100
+  iso_code: LVL
+  name: Latvian Lats
+  symbol: Ls
+  alternate_symbols: []
+  subunit: Santīms
+  subunit_to_unit: 100
+  symbol_first: true
+  html_entity: ''
+  decimal_mark: "."
+  thousands_separator: ","
+  iso_numeric: '428'
+  smallest_denomination: 1
 mro:
   priority: 100
   iso_code: MRO
   name: Mauritanian Ouguiya
   symbol: UM
-  disambiguate_symbol: MRO
+  disambiguate_symbol: A-UM
   alternate_symbols: []
   subunit: Khoums
   subunit_to_unit: 5
@@ -101,7 +143,7 @@ tmm:
   thousands_separator: ","
   iso_numeric: '795'
   smallest_denomination: 1
-VEB:
+veb:
   priority: 100
   iso_code: VEB
   name: Venezuelan Bolívar
