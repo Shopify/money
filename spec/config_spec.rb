@@ -2,6 +2,20 @@
 require 'spec_helper'
 
 RSpec.describe "Money::Config" do
+  describe 'thread safety' do
+    it 'does not share the same config across threads' do
+      configure(legacy_deprecations: true, default_currency: 'USD') do
+        expect(Money.config.legacy_deprecations).to eq(true)
+        expect(Money.default_currency).to eq('USD')
+        thread = Thread.new do
+          expect(Money.config.legacy_deprecations).to eq(false)
+          expect(Money.default_currency).to eq(nil)
+        end
+        thread.join
+      end
+    end
+  end
+
   describe 'legacy_deprecations' do
     it "respects the default currency" do
       configure(default_currency: 'USD', legacy_deprecations: true) do

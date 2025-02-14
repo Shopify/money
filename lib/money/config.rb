@@ -21,5 +21,13 @@ class Money
       @legacy_json_format = false
       @legacy_deprecations = false
     end
+
+    def without_legacy_deprecations(&block)
+      old_legacy_deprecations = @legacy_deprecations
+      @legacy_deprecations = false
+      yield
+    ensure
+      @legacy_deprecations = old_legacy_deprecations
+    end
   end
 end
