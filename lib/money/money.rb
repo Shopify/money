@@ -39,7 +39,7 @@ class Money
 
   class << self
     extend Forwardable
-    def_delegators :config, :default_currency, :default_currency=
+    def_delegators :config, :default_currency, :default_currency=, :without_legacy_deprecations
 
     def config
       Thread.current[:shopify_money__config] ||= Config.new
