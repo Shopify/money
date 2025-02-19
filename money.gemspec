@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("simplecov", ">= 0")
   s.add_development_dependency("sqlite3")
 
-  s.required_ruby_version = '>= 3.0'
+  s.required_ruby_version = '>= 3.1'
 
   s.files = %x(git ls-files).split($/)
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
