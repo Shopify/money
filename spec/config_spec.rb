@@ -4,14 +4,18 @@ require 'spec_helper'
 RSpec.describe "Money::Config" do
   describe 'thread safety' do
     it 'does not share the same config across threads' do
-      configure(legacy_deprecations: true, default_currency: 'USD') do
-        expect(Money.config.legacy_deprecations).to eq(true)
-        expect(Money.default_currency).to eq('USD')
+      configure(legacy_deprecations: false, default_currency: 'USD') do
+        expect(Money.config.legacy_deprecations).to eq(false)
+        expect(Money.config.default_currency).to eq('USD')
         thread = Thread.new do
-          expect(Money.config.legacy_deprecations).to eq(false)
-          expect(Money.default_currency).to eq(nil)
+          Money.config.legacy_deprecations!
+          Money.default_currency = "EUR"
+          expect(Money.config.legacy_deprecations).to eq(true)
+          expect(Money.config.default_currency).to eq("EUR")
         end
         thread.join
+        expect(Money.config.legacy_deprecations).to eq(false)
+        expect(Money.config.default_currency).to eq('USD')
       end
     end
   end

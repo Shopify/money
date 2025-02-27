@@ -42,7 +42,7 @@ class Money
     def_delegators :config, :default_currency, :default_currency=, :without_legacy_deprecations
 
     def config
-      Thread.current[:shopify_money__config] ||= Config.new
+      Thread.current[:shopify_money__config] ||= @config.dup
     end
 
     def config=(config)
@@ -50,7 +50,8 @@ class Money
     end
 
     def configure
-      yield(config) if block_given?
+      @config ||= Config.new
+      yield(@config) if block_given?
     end
 
     def new(value = 0, currency = nil)
