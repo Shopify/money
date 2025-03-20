@@ -20,6 +20,13 @@ RSpec.describe "Money" do
     end
   end
 
+  it ".configure updates the config" do
+    config_double = instance_double("Money::Config")
+    expect(Money).to receive(:config).and_return(config_double)
+    expect(config_double).to receive(:default_currency=).with('USD')
+    Money.configure { |config| config.default_currency = 'USD' }
+  end
+
   it ".zero has no currency" do
     expect(Money.new(0, Money::NULL_CURRENCY).currency).to be_a(Money::NullCurrency)
   end
