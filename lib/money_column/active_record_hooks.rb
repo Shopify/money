@@ -60,7 +60,7 @@ module MoneyColumn
         currency = options[:currency] || try(options[:currency_column])
         if currency && !money.currency.compatible?(Money::Helpers.value_to_currency(currency))
           msg = "[money_column] currency mismatch between #{currency} and #{money.currency} in column #{column}."
-          if Money.config.legacy_deprecations
+          if Money::Config.current.legacy_deprecations
             Money.deprecate(msg)
           else
             raise MoneyColumn::CurrencyReadOnlyError, msg

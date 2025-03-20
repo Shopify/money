@@ -2,7 +2,19 @@
 
 class Money
   class Config
+    class << self
+      def current
+        Thread.current[:shopify_money__config] ||= Money.config.dup
+      end
+
+      def current=(config)
+        Thread.current[:shopify_money__config] = config
+      end
+    end
+
     attr_accessor :default_currency, :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies
+    alias_method :current_currency, :default_currency
+    alias_method :current_currency=, :default_currency=
 
     def legacy_default_currency!
       @default_currency ||= Money::NULL_CURRENCY
@@ -33,6 +45,14 @@ class Money
       yield
     ensure
       @legacy_deprecations = old_legacy_deprecations
+    end
+
+    def with_currency(new_currency)
+      old_currency = current_currency
+      self.current_currency = new_currency
+      yield
+    ensure
+      self.current_currency = old_currency
     end
   end
 end

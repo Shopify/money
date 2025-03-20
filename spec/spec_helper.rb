@@ -72,11 +72,8 @@ RSpec::Matchers.define :quack_like do
 end
 
 
-def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil, experimental_crypto_currencies: nil)
-  old_currencies = Money::Currency.class_variable_get(:@@loaded_currencies) rescue {}
-  Money::Currency.class_variable_set(:@@loaded_currencies, {})
-  old_config = Money.config
-  Money.config = Money::Config.new.tap do |config|
+def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil)
+  Money::Config.current = Money::Config.new.tap do |config|
     config.default_currency = default_currency if default_currency
     config.legacy_json_format! if legacy_json_format
     config.legacy_deprecations! if legacy_deprecations
@@ -85,8 +82,7 @@ def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecation
   end
   yield
 ensure
-  Money::Currency.class_variable_set(:@@loaded_currencies, old_currencies)
-  Money.config = old_config
+  Money::Config.current = nil
 end
 
 def yaml_load(yaml)
