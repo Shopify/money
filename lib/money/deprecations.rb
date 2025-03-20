@@ -2,7 +2,7 @@
 
 Money.class_eval do
   ACTIVE_SUPPORT_DEFINED = defined?(ActiveSupport)
-  DEPRECATION_STACKTRACE_LENGTH = 5
+  DEPRECATION_STACKTRACE_LENGTH = 20
 
   def self.active_support_deprecator
     @active_support_deprecator ||= begin
