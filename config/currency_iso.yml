@@ -2176,8 +2176,8 @@ twd:
   alternate_symbols:
   - NT$
   - NTD
-  subunit: Cent
-  subunit_to_unit: 100
+  subunit:
+  subunit_to_unit: 1
   symbol_first: true
   html_entity: "$"
   decimal_mark: "."
@@ -2290,7 +2290,7 @@ ved:
   decimal_mark: ","
   thousands_separator: "."
   iso_numeric: '926'
-  # "On 1 Oct 2021, [...] another (redenomination) happened, but called 'Nueva expresión monetaria', 
+  # "On 1 Oct 2021, [...] another (redenomination) happened, but called 'Nueva expresión monetaria',
   # or new monetary expression, which removed 6 zeroes from the currency without affecting its denomination."
   # The VED has banknotes in denominations of 5, 10, 20, 50, and 100, and coins in 50 céntimos and 1 Bs.D.
   # Source: https://en.wikipedia.org/wiki/Venezuelan_bol%C3%ADvar
