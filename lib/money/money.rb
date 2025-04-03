@@ -69,19 +69,8 @@ class Money
     end
     alias_method :from_amount, :new
 
-    def from_subunits(subunits, currency_iso, format: :iso4217)
-      currency = Helpers.value_to_currency(currency_iso)
-
-      subunit_to_unit_value = if format == :iso4217
-        currency.subunit_to_unit
-      elsif format == :stripe
-        Helpers::STRIPE_SUBUNIT_OVERRIDE.fetch(currency.iso_code, currency.subunit_to_unit)
-      else
-        raise ArgumentError, "unknown format #{format}"
-      end
-
-      value = Helpers.value_to_decimal(subunits) / subunit_to_unit_value
-      new(value, currency)
+    def from_subunits(subunits, currency_iso, format: nil)
+      SubunitFormat.for(format).from_subunits(subunits, currency_iso)
     end
 
     def from_json(string)
@@ -163,16 +152,8 @@ class Money
     coder['currency'] = @currency.iso_code
   end
 
-  def subunits(format: :iso4217)
-    subunit_to_unit_value = if format == :iso4217
-      @currency.subunit_to_unit
-    elsif format == :stripe
-      Helpers::STRIPE_SUBUNIT_OVERRIDE.fetch(@currency.iso_code, @currency.subunit_to_unit)
-    else
-      raise ArgumentError, "unknown format #{format}"
-    end
-
-    (@value * subunit_to_unit_value).to_i
+  def subunits(format: nil)
+    SubunitFormat.for(format).to_subunits(self)
   end
 
   def no_currency?
@@ -261,25 +242,13 @@ class Money
   end
 
   def to_fs(style = nil)
-    units = case style
-    when :legacy_dollars
-      2
-    when :amount, nil
-      currency.minor_units
-    else
-      raise ArgumentError, "Unexpected format: #{style}"
-    end
-
+    units = currency.minor_units
     rounded_value = value.round(units)
+
     if units == 0
       format("%d", rounded_value)
     else
-      formatted = rounded_value.to_s("F")
-      decimal_digits = formatted.size - formatted.index(".") - 1
-      (units - decimal_digits).times do
-        formatted << '0'
-      end
-      formatted
+      format("%.#{units}f", rounded_value)
     end
   end
   alias_method :to_s, :to_fs

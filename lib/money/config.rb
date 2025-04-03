@@ -20,6 +20,7 @@ class Money
       @default_currency = nil
       @legacy_json_format = false
       @legacy_deprecations = false
+      @default_subunit_format = :iso4217
     end
 
     def without_legacy_deprecations(&block)
