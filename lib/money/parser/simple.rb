@@ -3,7 +3,7 @@
 class Money
   module Parser
     class Simple
-      SIGNED_DECIMAL_MATCHER = /\A-?\d*(?:\.\d*)?\z/
+      SIGNED_DECIMAL_MATCHER = /\A-?\d+(?:\.\d+)?\z/
 
       class << self
         # Parses an input string using BigDecimal, it always expects a dot character as a decimal separator and
