@@ -12,6 +12,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
 require 'pry-byebug'
 require 'database_cleaner'
+require 'ostruct'
 
 require 'rails'
 require 'active_record'
