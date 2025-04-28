@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'forwardable'
 require 'json'
 
 class Money
@@ -38,20 +37,36 @@ class Money
   end
 
   class << self
-    extend Forwardable
-    def_delegators :config, :default_currency, :default_currency=, :without_legacy_deprecations
-
-    def config
-      Thread.current[:shopify_money__config] ||= @config.dup
+    def default_currency
+      config.default_currency
     end
 
-    def config=(config)
-      Thread.current[:shopify_money__config] = config
+    def default_currency=(value)
+      config.default_currency = value
+    end
+
+    def without_legacy_deprecations(&block)
+      Money::Config.current.without_legacy_deprecations(&block)
+    end
+
+    def current_currency
+      Money::Config.current.currency
+    end
+
+    def current_currency=(value)
+      Money::Config.current.currency = value
+    end
+
+    def with_currency(currency, &block)
+      Money::Config.current.with_currency(currency, &block)
     end
 
     def configure
+      yield(config) if block_given?
+    end
+
+    def config
       @config ||= Config.new
-      yield(@config) if block_given?
     end
 
     def new(value = 0, currency = nil)
@@ -101,26 +116,6 @@ class Money
       end
     end
 
-    def current_currency
-      Thread.current[:money_currency]
-    end
-
-    def current_currency=(currency)
-      Thread.current[:money_currency] = currency
-    end
-
-    # Set Money.default_currency inside the supplied block, resets it to
-    # the previous value when done to prevent leaking state. Similar to
-    # I18n.with_locale and ActiveSupport's Time.use_zone. This won't affect
-    # instances being created with explicitly set currency.
-    def with_currency(new_currency)
-      old_currency = Money.current_currency
-      Money.current_currency = new_currency
-      yield
-    ensure
-      Money.current_currency = old_currency
-    end
-
     private
 
     def new_from_money(amount, currency)
@@ -137,7 +132,7 @@ class Money
       msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) " \
         "is changing the currency of an existing money object"
 
-      if Money.config.legacy_deprecations
+      if Money::Config.current.legacy_deprecations
         Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
         Money.new(amount.value, currency)
       else
@@ -145,7 +140,6 @@ class Money
       end
     end
   end
-  configure
 
   def initialize(value, currency)
     raise ArgumentError if value.nan?
@@ -286,7 +280,7 @@ class Money
   alias_method :to_formatted_s, :to_fs
 
   def to_json(options = nil)
-    if (options.is_a?(Hash) && options[:legacy_format]) || Money.config.legacy_json_format
+    if (options.is_a?(Hash) && options[:legacy_format]) || Money::Config.current.legacy_json_format
       to_s
     else
       as_json(options).to_json
@@ -294,7 +288,7 @@ class Money
   end
 
   def as_json(options = nil)
-    if (options.is_a?(Hash) && options[:legacy_format]) || Money.config.legacy_json_format
+    if (options.is_a?(Hash) && options[:legacy_format]) || Money::Config.current.legacy_json_format
       to_s
     else
       { value: to_s(:amount), currency: currency.to_s }
@@ -407,7 +401,7 @@ class Money
   def ensure_compatible_currency(other_currency, msg)
     return if currency.compatible?(other_currency)
 
-    if Money.config.legacy_deprecations
+    if Money::Config.current.legacy_deprecations
       Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
     else
       raise Money::IncompatibleCurrencyError, msg

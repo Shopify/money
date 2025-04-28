@@ -2,7 +2,32 @@
 
 class Money
   class Config
+    CONFIG_THREAD = :shopify_money__configs
+
+    class << self
+      def current
+        thread_local_config[Fiber.current.object_id] ||= Money.config.dup
+      end
+
+      def current=(config)
+        thread_local_config[Fiber.current.object_id] = config
+      end
+
+      def reset_current
+        thread_local_config.delete(Fiber.current.object_id)
+        Thread.current[CONFIG_THREAD] = nil if thread_local_config.empty?
+      end
+
+      private
+
+      def thread_local_config
+        Thread.current[CONFIG_THREAD] ||= {}
+      end
+    end
+
     attr_accessor :default_currency, :legacy_json_format, :legacy_deprecations
+    alias_method :currency, :default_currency
+    alias_method :currency=, :default_currency=
 
     def legacy_default_currency!
       @default_currency ||= Money::NULL_CURRENCY
@@ -28,6 +53,14 @@ class Money
       yield
     ensure
       @legacy_deprecations = old_legacy_deprecations
+    end
+
+    def with_currency(new_currency)
+      old_currency = @default_currency
+      @default_currency = new_currency
+      yield
+    ensure
+      @default_currency = old_currency
     end
   end
 end

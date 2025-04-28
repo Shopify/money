@@ -73,8 +73,7 @@ end
 
 
 def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecations: nil, legacy_default_currency: nil)
-  old_config = Money.config
-  Money.config = Money::Config.new.tap do |config|
+  Money::Config.current = Money::Config.new.tap do |config|
     config.default_currency = default_currency if default_currency
     config.legacy_json_format! if legacy_json_format
     config.legacy_deprecations! if legacy_deprecations
@@ -82,7 +81,7 @@ def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecation
   end
   yield
 ensure
-  Money.config = old_config
+  Money::Config.reset_current
 end
 
 def yaml_load(yaml)
