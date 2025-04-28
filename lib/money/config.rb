@@ -26,8 +26,8 @@ class Money
     end
 
     attr_accessor :default_currency, :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies
-    alias_method :current_currency, :default_currency
-    alias_method :current_currency=, :default_currency=
+    alias_method :currency, :default_currency
+    alias_method :currency=, :default_currency=
 
     def legacy_default_currency!
       @default_currency ||= Money::NULL_CURRENCY
@@ -61,11 +61,11 @@ class Money
     end
 
     def with_currency(new_currency)
-      old_currency = current_currency
-      self.current_currency = new_currency
+      old_currency = @default_currency
+      @default_currency = new_currency
       yield
     ensure
-      self.current_currency = old_currency
+      @default_currency = old_currency
     end
   end
 end

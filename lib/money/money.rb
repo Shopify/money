@@ -46,7 +46,7 @@ class Money
     end
 
     def without_legacy_deprecations(&block)
-      Money::Config.current.without_legacy_deprecations(yield)
+      Money::Config.current.without_legacy_deprecations(&block)
     end
 
     def current_currency
@@ -57,8 +57,8 @@ class Money
       Money::Config.current.currency = value
     end
 
-    def with_currency(&block)
-      Money::Config.current.with_currency(yield)
+    def with_currency(currency, &block)
+      Money::Config.current.with_currency(currency, &block)
     end
 
     def configure
