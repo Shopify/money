@@ -82,7 +82,7 @@ def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecation
   end
   yield
 ensure
-  Money::Config.current = nil
+  Money::Config.reset_current
 end
 
 def yaml_load(yaml)

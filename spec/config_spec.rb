@@ -3,17 +3,44 @@ require 'spec_helper'
 
 RSpec.describe "Money::Config" do
   describe 'thread safety' do
-    it 'does not share the same config across threads' do
+    it 'does not share the same config across fibers' do
       configure(legacy_deprecations: false, default_currency: 'USD') do
         expect(Money::Config.current.legacy_deprecations).to eq(false)
         expect(Money::Config.current.default_currency).to eq('USD')
+
+        fiber = Fiber.new do
+          Money::Config.current.legacy_deprecations!
+          Money::Config.current.default_currency = "EUR"
+
+          expect(Money::Config.current.legacy_deprecations).to eq(true)
+          expect(Money::Config.current.default_currency).to eq("EUR")
+
+          :fiber_completed
+        end
+        # run the fiber
+        expect(fiber.resume).to eq(:fiber_completed)
+
+        # Verify main fiber's config was not affected
+        expect(Money::Config.current.legacy_deprecations).to eq(false)
+        expect(Money::Config.current.default_currency).to eq('USD')
+      end
+    end
+
+    it 'isolates configuration between threads' do
+      configure(legacy_deprecations: false, default_currency: 'USD') do
+        expect(Money::Config.current.legacy_deprecations).to eq(false)
+        expect(Money::Config.current.default_currency).to eq('USD')
+
         thread = Thread.new do
           Money::Config.current.legacy_deprecations!
           Money::Config.current.default_currency = "EUR"
+
           expect(Money::Config.current.legacy_deprecations).to eq(true)
           expect(Money::Config.current.default_currency).to eq("EUR")
         end
+
         thread.join
+
         expect(Money::Config.current.legacy_deprecations).to eq(false)
         expect(Money::Config.current.default_currency).to eq('USD')
       end
