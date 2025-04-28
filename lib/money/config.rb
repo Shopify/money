@@ -2,6 +2,8 @@
 
 class Money
   class Config
+    CONFIG_THREAD = :shopify_money__configs
+
     class << self
       def current
         thread_local_config[Fiber.current.object_id] ||= Money.config.dup
@@ -13,13 +15,13 @@ class Money
 
       def reset_current
         thread_local_config.delete(Fiber.current.object_id)
-        Thread.current[:shopify_money__configs] = nil if thread_local_config.empty?
+        Thread.current[CONFIG_THREAD] = nil if thread_local_config.empty?
       end
 
       private
 
       def thread_local_config
-        Thread.current[:shopify_money__configs] ||= {}
+        Thread.current[CONFIG_THREAD] ||= {}
       end
     end
 
