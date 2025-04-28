@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'forwardable'
 require 'json'
 
 class Money
@@ -38,15 +37,29 @@ class Money
   end
 
   class << self
-    extend Forwardable
-    def_delegators(:config, :default_currency, :default_currency=)
-    def_delegators(
-      :'Money::Config.current',
-      :without_legacy_deprecations,
-      :current_currency,
-      :current_currency=,
-      :with_currency,
-    )
+    def default_currency
+      config.default_currency
+    end
+
+    def default_currency=(value)
+      config.default_currency = value
+    end
+
+    def without_legacy_deprecations(&block)
+      Money::Config.current.without_legacy_deprecations(yield)
+    end
+
+    def current_currency
+      Money::Config.current.currency
+    end
+
+    def current_currency=(value)
+      Money::Config.current.currency = value
+    end
+
+    def with_currency(&block)
+      Money::Config.current.with_currency(yield)
+    end
 
     def configure
       yield(config) if block_given?
