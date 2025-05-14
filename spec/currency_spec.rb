@@ -37,6 +37,66 @@ RSpec.describe "Currency" do
     it "raises when the currency is nil" do
       expect { Money::Currency.new(nil) }.to raise_error(Money::Currency::UnknownCurrency)
     end
+    
+    it "looks up crypto currencies when enabled" do
+      old_config = Money.config
+      Money.config = Money::Config.new.tap do |config|
+        config.crypto_currencies = true
+      end
+      
+      allow(Money::Currency).to receive(:currencies).and_return({})
+      crypto_currencies = { 
+        "usdc" => { 
+          "iso_code" => "USDC", 
+          "name" => "USD Coin",
+          "symbol" => "USDC",
+          "disambiguate_symbol" => "USDC",
+          "subunit_to_unit" => 100,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        } 
+      }
+      allow(Money::Currency).to receive(:crypto_currencies).and_return(crypto_currencies)
+      
+      currency = Money::Currency.new('USDC')
+      expect(currency.iso_code).to eq('USDC')
+      expect(currency.symbol).to eq('USDC')
+      
+      Money.config = old_config
+    end
+    
+    it "doesn't look up crypto currencies when disabled" do
+      # Reset class variables to ensure clean state
+      old_currencies = Money::Currency.class_variable_get(:@@loaded_currencies) rescue {}
+      Money::Currency.class_variable_set(:@@loaded_currencies, {})
+      
+      # Explicitly set config
+      old_config = Money.config
+      Money.config = Money::Config.new
+      expect(Money.config.crypto_currencies).to eq(false)
+      
+      # Mock currencies
+      allow(Money::Currency).to receive(:currencies).and_return({})
+      crypto_currencies = { 
+        "usdc" => { 
+          "iso_code" => "USDC", 
+          "name" => "USD Coin",
+          "symbol" => "USDC",
+          "disambiguate_symbol" => "USDC",
+          "subunit_to_unit" => 100,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        } 
+      }
+      allow(Money::Currency).to receive(:crypto_currencies).and_return(crypto_currencies)
+      
+      # When crypto_currencies is disabled, new should raise an error for a crypto currency
+      expect { Money::Currency.new('USDC') }.to raise_error(Money::Currency::UnknownCurrency)
+      
+      # Cleanup
+      Money.config = old_config
+      Money::Currency.class_variable_set(:@@loaded_currencies, old_currencies)
+    end
   end
 
   describe ".find" do
@@ -47,6 +107,66 @@ RSpec.describe "Currency" do
     it "returns a valid currency" do
       expect(Money::Currency.find('usd')).to eq(Money::Currency.new('usd'))
     end
+    
+    it "returns a crypto currency when enabled" do
+      old_config = Money.config
+      Money.config = Money::Config.new.tap do |config|
+        config.crypto_currencies = true
+      end
+      
+      allow(Money::Currency).to receive(:currencies).and_return({})
+      crypto_currencies = { 
+        "usdc" => { 
+          "iso_code" => "USDC", 
+          "name" => "USD Coin",
+          "symbol" => "USDC",
+          "disambiguate_symbol" => "USDC",
+          "subunit_to_unit" => 100,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        } 
+      }
+      allow(Money::Currency).to receive(:crypto_currencies).and_return(crypto_currencies)
+      
+      expect(Money::Currency.find('USDC')).not_to eq(nil)
+      expect(Money::Currency.find('USDC').symbol).to eq("USDC")
+      
+      Money.config = old_config
+    end
+    
+    it "returns nil for crypto currency when disabled" do
+      # Reset class variables to ensure clean state
+      old_currencies = Money::Currency.class_variable_get(:@@loaded_currencies) rescue {}
+      Money::Currency.class_variable_set(:@@loaded_currencies, {})
+      
+      # Explicitly set config
+      old_config = Money.config
+      Money.config = Money::Config.new
+      expect(Money.config.crypto_currencies).to eq(false)
+      
+      # Mock currencies
+      allow(Money::Currency).to receive(:currencies).and_return({})
+      crypto_currencies = { 
+        "usdc" => { 
+          "iso_code" => "USDC", 
+          "name" => "USD Coin",
+          "symbol" => "USDC",
+          "disambiguate_symbol" => "USDC",
+          "subunit_to_unit" => 100,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        } 
+      }
+      allow(Money::Currency).to receive(:crypto_currencies).and_return(crypto_currencies)
+      
+      # When crypto_currencies is disabled, find should return nil
+      # because new would raise an UnknownCurrency error
+      expect(Money::Currency.find('USDC')).to eq(nil)
+      
+      # Cleanup
+      Money.config = old_config
+      Money::Currency.class_variable_set(:@@loaded_currencies, old_currencies)
+    end
   end
 
   describe ".find!" do
@@ -56,6 +176,32 @@ RSpec.describe "Currency" do
 
     it "returns a valid currency" do
       expect(Money::Currency.find!('CAD')).to eq(Money::Currency.new('CAD'))
+    end
+  end
+
+  describe ".crypto_currencies" do
+    it "loads crypto currencies from the loader" do
+      old_currencies = Money::Currency.class_variable_get(:@@crypto_currencies) rescue nil
+      Money::Currency.class_variable_set(:@@crypto_currencies, nil)
+      
+      crypto_currencies = { 
+        "usdc" => { 
+          "iso_code" => "USDC", 
+          "name" => "USD Coin",
+          "symbol" => "USDC",
+          "disambiguate_symbol" => "USDC",
+          "subunit_to_unit" => 100,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        } 
+      }
+      allow(Money::Currency::Loader).to receive(:load_crypto_currencies).and_return(crypto_currencies)
+      
+      expect(Money::Currency.crypto_currencies).to eq(crypto_currencies)
+      expect(Money::Currency.crypto_currencies).to eq(crypto_currencies) # Second call to verify caching
+      expect(Money::Currency::Loader).to have_received(:load_crypto_currencies).once
+      
+      Money::Currency.class_variable_set(:@@crypto_currencies, old_currencies) if old_currencies
     end
   end
 

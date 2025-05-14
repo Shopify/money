@@ -157,6 +157,14 @@ Money.new(money.value * exchange_rate, "JPY")
 money.convert_currency(exchange_rate, "JPY")
 ```
 
+### Crypto Currencies
+To enable support for currencies listed in `cryto.yml` use
+``` ruby
+Money.configure do |config|
+  config.cryto_currencies = true
+end
+```
+
 ## Money column
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column
