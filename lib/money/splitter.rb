@@ -77,6 +77,7 @@ class Money
           return money
         end
       end
+      nil
     end
 
     def reverse_each(&block)
