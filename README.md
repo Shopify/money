@@ -157,6 +157,14 @@ Money.new(money.value * exchange_rate, "JPY")
 money.convert_currency(exchange_rate, "JPY")
 ```
 
+### Crypto Currencies
+To enable support for currencies listed in `crypto.yml` use
+``` ruby
+Money.configure do |config|
+  config.experimental_crypto_currencies = true
+end
+```
+
 ## Money column
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column
@@ -237,4 +245,3 @@ To release a new version of the gem, follow these steps:
 
 Copyright (c) 2011 Shopify. See LICENSE.txt for
 further details.
-

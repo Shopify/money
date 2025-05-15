@@ -63,4 +63,16 @@ RSpec.describe "Money::Config" do
       end
     end
   end
+  
+  describe 'experimental_crypto_currencies' do
+    it 'defaults to false' do
+      expect(Money::Config.new.experimental_crypto_currencies).to eq(false)
+    end
+    
+    it 'can be set to true' do
+      config = Money::Config.new
+      config.experimental_crypto_currencies = true
+      expect(config.experimental_crypto_currencies).to eq(true)
+    end
+  end
 end

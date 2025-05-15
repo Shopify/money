@@ -26,6 +26,10 @@ class Money
       def currencies
         @@currencies ||= Loader.load_currencies
       end
+
+      def crypto_currencies
+        @@crypto_currencies ||= Loader.load_crypto_currencies
+      end
     end
 
     attr_reader :iso_code,
@@ -41,6 +45,7 @@ class Money
 
     def initialize(currency_iso)
       data = self.class.currencies[currency_iso]
+      data = self.class.crypto_currencies[currency_iso] if data.nil? && Money.config.experimental_crypto_currencies
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data
       @symbol                = data['symbol']
       @disambiguate_symbol   = data['disambiguate_symbol'] || data['symbol']
