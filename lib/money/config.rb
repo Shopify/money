@@ -16,6 +16,10 @@ class Money
       @legacy_json_format = true
     end
 
+    def experimental_crypto_currencies!
+      @experimental_crypto_currencies = true
+    end
+
     def initialize
       @default_currency = nil
       @legacy_json_format = false
