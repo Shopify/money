@@ -72,7 +72,25 @@ RSpec.describe "Money::Config" do
     it 'can be set to true' do
       config = Money::Config.new
       config.experimental_crypto_currencies = true
+      expect(config.experimental_crypto_currencies).to be(true)
+    end
+
+    it 'can be set to true using the bang method' do
+      config = Money::Config.new
+      config.experimental_crypto_currencies!
       expect(config.experimental_crypto_currencies).to eq(true)
+    end
+  end
+
+  describe 'legacy_json_format' do
+    it 'defaults to false' do
+      expect(Money::Config.new.legacy_json_format).to eq(false)
+    end
+
+    it 'can be set to true using the bang method' do
+      config = Money::Config.new
+      config.legacy_json_format!
+      expect(config.legacy_json_format).to eq(true)
     end
   end
 end

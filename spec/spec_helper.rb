@@ -81,7 +81,7 @@ def configure(default_currency: nil, legacy_json_format: nil, legacy_deprecation
     config.legacy_json_format! if legacy_json_format
     config.legacy_deprecations! if legacy_deprecations
     config.legacy_default_currency! if legacy_default_currency
-    config.experimental_crypto_currencies = experimental_crypto_currencies unless experimental_crypto_currencies.nil?
+    config.experimental_crypto_currencies! if experimental_crypto_currencies
   end
   yield
 ensure
