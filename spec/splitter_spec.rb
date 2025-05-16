@@ -48,6 +48,12 @@ RSpec.describe "Money::Splitter" do
     expect(moneys[2].value).to eq(33)
   end
 
+  specify "#spit results behaves like an array" do
+    moneys = Money.new(100, 'JPY').split(3)
+    expect(moneys.size).to eq(3)
+    expect(moneys[3]).to eq(nil)
+  end
+
   specify "#split return respond to #first" do
     expect(Money.new(100).split(3).first).to eq(Money.new(33.34))
     expect(Money.new(100).split(3).first(2)).to eq([Money.new(33.34), Money.new(33.33)])
