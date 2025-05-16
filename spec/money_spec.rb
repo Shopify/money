@@ -457,6 +457,12 @@ RSpec.describe "Money" do
         expect(Money.from_subunits(100, 'UGX', format: :stripe)).to eq(Money.new(1, 'UGX'))
       end
 
+      it 'overrides the subunit_to_unit amount for USDC' do
+        configure(experimental_crypto_currencies: true) do
+          expect(Money.from_subunits(500000, "USDC", format: :stripe)).to eq(Money.new(0.50, 'USDC'))
+        end
+      end
+
       it 'fallbacks to the default subunit_to_unit amount if no override is specified' do
         expect(Money.from_subunits(100, 'USD', format: :stripe)).to eq(Money.new(1, 'USD'))
       end
