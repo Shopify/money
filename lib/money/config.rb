@@ -25,8 +25,20 @@ class Money
       end
     end
 
-    attr_accessor :default_currency, :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies
+    attr_accessor :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies
+
+    attr_reader :default_currency
     alias_method :currency, :default_currency
+
+    def default_currency=(value)
+      @default_currency =
+        case value
+        when String
+          Currency.find!(value)
+        else
+          value
+        end
+    end
     alias_method :currency=, :default_currency=
 
     def legacy_default_currency!

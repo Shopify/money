@@ -6,14 +6,14 @@ RSpec.describe "Money::Config" do
     it 'does not share the same config across fibers' do
       configure(legacy_deprecations: false, default_currency: 'USD') do
         expect(Money::Config.current.legacy_deprecations).to eq(false)
-        expect(Money::Config.current.default_currency).to eq('USD')
+        expect(Money::Config.current.default_currency.to_s).to eq('USD')
 
         fiber = Fiber.new do
           Money::Config.current.legacy_deprecations!
           Money::Config.current.default_currency = "EUR"
 
           expect(Money::Config.current.legacy_deprecations).to eq(true)
-          expect(Money::Config.current.default_currency).to eq("EUR")
+          expect(Money::Config.current.default_currency.to_s).to eq("EUR")
 
           :fiber_completed
         end
@@ -22,35 +22,33 @@ RSpec.describe "Money::Config" do
 
         # Verify main fiber's config was not affected
         expect(Money::Config.current.legacy_deprecations).to eq(false)
-        expect(Money::Config.current.default_currency).to eq('USD')
+        expect(Money::Config.current.default_currency.to_s).to eq('USD')
       end
     end
 
     it 'isolates configuration between threads' do
-      configure(legacy_deprecations: false, default_currency: 'USD') do
-        expect(Money::Config.current.legacy_deprecations).to eq(false)
-        expect(Money::Config.current.default_currency).to eq('USD')
+      expect(Money::Config.current.legacy_deprecations).to eq(false)
+      expect(Money::Config.current.default_currency).to eq(Money::Currency.find!('CAD'))
 
-        thread = Thread.new do
-          Money::Config.current.legacy_deprecations!
-          Money::Config.current.default_currency = "EUR"
+      thread = Thread.new do
+        Money::Config.current.legacy_deprecations!
+        Money::Config.current.default_currency = "EUR"
 
-          expect(Money::Config.current.legacy_deprecations).to eq(true)
-          expect(Money::Config.current.default_currency).to eq("EUR")
-        end
-
-        thread.join
-
-        expect(Money::Config.current.legacy_deprecations).to eq(false)
-        expect(Money::Config.current.default_currency).to eq('USD')
+        expect(Money::Config.current.legacy_deprecations).to eq(true)
+        expect(Money::Config.current.default_currency).to eq(Money::Currency.find!("EUR"))
       end
+
+      thread.join
+
+      expect(Money::Config.current.legacy_deprecations).to eq(false)
+      expect(Money::Config.current.default_currency).to eq(Money::Currency.find!('CAD'))
     end
   end
 
   describe 'legacy_deprecations' do
     it "respects the default currency" do
       configure(default_currency: 'USD', legacy_deprecations: true) do
-        expect(Money::Config.current.default_currency).to eq("USD")
+        expect(Money::Config.current.default_currency.to_s).to eq("USD")
       end
     end
 
@@ -84,16 +82,16 @@ RSpec.describe "Money::Config" do
 
     it 'can be set to a new currency' do
       configure(default_currency: 'USD') do
-        expect(Money::Config.current.default_currency).to eq('USD')
+        expect(Money::Config.current.default_currency.to_s).to eq('USD')
       end
     end
   end
-  
+
   describe 'experimental_crypto_currencies' do
     it 'defaults to false' do
       expect(Money::Config.new.experimental_crypto_currencies).to eq(false)
     end
-    
+
     it 'can be set to true' do
       config = Money::Config.new
       config.experimental_crypto_currencies = true
