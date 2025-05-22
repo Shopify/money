@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'json'
 
 class Money
@@ -37,16 +38,23 @@ class Money
   end
 
   class << self
-    def default_currency
-      Money::Config.global.currency
-    end
-
-    def default_currency=(value)
-      Money::Config.global.currency = value
-    end
+    extend Forwardable
+    def_delegators :'Money::Config.global', :default_currency, :default_currency=
 
     def without_legacy_deprecations(&block)
       with_config(legacy_deprecations: false, &block)
+    end
+
+    def with_config(**configs, &block)
+      Money::Config.configure_current(**configs, &block)
+    end
+
+    def config
+      Money::Config.global
+    end
+
+    def configure(&block)
+      Money::Config.global.tap(&block)
     end
 
     def current_currency
@@ -63,18 +71,6 @@ class Money
         currency = default_currency
       end
       with_config(currency: currency, &block)
-    end
-
-    def with_config(**configs, &block)
-      Money::Config.configure_current(**configs, &block)
-    end
-
-    def configure(&block)
-      Money::Config.global.tap(&block)
-    end
-
-    def config
-      Money::Config.global
     end
 
     def new(value = 0, currency = nil)
