@@ -44,7 +44,7 @@ class Money
       when Money::Currency, Money::NullCurrency
         currency
       when nil, ''
-        default = Money::Config.current.default_currency
+        default = Money::Config.current.currency
         raise(Money::Currency::UnknownCurrency, 'missing currency') if default.nil? || default == ''
         value_to_currency(default)
       when 'xxx', 'XXX'
