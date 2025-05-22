@@ -1123,13 +1123,11 @@ RSpec.describe "Money" do
       expect(money.currency.iso_code).to eq('USD')
     end
 
-    it "[deprecated] accepts nil as currency" do
-      expect(Money).to receive(:deprecate).once
+    it "accepts nil as currency" do
       money = nil
       Money.with_currency(nil) do
         money = Money.new(1.00)
       end
-
       # uses the default currency
       expect(money.currency.iso_code).to eq('CAD')
     end

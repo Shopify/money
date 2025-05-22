@@ -67,8 +67,7 @@ class Money
 
     def with_currency(currency, &block)
       if currency.nil?
-        Money.deprecate("Money.with_currency(nil) is deprecated. Use Money.with_currency(Money.default_currency) instead")
-        currency = default_currency
+        currency = current_currency
       end
       with_config(currency: currency, &block)
     end
