@@ -44,7 +44,7 @@ class Money
       when Money::Currency, Money::NullCurrency
         currency
       when nil, ''
-        default = Money.current_currency || Money.default_currency
+        default = Money::Config.current.currency
         raise(Money::Currency::UnknownCurrency, 'missing currency') if default.nil? || default == ''
         value_to_currency(default)
       when 'xxx', 'XXX'
@@ -53,7 +53,7 @@ class Money
         begin
           Currency.find!(currency)
         rescue Money::Currency::UnknownCurrency => error
-          if Money.config.legacy_deprecations
+          if Money::Config.current.legacy_deprecations
             Money.deprecate(error.message)
             Money::NULL_CURRENCY
           else
