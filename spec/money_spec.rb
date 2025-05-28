@@ -64,21 +64,6 @@ RSpec.describe "Money" do
     expect(money.currency.to_s).to eq('USD')
   end
 
-  it "legacy_deprecations #to_money doesn't overwrite the money object's currency" do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).with(match(/to_money is attempting to change currency of an existing money object/)).once
-      expect(Money.new(1, 'USD').to_money('CAD')).to eq(Money.new(1, 'USD'))
-    end
-  end
-
-  it "#without_legacy_deprecations bypasses the legacy deprecations and gives the real behavior" do
-    configure(legacy_deprecations: true) do
-      Money.without_legacy_deprecations do
-        expect{ Money.new(1, 'USD').to_money('CAD') }.to raise_error(Money::IncompatibleCurrencyError)
-      end
-    end
-  end
-
   it "#to_money raises when changing currency" do
     expect{ Money.new(1, 'USD').to_money('CAD') }.to raise_error(Money::IncompatibleCurrencyError)
   end
@@ -116,13 +101,6 @@ RSpec.describe "Money" do
 
   it "constructor raises when changing currency" do
     expect { Money.new(Money.new(1, 'USD'), 'CAD') }.to raise_error(Money::IncompatibleCurrencyError)
-  end
-
-  it "legacy_deprecations constructor with money used the constructor currency" do
-    configure(legacy_deprecations: true) do
-     expect(Money).to receive(:deprecate).with(match(/Money.new\(Money.new\(amount, USD\), CAD\) is changing the currency of an existing money object/)).once
-      expect(Money.new(Money.new(1, 'USD'), 'CAD')).to eq(Money.new(1, 'CAD'))
-    end
   end
 
   it "raises when constructed with an invalid string" do
@@ -237,13 +215,6 @@ RSpec.describe "Money" do
     expect((Money.new + Money.new)).to eq(Money.new)
   end
 
-  it "legacy_deprecations adds inconsistent currencies" do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
-      expect(Money.new(5, 'USD') + Money.new(1, 'CAD')).to eq(Money.new(6, 'USD'))
-    end
-  end
-
   it "raises when adding inconsistent currencies" do
     expect{ Money.new(5, 'USD') + Money.new(1, 'CAD') }.to raise_error(Money::IncompatibleCurrencyError)
   end
@@ -258,13 +229,6 @@ RSpec.describe "Money" do
 
   it "is subtractable to $0" do
     expect((Money.new(5.00) - Money.new(5.00))).to eq(Money.new)
-  end
-
-  it "logs a deprecation warning when adding across currencies" do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).with(match(/mathematical operation not permitted for Money objects with different currencies/))
-      expect(Money.new(10, 'USD') - Money.new(1, 'JPY')).to eq(Money.new(9, 'USD'))
-    end
   end
 
   it "keeps currency when doing a computation with a null currency" do
@@ -505,11 +469,10 @@ RSpec.describe "Money" do
 
   it "generates a true rational" do
     expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'USD'))).to eq(Rational(2,3))
+  end
 
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
-      expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY'))).to eq(Rational(2,3))
-    end
+  it "raises when attempting to make a rational from different currencies" do
+    expect { Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY')) }.to raise_error(Money::IncompatibleCurrencyError)
   end
 
   it "does not allocate a new money object when multiplying by 1" do
@@ -592,11 +555,8 @@ RSpec.describe "Money" do
     end
 
     it "<=> issues deprecation warning when comparing incompatible currency" do
-      configure(legacy_deprecations: true) do
-        expect(Money).to receive(:deprecate).twice
-        expect(Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')).to eq(-1)
-        expect(Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')).to eq(1)
-      end
+      expect{Money.new(1000, 'USD') <=> Money.new(2000, 'JPY')}.to raise_error(Money::IncompatibleCurrencyError)
+      expect{Money.new(2000, 'JPY') <=> Money.new(1000, 'USD')}.to raise_error(Money::IncompatibleCurrencyError)
     end
 
     describe('same values') do
@@ -616,18 +576,6 @@ RSpec.describe "Money" do
         it { expect(cad_10 == nil_10).to(eq(true)) }
         it { expect(cad_10 <= nil_10).to(eq(true)) }
         it { expect(cad_10 <  nil_10).to(eq(false)) }
-      end
-
-      describe('legacy different currencies') do
-        around(:each) do |test|
-          configure(legacy_deprecations: true) { test.run }
-        end
-
-        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <=> usd_10).to(eq(0)) }
-        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >  usd_10).to(eq(false)) }
-        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 >= usd_10).to(eq(true)) }
-        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <= usd_10).to(eq(true)) }
-        it { expect(Money).to(receive(:deprecate).once); expect(cad_10 <  usd_10).to(eq(false)) }
       end
 
       describe('different currencies') do
@@ -663,20 +611,6 @@ RSpec.describe "Money" do
         it { expect { cad_10 <   coercible_object }.to(raise_error(TypeError)) }
         it { expect { cad_10 +   coercible_object }.to(raise_error(TypeError)) }
         it { expect { cad_10 -   coercible_object }.to(raise_error(TypeError)) }
-
-        describe('with legacy_deprecations') do
-          around(:each) do |test|
-            configure(legacy_deprecations: true) { test.run }
-          end
-
-          it { expect { cad_10 <=> coercible_object }.to(raise_error(TypeError)) }
-          it { expect { cad_10 >   coercible_object }.to(raise_error(TypeError)) }
-          it { expect { cad_10 >=  coercible_object }.to(raise_error(TypeError)) }
-          it { expect { cad_10 <=  coercible_object }.to(raise_error(TypeError)) }
-          it { expect { cad_10 <   coercible_object }.to(raise_error(TypeError)) }
-          it { expect { cad_10 +   coercible_object }.to(raise_error(TypeError)) }
-          it { expect { cad_10 -   coercible_object }.to(raise_error(TypeError)) }
-        end
       end
     end
 

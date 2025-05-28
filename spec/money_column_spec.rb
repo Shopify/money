@@ -115,25 +115,11 @@ RSpec.describe 'MoneyColumn' do
       expect(record.price_usd.value).to eq(8)
       expect(record.price_usd.currency.to_s).to eq('USD')
     end
-
-    it 'deprecates (but does not raise) under legacy_deprecations' do
-      configure(legacy_deprecations: true) do
-        expect(Money).to receive(:deprecate).once
-        record.price_usd = Money.new(9, 'EUR')
-        expect(record.price_usd.value).to eq(9)
-        expect(record.price_usd.currency.to_s).to eq('USD')
-      end
-    end
   end
 
-  it 'returns money with null currency when the currency in the DB is invalid' do
-    configure(legacy_deprecations: true) do
-      expect(Money).to receive(:deprecate).once
-      record.update_columns(price_currency: 'invalid')
-      record.reload
-      expect(record.price.currency).to be_a(Money::NullCurrency)
-      expect(record.price.value).to eq(1.23)
-    end
+  it 'raises when reading money objects with invalid currency' do
+    record.update(price_currency: 'invalid')
+    expect{record.price}.to raise_error(Money::Currency::UnknownCurrency)
   end
 
   it 'handles legacy support for saving floats' do
@@ -271,18 +257,6 @@ RSpec.describe 'MoneyColumn' do
       expect(record.price.value).to eq(2)
     end
 
-    it 'legacy_deprecations does not write the currency to the db' do
-      configure(legacy_deprecations: true) do
-        record = MoneyWithReadOnlyCurrency.create
-        record.update_columns(price_currency: 'USD')
-
-        expect(Money).to receive(:deprecate).once
-        record.update(price: Money.new(4, 'CAD'))
-        expect(record.price.value).to eq(4)
-        expect(record.price.currency.to_s).to eq('USD')
-      end
-    end
-
     it 'reads the currency that is already in the db' do
       record = MoneyWithReadOnlyCurrency.create
       record.update_columns(price_currency: 'USD', price: 1)
@@ -292,14 +266,10 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'reads an invalid currency from the db and generates a no currency object' do
-      configure(legacy_deprecations: true) do
-        expect(Money).to receive(:deprecate).once
-        record = MoneyWithReadOnlyCurrency.create
-        record.update_columns(price_currency: 'invalid', price: 1)
-        record.reload
-        expect(record.price.value).to eq(1)
-        expect(record.price.currency.to_s).to eq('')
-      end
+      record = MoneyWithReadOnlyCurrency.create
+      record.update_columns(price_currency: 'invalid', price: 1)
+      record.reload
+      expect{record.price}.to raise_error(Money::Currency::UnknownCurrency)
     end
 
     it 'sets the currency correctly when the currency is changed' do
