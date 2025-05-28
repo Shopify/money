@@ -20,6 +20,15 @@ RSpec.describe "Money" do
     end
   end
 
+  it ".configure the config" do
+    config = Money::Config.new
+    allow(Money::Config).to receive(:global).and_return(config)
+
+    expect {
+      Money.configure { |c| c.default_currency = "USD" }
+    }.to change { config.default_currency }.from(nil).to(Money::Currency.find!("USD"))
+  end
+
   it ".zero has no currency" do
     expect(Money.new(0, Money::NULL_CURRENCY).currency).to be_a(Money::NullCurrency)
   end
@@ -1095,7 +1104,7 @@ RSpec.describe "Money" do
     end
   end
 
-  describe '#use_currency' do
+  describe '.with_currency' do
     it "allows setting the implicit default currency for a block scope" do
       money = nil
       Money.with_currency('CAD') do
@@ -1112,6 +1121,15 @@ RSpec.describe "Money" do
       end
 
       expect(money.currency.iso_code).to eq('USD')
+    end
+
+    it "accepts nil as currency" do
+      money = nil
+      Money.with_currency(nil) do
+        money = Money.new(1.00)
+      end
+      # uses the default currency
+      expect(money.currency.iso_code).to eq('CAD')
     end
 
     context "with .default_currency set" do
@@ -1157,6 +1175,14 @@ RSpec.describe "Money" do
       money = Money.new(-9001, 'EUR').clamp(min, max)
       expect(money.value).to eq(-9000)
       expect(money.currency.iso_code).to eq('EUR')
+    end
+  end
+
+  describe ".current_currency" do
+    it "gets and sets the current currency via Config.current" do
+      Money.current_currency = "USD"
+      expect(Money.default_currency.iso_code).to eq("CAD")
+      expect(Money.current_currency.iso_code).to eq("USD")
     end
   end
 end

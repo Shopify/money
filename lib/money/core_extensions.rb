@@ -17,7 +17,7 @@ class String
   def to_money(currency = nil)
     currency = Money::Helpers.value_to_currency(currency)
 
-    unless Money.config.legacy_deprecations
+    unless Money::Config.current.legacy_deprecations
       return Money.new(self, currency)
     end
 
