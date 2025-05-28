@@ -85,6 +85,11 @@ RSpec.describe "Money::Config" do
         expect(Money::Config.current.default_currency.to_s).to eq('USD')
       end
     end
+
+    it 'raises ArgumentError for invalid currency' do
+      config = Money::Config.new
+      expect { config.default_currency = 123 }.to raise_error(ArgumentError, "Invalid currency")
+    end
   end
 
   describe 'experimental_crypto_currencies' do

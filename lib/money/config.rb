@@ -51,8 +51,10 @@ class Money
         case value
         when String
           Currency.find!(value)
-        else
+        when Money::Currency, Money::NullCurrency, nil
           value
+        else
+          raise ArgumentError, "Invalid currency"
         end
     end
     alias_method :currency=, :default_currency=
