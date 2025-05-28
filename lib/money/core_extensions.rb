@@ -16,27 +16,6 @@ end
 class String
   def to_money(currency = nil)
     currency = Money::Helpers.value_to_currency(currency)
-
-    unless Money::Config.current.legacy_deprecations
-      return Money.new(self, currency)
-    end
-
-    new_value = BigDecimal(self, exception: false)&.round(currency.minor_units)
-    unless new_value.nil?
-      return Money.new(self, currency)
-    end
-
-    return Money.new(0, currency) if empty?
-
-    Money::Parser::Fuzzy.parse(self, currency).tap do |money|
-      old_value = money.value
-
-      if new_value != old_value
-        message = "`\"#{self}\".to_money` will soon behave like `Money.new(\"#{self}\")` and " \
-          "raise an ArgumentError exception. Use the browser's locale to parse money strings."
-
-        Money.deprecate(message)
-      end
-    end
+    Money.new(self, currency)
   end
 end
