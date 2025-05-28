@@ -69,7 +69,7 @@ RSpec.describe Money::Helpers do
     end
 
     it 'returns the default currency when value is empty' do
-      configure(legacy_deprecations: true, default_currency: 'USD') do
+      configure(default_currency: 'USD') do
         expect(subject.value_to_currency('')).to eq(Money::Currency.new('USD'))
       end
     end
@@ -86,16 +86,10 @@ RSpec.describe Money::Helpers do
       expect(subject.value_to_currency('usd')).to eq(Money::Currency.new('USD'))
     end
 
-    it 'returns the null currency when invalid iso is passed' do
-      configure(legacy_deprecations: true) do
-        expect(Money).to receive(:deprecate).once
-        expect(subject.value_to_currency('invalid')).to eq(Money::NULL_CURRENCY)
-      end
-    end
-
     it 'raises on invalid object' do
       expect { subject.value_to_currency(OpenStruct.new(amount: 1)) }.to raise_error(ArgumentError)
       expect { subject.value_to_currency(1) }.to raise_error(ArgumentError)
+      expect { subject.value_to_currency('invalid') }.to raise_error(ArgumentError)
     end
   end
 end
