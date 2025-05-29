@@ -57,9 +57,8 @@ module MoneyColumn
       end
 
       if options[:currency_read_only]
-        currency = options[:currency] || try(options[:currency_column])
-        if currency && !money.currency.compatible?(Money::Helpers.value_to_currency(currency))
-          msg = "[money_column] currency mismatch between #{currency} and #{money.currency} in column #{column}."
+        unless compatible_currency?(money, options)
+          msg = "Cannot update #{column}: Attempting to write a money with currency #{money.currency} to a record with currency #{currency}. If you do want to change the currency, either remove `currency_read_only` or update the record's currency manually"
           if Money::Config.current.legacy_deprecations
             Money.deprecate(msg)
           else
@@ -71,6 +70,22 @@ module MoneyColumn
       end
 
       self[column] = money.value
+    end
+
+    def compatible_currency?(money, options)
+      currency_column = options[:currency_column]
+      currency = options[:currency] ||
+        @money_raw_new_attributes[currency_column.to_sym] ||
+        try(currency_column)
+
+      currency.nil? || money.currency.compatible?(Money::Helpers.value_to_currency(currency))
+    end
+
+    def _assign_attributes(new_attributes)
+      @money_raw_new_attributes = new_attributes.symbolize_keys
+      super
+    ensure
+      @money_raw_new_attributes = nil
     end
 
     module ClassMethods
