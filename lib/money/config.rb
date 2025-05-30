@@ -41,7 +41,7 @@ class Money
       end
     end
 
-    attr_accessor :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies
+    attr_accessor :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies, :default_subunit_format
 
     attr_reader :default_currency
     alias_method :currency, :default_currency
@@ -80,6 +80,7 @@ class Money
       @legacy_json_format = false
       @legacy_deprecations = false
       @experimental_crypto_currencies = false
+      @default_subunit_format = :iso4217
     end
   end
 end

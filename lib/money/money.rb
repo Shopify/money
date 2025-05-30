@@ -87,19 +87,8 @@ class Money
     end
     alias_method :from_amount, :new
 
-    def from_subunits(subunits, currency_iso, format: :iso4217)
-      currency = Helpers.value_to_currency(currency_iso)
-
-      subunit_to_unit_value = if format == :iso4217
-        currency.subunit_to_unit
-      elsif format == :stripe
-        Helpers::STRIPE_SUBUNIT_OVERRIDE.fetch(currency.iso_code, currency.subunit_to_unit)
-      else
-        raise ArgumentError, "unknown format #{format}"
-      end
-
-      value = Helpers.value_to_decimal(subunits) / subunit_to_unit_value
-      new(value, currency)
+    def from_subunits(subunits, currency_iso, format: nil)
+      Converters.for(format).from_subunits(subunits, currency_iso)
     end
 
     def from_json(string)
@@ -160,16 +149,8 @@ class Money
     coder['currency'] = @currency.iso_code
   end
 
-  def subunits(format: :iso4217)
-    subunit_to_unit_value = if format == :iso4217
-      @currency.subunit_to_unit
-    elsif format == :stripe
-      Helpers::STRIPE_SUBUNIT_OVERRIDE.fetch(@currency.iso_code, @currency.subunit_to_unit)
-    else
-      raise ArgumentError, "unknown format #{format}"
-    end
-
-    (@value * subunit_to_unit_value).to_i
+  def subunits(format: nil)
+    Converters.for(format).to_subunits(self)
   end
 
   def no_currency?
