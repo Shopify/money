@@ -420,7 +420,6 @@ cad:
   alternate_symbols:
   - C$
   - CAD$
-  subunit_symbol: "¢"
   subunit: Cent
   subunit_to_unit: 100
   symbol_first: true
@@ -758,7 +757,6 @@ gbp:
   name: British Pound
   symbol: "£"
   alternate_symbols: []
-  subunit_symbol: p
   subunit: Penny
   subunit_to_unit: 100
   symbol_first: true
@@ -2235,7 +2233,6 @@ usd:
   alternate_symbols:
   - US$
   subunit: Cent
-  subunit_symbol: "¢"
   subunit_to_unit: 100
   symbol_first: true
   html_entity: "$"
