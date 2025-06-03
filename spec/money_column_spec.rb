@@ -412,4 +412,19 @@ RSpec.describe 'MoneyColumn' do
       expect(record.price.currency.to_s).to eq('GBP')
     end
   end
+
+  describe 'updating amount and currency simultaneously' do
+    let(:record) { MoneyWithReadOnlyCurrency.create!(currency: "CAD") }
+
+    it 'allows updating both amount and currency at the same time' do
+      record.update!(
+        price: Money.new(10, 'USD'),
+        currency: 'USD'
+      )
+      record.reload
+      expect(record.price.value).to eq(10)
+      expect(record.price.currency.to_s).to eq('USD')
+      expect(record.currency).to eq('USD')
+    end
+  end
 end
