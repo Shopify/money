@@ -183,7 +183,7 @@ Money.new(1.00, 'ISK').subunits                    # => 1
 Money.new(1.00, 'ISK').subunits(format: :stripe)   # => 100
 
 # Convert from subunits
-Money.from_subunits(100, 'ISK')                    # => Money.new(1.00, 'USD')
+Money.from_subunits(100, 'ISK')                    # => Money.new(1.00, 'ISK')
 ```
 
 #### Custom Converters
