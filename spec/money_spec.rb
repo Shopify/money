@@ -167,6 +167,13 @@ RSpec.describe "Money" do
     expect(Money.new("999999999999999999.99", "USD").to_s).to eq("999999999999999999.99")
   end
 
+  it "to_fs formats with correct decimal places" do
+    expect(amount_money.to_fs).to eq("1.23")
+    expect(non_fractional_money.to_fs).to eq("1")
+    expect(Money.new(1.2345, 'USD').to_fs).to eq("1.23")
+    expect(Money.new(1.2345, 'BHD').to_fs).to eq("1.235")
+  end
+
   it "to_fs raises ArgumentError on unsupported style" do
     expect{ money.to_fs(:some_weird_style) }.to raise_error(ArgumentError)
   end
@@ -758,6 +765,12 @@ RSpec.describe "Money" do
         expect(Money.new(1, 'UGX').subunits(format: :stripe)).to eq(100)
       end
 
+      it 'overrides the subunit_to_unit amount for USDC' do
+        configure(experimental_crypto_currencies: true) do
+          expect(Money.from_subunits(500000, "USDC", format: :stripe)).to eq(Money.new(0.50, 'USDC'))
+        end
+      end
+
       it 'fallbacks to the default subunit_to_unit amount if no override is specified' do
         expect(Money.new(1, 'USD').subunits(format: :stripe)).to eq(100)
       end
@@ -1183,6 +1196,42 @@ RSpec.describe "Money" do
       Money.current_currency = "USD"
       expect(Money.default_currency.iso_code).to eq("CAD")
       expect(Money.current_currency.iso_code).to eq("USD")
+    end
+  end
+
+  describe 'from_subunits' do
+    it 'creates money from subunits using ISO4217 format' do
+      expect(Money.from_subunits(100, 'USD')).to eq(Money.new(1.00, 'USD'))
+      expect(Money.from_subunits(10, 'JPY')).to eq(Money.new(10, 'JPY'))
+    end
+
+    it 'creates money from subunits using custom format' do
+      expect(Money.from_subunits(100, 'USD', format: :iso4217)).to eq(Money.new(1.00, 'USD'))
+      expect(Money.from_subunits(100, 'USD', format: :stripe)).to eq(Money.new(1.00, 'USD'))
+    end
+
+    it 'raises error for unknown format' do
+      expect {
+        Money.from_subunits(100, 'USD', format: :unknown)
+      }.to raise_error(ArgumentError, /unknown format/)
+    end
+  end
+
+  describe 'subunits' do
+    it 'converts money to subunits using ISO4217 format' do
+      expect(Money.new(1.00, 'USD').subunits).to eq(100)
+      expect(Money.new(10, 'JPY').subunits).to eq(10)
+    end
+
+    it 'converts money to subunits using custom format' do
+      expect(Money.new(1.00, 'USD').subunits(format: :iso4217)).to eq(100)
+      expect(Money.new(1.00, 'USD').subunits(format: :stripe)).to eq(100)
+    end
+
+    it 'raises error for unknown format' do
+      expect {
+        Money.new(1.00, 'USD').subunits(format: :unknown)
+      }.to raise_error(ArgumentError, /unknown format/)
     end
   end
 end
