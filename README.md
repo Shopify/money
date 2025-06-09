@@ -165,6 +165,45 @@ Money.configure do |config|
 end
 ```
 
+### Converters
+The Money gem provides a flexible converter system for handling different subunit formats. This is particularly useful when working with payment providers or APIs that have their own conventions for handling currency subunits.
+
+#### Built-in Converters
+- `:iso4217` (default) - Uses the standard ISO 4217 subunit definitions
+- `:stripe` - Uses Stripe's special cases for certain currencies
+- `:legacy_dollar` - Always uses 100 as the subunit_to_unit value
+
+#### Using Converters
+```ruby
+# Convert to subunits using ISO4217 format (default)
+Money.new(1.00, 'USD').subunits                    # => 100
+Money.new(1.00, 'ISK').subunits                    # => 1
+
+# Convert to subunits using Stripe format
+Money.new(1.00, 'ISK').subunits(format: :stripe)   # => 100
+
+# Convert from subunits
+Money.from_subunits(100, 'ISK', format: :stripe)                    # => Money.new(1.00, 'ISK')
+```
+
+#### Custom Converters
+You can create your own converter by subclassing `Money::Converters::Converter`:
+
+```ruby
+class MyCustomConverter < Money::Converters::Converter
+  def subunit_to_unit(currency)
+    # Your custom logic here
+    1000
+  end
+end
+
+# Register your converter
+Money::Converters.register(:my_format, MyCustomConverter)
+
+# Use your converter
+Money.new(1.00, 'USD').subunits(format: :my_format) # => 1000
+```
+
 ## Money column
 
 Since money internally uses BigDecimal it's logical to use a `decimal` column
