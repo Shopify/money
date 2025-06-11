@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    shopify-money (3.2.1)
+    shopify-money (3.2.2)
       bigdecimal (>= 3.0)
 
 GEM
