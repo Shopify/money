@@ -281,6 +281,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  bigdecimal (>= 3.0)
   bundler
   database_cleaner (~> 2.0)
   ostruct
