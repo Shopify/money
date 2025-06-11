@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    shopify-money (3.2.0)
+    shopify-money (3.2.1)
+      bigdecimal (>= 3.0)
 
 GEM
   remote: https://rubygems.org/
@@ -281,7 +282,6 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  bigdecimal (>= 3.0)
   bundler
   database_cleaner (~> 2.0)
   ostruct
