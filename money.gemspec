@@ -16,6 +16,8 @@ Gem::Specification.new do |s|
 
   s.metadata['allowed_push_host'] = "https://rubygems.org"
 
+  s.add_dependency("bigdecimal", ">= 3.0")
+
   s.add_development_dependency("bundler")
   s.add_development_dependency("database_cleaner", "~> 2.0")
   s.add_development_dependency("ostruct")
