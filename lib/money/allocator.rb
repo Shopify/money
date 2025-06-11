@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'delegate'
+require 'bigdecimal'
 
 class Money
   class Allocator < SimpleDelegator
