@@ -58,6 +58,7 @@ module MoneyColumn
 
       if options[:currency_read_only]
         unless compatible_currency?(money, options)
+          currency = options[:currency] || try(options[:currency_column])
           msg = "Cannot update #{column}: Attempting to write a money with currency #{money.currency} to a record with currency #{currency}. If you do want to change the currency, either remove `currency_read_only` or update the record's currency manually"
           if Money::Config.current.legacy_deprecations
             Money.deprecate(msg)
