@@ -222,10 +222,28 @@ RSpec.describe 'MoneyColumn' do
   end
 
   describe 'read_only_currency true' do
-    it 'does not write the currency to the db' do
+    it 'raises CurrencyReadOnlyError when updating price with different currency' do
       record = MoneyWithReadOnlyCurrency.create
       record.update_columns(currency: 'USD')
       expect { record.update(price: Money.new(4, 'CAD')) }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
+    end
+
+    it 'raises CurrencyReadOnlyError when assigning money with different currency' do
+      record = MoneyWithReadOnlyCurrency.create(currency: 'USD', price: 1)
+      expect { record.price = Money.new(2, 'CAD') }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
+    end
+
+    it 'allows updating price when currency matches existing currency' do
+      record = MoneyWithReadOnlyCurrency.create
+      record.update_columns(currency: 'USD')
+      record.update(price: Money.new(4, 'USD'))
+      expect(record.price.value).to eq(4)
+    end
+
+    it 'allows assigning price when currency matches existing currency' do
+      record = MoneyWithReadOnlyCurrency.create(currency: 'CAD', price: 1)
+      record.price = Money.new(2, 'CAD')
+      expect(record.price.value).to eq(2)
     end
 
     it 'legacy_deprecations does not write the currency to the db' do
