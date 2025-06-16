@@ -74,9 +74,9 @@ module MoneyColumn
 
     def compatible_currency?(money, options)
       currency_column = options[:currency_column]
-      currency = options[:currency] ||
-        @money_raw_new_attributes[currency_column.to_sym] ||
-        try(currency_column)
+      currency = options[:currency]
+      currency ||= @money_raw_new_attributes[currency_column.to_sym] if @money_raw_new_attributes
+      currency ||= try(currency_column)
 
       currency.nil? || money.currency.compatible?(Money::Helpers.value_to_currency(currency))
     end
