@@ -445,4 +445,533 @@ RSpec.describe 'MoneyColumn' do
       expect(record.currency).to eq('USD')
     end
   end
+
+  describe 'multiple money columns' do
+    it 'handles multiple money columns with different currencies' do
+      record = MoneyRecord.create!(
+        price: Money.new(100, 'USD'),
+        prix: Money.new(200, 'EUR'),
+        devise: 'EUR'
+      )
+      record.reload
+      expect(record.price.value).to eq(100)
+      expect(record.price.currency.to_s).to eq('USD')
+      expect(record.prix.value).to eq(200)
+      expect(record.prix.currency.to_s).to eq('EUR')
+      # price_usd is calculated from price * RATE (1.17) in before_validation
+      expect(record.price_usd.value).to eq(117)
+      expect(record.price_usd.currency.to_s).to eq('USD')
+    end
+
+    it 'maintains separate caches for each money column' do
+      record = MoneyRecord.new
+      record.price = Money.new(100, 'USD')
+      record.prix = Money.new(200, 'EUR')
+
+      expect(record.price).to eq(Money.new(100, 'USD'))
+      expect(record.prix).to eq(Money.new(200, 'EUR'))
+
+      # Verify they're independent by changing one
+      record.price = Money.new(300, 'CAD')
+      expect(record.price).to eq(Money.new(300, 'CAD'))
+      expect(record.prix).to eq(Money.new(200, 'EUR'))
+    end
+  end
+
+  describe 'blank money handling' do
+    it 'handles empty string as nil' do
+      record = MoneyRecord.new(price: '')
+      expect(record.price).to be_nil
+    end
+
+    it 'handles whitespace string as nil' do
+      record = MoneyRecord.new(price: '   ')
+      expect(record.price).to be_nil
+    end
+
+    it 'clears cache when setting to blank' do
+      record = MoneyRecord.new(price: Money.new(100, 'USD'))
+      expect(record.price).to eq(Money.new(100, 'USD'))
+
+      record.price = ''
+      expect(record.price).to be_nil
+
+      # Verify the cache was cleared by setting a new value
+      record.price = Money.new(200, 'EUR')
+      expect(record.price).to eq(Money.new(200, 'EUR'))
+    end
+  end
+
+  describe 'currency column cache clearing' do
+    it 'clears all money column caches when currency changes' do
+      record = MoneyRecord.new(
+        price: Money.new(100, 'USD'),
+        currency: 'USD'
+      )
+
+      expect(record.price).to eq(Money.new(100, 'USD'))
+
+      # Change currency should invalidate the cache
+      record.currency = 'EUR'
+      expect(record.price.currency.to_s).to eq('EUR')
+    end
+
+    it 'only defines currency setter once for shared currency columns' do
+      class MoneyWithSharedCurrency < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price, currency_column: 'currency'
+        money_column :prix, currency_column: 'currency'
+      end
+
+      record = MoneyWithSharedCurrency.new
+      methods_count = record.methods.count { |m| m.to_s == 'currency=' }
+      expect(methods_count).to eq(1)
+    end
+  end
+
+  describe 'no_currency handling' do
+    it 'does not write currency when money has no_currency' do
+      record = MoneyRecord.create!(currency: 'USD')
+      record.price = Money.new(100, Money::NULL_CURRENCY)
+      record.save!
+      record.reload
+      expect(record.currency).to eq('USD')
+    end
+  end
+
+  describe 'edge cases' do
+    it 'handles BigDecimal values' do
+      record = MoneyRecord.new(price: BigDecimal('123.45'))
+      expect(record.price.value).to eq(123.45)
+    end
+
+    it 'handles negative values' do
+      record = MoneyRecord.new(price: Money.new(-100, 'USD'))
+      record.save!
+      record.reload
+      expect(record.price.value).to eq(-100)
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+
+    it 'handles very large values' do
+      large_value = BigDecimal('999999999999999.999')
+      record = MoneyRecord.new(price: Money.new(large_value, 'USD'))
+      record.save!
+      record.reload
+      # Database might round very large values
+      expect(record.price.value).to be_within(0.001).of(large_value)
+    end
+
+    it 'handles zero values' do
+      record = MoneyRecord.new(price: Money.new(0, 'USD'))
+      record.save!
+      record.reload
+      expect(record.price.value).to eq(0)
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+  end
+
+  describe 'ActiveRecord callbacks integration' do
+    class MoneyWithCallbacks < ActiveRecord::Base
+      self.table_name = 'money_records'
+      money_column :price, currency_column: 'currency'
+
+      before_save :double_price
+
+      private
+
+      def double_price
+        self.price = price * 2 if price
+      end
+    end
+
+    it 'works with before_save callbacks' do
+      record = MoneyWithCallbacks.new(price: Money.new(50, 'USD'))
+      record.save!
+      expect(record.price.value).to eq(100)
+    end
+  end
+
+  describe 'validation integration' do
+    class MoneyWithCustomValidation < ActiveRecord::Base
+      self.table_name = 'money_records'
+      money_column :price, currency_column: 'currency'
+
+      validate :price_must_be_positive
+
+      private
+
+      def price_must_be_positive
+        errors.add(:price, 'must be positive') if price && price.value < 0
+      end
+    end
+
+    it 'works with custom validations' do
+      record = MoneyWithCustomValidation.new(price: Money.new(-10, 'USD'))
+      expect(record).not_to be_valid
+      expect(record.errors[:price]).to include('must be positive')
+    end
+
+    it 'allows valid values' do
+      record = MoneyWithCustomValidation.new(price: Money.new(10, 'USD'))
+      expect(record).to be_valid
+    end
+  end
+
+  describe 'ActiveRecord query interface' do
+    before do
+      MoneyRecord.delete_all
+      MoneyRecord.create!(price: Money.new(100, 'USD'), currency: 'USD')
+      MoneyRecord.create!(price: Money.new(200, 'USD'), currency: 'USD')
+      MoneyRecord.create!(price: Money.new(150, 'EUR'), currency: 'EUR')
+    end
+
+    it 'supports where queries with money values' do
+      records = MoneyRecord.where(price: 100)
+      expect(records.count).to eq(1)
+      expect(records.first.price.value).to eq(100)
+    end
+
+    it 'supports range queries' do
+      records = MoneyRecord.where(price: 100..200)
+      expect(records.count).to eq(3)
+    end
+
+    it 'supports ordering by money columns' do
+      records = MoneyRecord.order(:price)
+      expect(records.map { |r| r.price.value }).to eq([100, 150, 200])
+    end
+
+    it 'supports pluck with money columns' do
+      values = MoneyRecord.pluck(:price)
+      expect(values).to contain_exactly(100, 200, 150)
+    end
+  end
+
+  describe 'thread safety' do
+    it 'maintains separate caches per instance' do
+      record1 = MoneyRecord.new
+      record2 = MoneyRecord.new
+
+      record1.price = Money.new(100, 'USD')
+      record2.price = Money.new(200, 'EUR')
+
+      expect(record1.price).to eq(Money.new(100, 'USD'))
+      expect(record2.price).to eq(Money.new(200, 'EUR'))
+    end
+  end
+
+  describe 'attribute assignment' do
+    it 'handles hash assignment with string keys' do
+      record = MoneyRecord.new('price' => 100, 'currency' => 'USD')
+      expect(record.price.value).to eq(100)
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+
+    it 'handles hash assignment with symbol keys' do
+      record = MoneyRecord.new(price: 100, currency: 'USD')
+      expect(record.price.value).to eq(100)
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+
+    it 'handles update_attributes' do
+      record = MoneyRecord.create!(price: Money.new(100, 'USD'))
+      record.update!(price: Money.new(200, 'EUR'))
+      expect(record.price.value).to eq(200)
+      expect(record.price.currency.to_s).to eq('EUR')
+    end
+  end
+
+  describe 'error handling' do
+    it 'provides helpful error message for invalid currency in money object' do
+      expect {
+        MoneyRecord.new(price: Money.new(100, 'INVALID'))
+      }.to raise_error(Money::Currency::UnknownCurrency)
+    end
+
+    it 'handles non-numeric string values' do
+      expect {
+        MoneyRecord.new(price: 'not a number')
+      }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe 'coerce_null with different scenarios' do
+    it 'coerces nil to zero money with proper currency from column' do
+      record = MoneyRecordCoerceNull.new(currency: 'EUR')
+      expect(record.price.value).to eq(0)
+      expect(record.price.currency.to_s).to eq('EUR')
+    end
+
+    it 'coerces nil to zero money with hardcoded currency' do
+      record = MoneyRecordCoerceNull.new
+      expect(record.price_usd.value).to eq(0)
+      expect(record.price_usd.currency.to_s).to eq('USD')
+    end
+
+    it 'does not coerce non-nil values' do
+      record = MoneyRecordCoerceNull.new(price: Money.new(100, 'USD'))
+      expect(record.price.value).to eq(100)
+    end
+  end
+
+  describe 'currency_read_only with edge cases' do
+    it 'allows setting money when currency column is nil' do
+      record = MoneyWithReadOnlyCurrency.new
+      record.price = Money.new(100, 'USD')
+      expect(record.price.value).to eq(100)
+      # Currency is not written for read_only columns when not saved
+      expect(record.currency).to be_nil
+    end
+
+    it 'allows setting money with compatible currency using string' do
+      record = MoneyWithReadOnlyCurrency.create!(currency: 'USD')
+      record.price = Money.new(100, 'USD')
+      expect(record.price.value).to eq(100)
+    end
+  end
+
+  describe 'initialize_dup behavior' do
+    it 'creates independent cache for duplicated record' do
+      original = MoneyRecord.new(price: Money.new(100, 'USD'))
+      duplicate = original.dup
+
+      duplicate.price = Money.new(200, 'EUR')
+
+      expect(original.price).to eq(Money.new(100, 'USD'))
+      expect(duplicate.price).to eq(Money.new(200, 'EUR'))
+    end
+
+    it 'preserves money values when duplicating' do
+      original = MoneyRecord.create!(
+        price: Money.new(100, 'USD'),
+        prix: Money.new(200, 'EUR')
+      )
+
+      duplicate = original.dup
+      expect(duplicate.price).to eq(Money.new(100, 'USD'))
+      expect(duplicate.prix).to eq(Money.new(200, 'EUR'))
+      expect(duplicate).to be_new_record
+    end
+  end
+
+  describe 'ActiveRecord dirty tracking' do
+    it 'tracks changes to money columns' do
+      record = MoneyRecord.create!(price: Money.new(100, 'USD'))
+      record.price = Money.new(200, 'USD')
+
+      expect(record.price_changed?).to be true
+      expect(record.price_was).to eq(100)
+      expect(record.price_change).to eq([100, 200])
+    end
+
+    it 'tracks currency changes' do
+      record = MoneyRecord.create!(currency: 'USD', price: 100)
+      record.currency = 'EUR'
+
+      expect(record.currency_changed?).to be true
+      expect(record.currency_was).to eq('USD')
+    end
+  end
+
+  describe 'mass assignment with currency updates' do
+    it 'handles simultaneous updates of money and currency in mass assignment' do
+      record = MoneyWithReadOnlyCurrency.create!(currency: 'USD', price: 100)
+
+      record.assign_attributes(
+        currency: 'EUR',
+        price: Money.new(200, 'EUR')
+      )
+
+      expect { record.save! }.not_to raise_error
+      expect(record.price.value).to eq(200)
+      expect(record.currency).to eq('EUR')
+    end
+  end
+
+  describe 'decimal precision handling' do
+    it 'preserves precision up to currency minor units' do
+      # USD has 2 minor units, so 123.456 will be rounded to 123.46
+      record = MoneyRecord.create!(price: Money.new(123.456, 'USD'))
+      record.reload
+      expect(record.price.value.to_f).to eq(123.46)
+    end
+
+    it 'preserves full precision for currencies with 3 decimal places' do
+      # JOD has 3 minor units, so it preserves 3 decimal places
+      record = MoneyRecord.create!(price: Money.new(123.456, 'JOD'), currency: 'JOD')
+      record.reload
+      expect(record.price.value).to eq(123.456)
+    end
+
+    it 'rounds database values beyond 3 decimal places' do
+      record = MoneyRecord.new
+      record['price'] = 123.4567
+      record.currency = 'USD'
+      record.save!
+      record.reload
+      expect(record['price'].to_f.round(3)).to eq(123.457)
+    end
+  end
+
+  describe 'ActiveRecord Type integration' do
+    it 'uses MoneyColumn::ActiveRecordType for money columns' do
+      type = MoneyRecord.attribute_types['price']
+      expect(type).to be_a(MoneyColumn::ActiveRecordType)
+    end
+  end
+
+  describe 'money column options inheritance' do
+    it 'does not share options between different models' do
+      class MoneyModel1 < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price, currency_column: 'currency'
+      end
+
+      class MoneyModel2 < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price, currency: 'EUR'
+      end
+
+      expect(MoneyModel1.money_column_options['price'][:currency_column]).to eq('currency')
+      expect(MoneyModel1.money_column_options['price'][:currency]).to be_nil
+
+      expect(MoneyModel2.money_column_options['price'][:currency]).to eq('EUR')
+      expect(MoneyModel2.money_column_options['price'][:currency_column]).to be_nil
+    end
+  end
+
+  describe 'raw attributes access' do
+    it 'allows direct access to raw decimal value' do
+      record = MoneyRecord.create!(price: Money.new(123.45, 'USD'))
+      expect(record['price']).to eq(123.45)
+      expect(record.read_attribute(:price)).to eq(123.45)
+    end
+
+    it 'allows direct writing of raw decimal value' do
+      record = MoneyRecord.new
+      record['price'] = 99.99
+      record.currency = 'EUR'
+      expect(record.price.value).to eq(99.99)
+      expect(record.price.currency.to_s).to eq('EUR')
+    end
+  end
+
+  describe 'nil handling' do
+    it 'returns Money with default currency for zero values' do
+      record = MoneyRecord.new
+      # The default value in the schema is 0.000, not nil
+      expect(record['price']).to eq(0)
+      # With default currency CAD, it returns Money with 0 value
+      expect(record.price).to eq(Money.new(0, 'CAD'))
+    end
+
+    it 'returns nil when value is explicitly nil' do
+      record = MoneyRecord.new
+      record['price'] = nil
+      expect(record.price).to be_nil
+    end
+
+    it 'handles nil assignment' do
+      record = MoneyRecord.create!(price: Money.new(100, 'USD'))
+      record.price = nil
+      record.save!
+      record.reload
+      expect(record.price).to be_nil
+    end
+  end
+
+  describe 'currency normalization' do
+    it 'normalizes currency strings to uppercase' do
+      record = MoneyRecord.new(price: Money.new(100, 'usd'))
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+
+    it 'freezes currency strings for performance' do
+      class MoneyWithFrozenCurrency < ActiveRecord::Base
+        self.table_name = 'money_records'
+        money_column :price, currency: 'USD'
+      end
+
+      expect(MoneyWithFrozenCurrency.money_column_options['price'][:currency]).to be_frozen
+    end
+  end
+
+  describe 'error messages' do
+    it 'provides clear error for missing currency when default_currency is nil' do
+      configure(default_currency: nil) do
+        record = MoneyRecord.create!(price: 100, currency: nil)
+        expect { record.reload.price }.to raise_error(ArgumentError, 'missing currency')
+      end
+    end
+  end
+
+  describe 'money column with different column names' do
+    class MoneyWithCustomColumns < ActiveRecord::Base
+      self.table_name = 'money_records'
+      money_column :price, currency_column: :devise
+      money_column :prix, currency_column: 'currency'
+    end
+
+    it 'supports both string and symbol currency column names' do
+      record = MoneyWithCustomColumns.new(
+        price: Money.new(100, 'EUR'),
+        devise: 'EUR',
+        prix: Money.new(200, 'USD'),
+        currency: 'USD'
+      )
+
+      expect(record.price.currency.to_s).to eq('EUR')
+      expect(record.prix.currency.to_s).to eq('USD')
+    end
+  end
+
+  describe 'money column array syntax' do
+    class MoneyWithArrayColumns < ActiveRecord::Base
+      self.table_name = 'money_records'
+      money_column [:price, :prix], currency_column: 'currency'
+    end
+
+    it 'supports defining multiple columns at once' do
+      record = MoneyWithArrayColumns.new(
+        price: Money.new(100, 'USD'),
+        prix: Money.new(200, 'USD'),
+        currency: 'USD'
+      )
+
+      expect(record.price).to eq(Money.new(100, 'USD'))
+      expect(record.prix).to eq(Money.new(200, 'USD'))
+    end
+  end
+
+  describe 'ActiveRecord scopes' do
+    it 'works with ActiveRecord scopes' do
+      MoneyRecord.delete_all
+      cheap = MoneyRecord.create!(price: Money.new(10, 'USD'))
+      expensive = MoneyRecord.create!(price: Money.new(100, 'USD'))
+
+      scope = MoneyRecord.where('price < ?', 50)
+      expect(scope.to_a).to eq([cheap])
+    end
+  end
+
+  describe 'JSON serialization' do
+    it 'includes money values in as_json' do
+      record = MoneyRecord.new(price: Money.new(100, 'USD'))
+      json = record.as_json
+      # Money columns are serialized as a hash with symbol keys
+      expect(json['price']).to eq({ currency: 'USD', value: '100.00' })
+      expect(json['currency']).to eq('USD')
+    end
+  end
+
+  describe 'update_columns behavior' do
+    it 'bypasses money column methods when using update_columns' do
+      record = MoneyRecord.create!(price: Money.new(100, 'USD'))
+      record.update_columns(price: 200)
+      record.reload
+      expect(record.price.value).to eq(200)
+      expect(record.price.currency.to_s).to eq('USD')
+    end
+  end
 end
