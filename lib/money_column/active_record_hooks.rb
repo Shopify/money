@@ -52,33 +52,47 @@ module MoneyColumn
         return self[column] = nil
       end
 
-      unless money.is_a?(Money)
-        return self[column] = Money::Helpers.value_to_decimal(money)
+      if money.is_a?(Money)
+        write_currency(column, money, options)
       end
 
-      if options[:currency_read_only]
-        unless compatible_currency?(money, options)
-          msg = "Cannot update #{column}: Attempting to write a money with currency #{money.currency} to a record with currency #{currency}. If you do want to change the currency, either remove `currency_read_only` or update the record's currency manually"
-          if Money::Config.current.legacy_deprecations
-            Money.deprecate(msg)
-          else
-            raise MoneyColumn::CurrencyReadOnlyError, msg
-          end
-        end
-      else
-        self[options[:currency_column]] = money.currency.to_s unless money.no_currency?
-      end
-
-      self[column] = money.value
+      self[column] = Money::Helpers.value_to_decimal(money)
     end
 
-    def compatible_currency?(money, options)
+    def write_currency(column, money, options)
       currency_column = options[:currency_column]
-      currency = options[:currency]
-      currency ||= @money_raw_new_attributes[currency_column.to_sym] if @money_raw_new_attributes
-      currency ||= try(currency_column)
 
-      currency.nil? || money.currency.compatible?(Money::Helpers.value_to_currency(currency))
+      if options[:currency_read_only]
+        current_currency = options[:currency] || read_currency_column(currency_column)
+        validate_currency_compatibility!(column, money, current_currency)
+        return
+      end
+
+      unless money.no_currency?
+        self[currency_column] = money.currency.to_s
+      end
+    end
+
+    def read_currency_column(currency_column)
+      if @money_raw_new_attributes&.key?(currency_column.to_sym)
+        # currency column in the process of being updated
+        return @money_raw_new_attributes[currency_column.to_sym]
+      end
+
+      try(currency_column)
+    end
+
+    def validate_currency_compatibility!(column, money, current_currency)
+      return if current_currency.nil? || money.currency.compatible?(Money::Helpers.value_to_currency(current_currency))
+
+      msg = "Invalid #{column}: attempting to write a money object with currency '#{money.currency}' to a record with currency '#{current_currency}'. " \
+        "If you do want to change the record's currency, either remove `currency_read_only` or update the record's currency manually"
+
+      if Money::Config.current.legacy_deprecations
+        Money.deprecate(msg)
+      else
+        raise MoneyColumn::CurrencyReadOnlyError, msg
+      end
     end
 
     def _assign_attributes(new_attributes)
