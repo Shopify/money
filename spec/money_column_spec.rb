@@ -6,47 +6,47 @@ class MoneyRecord < ActiveRecord::Base
   before_validation do
     self.price_usd = Money.new(self["price"] * RATE, 'USD') if self["price"]
   end
-  money_column :price, currency_column: 'currency'
-  money_column :prix, currency_column: :devise
+  money_column :price, currency_column: 'price_currency'
+  money_column :prix, currency_column: :prix_currency
   money_column :price_usd, currency: 'USD'
 end
 
 class MoneyWithValidation < ActiveRecord::Base
   self.table_name = 'money_records'
-  validates :price, :currency, presence: true
-  money_column :price, currency_column: 'currency'
+  validates :price, :price_currency, presence: true
+  money_column :price, currency_column: 'price_currency'
 end
 
 class MoneyWithReadOnlyCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
-  money_column :price, currency_column: 'currency', currency_read_only: true
+  money_column :price, currency_column: 'price_currency', currency_read_only: true
 end
 
 class MoneyRecordCoerceNull < ActiveRecord::Base
   self.table_name = 'money_records'
-  money_column :price, currency_column: 'currency', coerce_null: true
+  money_column :price, currency_column: 'price_currency', coerce_null: true
   money_column :price_usd, currency: 'USD', coerce_null: true
 end
 
 class MoneyWithDelegatedCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
-  delegate :currency, to: :delegated_record
-  money_column :price, currency_column: 'currency', currency_read_only: true
+  delegate :price_currency, to: :delegated_record
+  money_column :price, currency_column: 'price_currency', currency_read_only: true
   money_column :prix, currency_column: 'currency2', currency_read_only: true
   def currency2
-    delegated_record.currency
+    delegated_record.price_currency
   end
 
   private
 
   def delegated_record
-    MoneyRecord.new(currency: 'USD')
+    MoneyRecord.new(price_currency: 'USD')
   end
 end
 
 class MoneyWithCustomAccessors < ActiveRecord::Base
   self.table_name = 'money_records'
-  money_column :price, currency_column: 'currency'
+  money_column :price, currency_column: 'price_currency'
   def price
     read_money_attribute(:price)
   end
@@ -56,7 +56,7 @@ class MoneyWithCustomAccessors < ActiveRecord::Base
 end
 
 class MoneyClassInheritance < MoneyWithCustomAccessors
-  money_column :prix, currency_column: 'currency'
+  money_column :prix, currency_column: 'price_currency'
 end
 
 class MoneyClassInheritance2 < MoneyWithCustomAccessors
@@ -71,7 +71,7 @@ RSpec.describe 'MoneyColumn' do
   let(:toonie) { Money.new(2.00, 'CAD') }
   let(:subject) { MoneyRecord.new(price: money, prix: toonie) }
   let(:record) do
-    subject.devise = 'CAD'
+    subject.prix_currency = 'CAD'
     subject.save
     subject.reload
   end
@@ -81,7 +81,7 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'writes the currency to the db' do
-    record.update(currency: nil)
+    record.update(price_currency: nil)
     record.update(price: Money.new(4, 'JPY'))
     record.reload
     expect(record.price.value).to eq(4)
@@ -101,10 +101,35 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price_usd).to eq(Money.new(1.44, 'USD'))
   end
 
+  describe 'hard-coded currency (currency: "USD")' do
+    let(:record) { MoneyRecord.new }
+
+    it 'raises CurrencyMismatchError when assigning Money with wrong currency' do
+      expect {
+        record.price_usd = Money.new(5, 'EUR')
+      }.to raise_error(MoneyColumn::CurrencyMismatchError)
+    end
+
+    it 'allows assigning Money with the correct currency' do
+      record.price_usd = Money.new(8, 'USD')
+      expect(record.price_usd.value).to eq(8)
+      expect(record.price_usd.currency.to_s).to eq('USD')
+    end
+
+    it 'deprecates (but does not raise) under legacy_deprecations' do
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).once
+        record.price_usd = Money.new(9, 'EUR')
+        expect(record.price_usd.value).to eq(9)
+        expect(record.price_usd.currency.to_s).to eq('USD')
+      end
+    end
+  end
+
   it 'returns money with null currency when the currency in the DB is invalid' do
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once
-      record.update_columns(currency: 'invalid')
+      record.update_columns(price_currency: 'invalid')
       record.reload
       expect(record.price.currency).to be_a(Money::NullCurrency)
       expect(record.price.value).to eq(1.23)
@@ -142,15 +167,15 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'does not overwrite a currency column with a default currency when saving zero' do
-    expect(record.currency.to_s).to eq('EUR')
+    expect(record.price_currency.to_s).to eq('EUR')
     record.update(price: Money.new(0, Money::NULL_CURRENCY))
-    expect(record.currency.to_s).to eq('EUR')
+    expect(record.price_currency.to_s).to eq('EUR')
   end
 
   it 'does overwrite a currency' do
-    expect(record.currency.to_s).to eq('EUR')
+    expect(record.price_currency.to_s).to eq('EUR')
     record.update(price: Money.new(4, 'JPY'))
-    expect(record.currency.to_s).to eq('JPY')
+    expect(record.price_currency.to_s).to eq('JPY')
   end
 
   describe 'non-fractional-currencies' do
@@ -217,31 +242,31 @@ RSpec.describe 'MoneyColumn' do
 
     it 'is not allowed to be saved because `to_s` returns a blank string' do
       subject.valid?
-      expect(subject.errors[:currency]).to include("can't be blank")
+      expect(subject.errors[:price_currency]).to include("can't be blank")
     end
   end
 
   describe 'read_only_currency true' do
     it 'raises CurrencyReadOnlyError when updating price with different currency' do
       record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(currency: 'USD')
+      record.update_columns(price_currency: 'USD')
       expect { record.update(price: Money.new(4, 'CAD')) }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
     end
 
     it 'raises CurrencyReadOnlyError when assigning money with different currency' do
-      record = MoneyWithReadOnlyCurrency.create(currency: 'USD', price: 1)
+      record = MoneyWithReadOnlyCurrency.create(price_currency: 'USD', price: 1)
       expect { record.price = Money.new(2, 'CAD') }.to raise_error(MoneyColumn::CurrencyReadOnlyError)
     end
 
     it 'allows updating price when currency matches existing currency' do
       record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(currency: 'USD')
+      record.update_columns(price_currency: 'USD')
       record.update(price: Money.new(4, 'USD'))
       expect(record.price.value).to eq(4)
     end
 
     it 'allows assigning price when currency matches existing currency' do
-      record = MoneyWithReadOnlyCurrency.create(currency: 'CAD', price: 1)
+      record = MoneyWithReadOnlyCurrency.create(price_currency: 'CAD', price: 1)
       record.price = Money.new(2, 'CAD')
       expect(record.price.value).to eq(2)
     end
@@ -249,7 +274,7 @@ RSpec.describe 'MoneyColumn' do
     it 'legacy_deprecations does not write the currency to the db' do
       configure(legacy_deprecations: true) do
         record = MoneyWithReadOnlyCurrency.create
-        record.update_columns(currency: 'USD')
+        record.update_columns(price_currency: 'USD')
 
         expect(Money).to receive(:deprecate).once
         record.update(price: Money.new(4, 'CAD'))
@@ -260,7 +285,7 @@ RSpec.describe 'MoneyColumn' do
 
     it 'reads the currency that is already in the db' do
       record = MoneyWithReadOnlyCurrency.create
-      record.update_columns(currency: 'USD', price: 1)
+      record.update_columns(price_currency: 'USD', price: 1)
       record.reload
       expect(record.price.value).to eq(1)
       expect(record.price.currency.to_s).to eq('USD')
@@ -270,7 +295,7 @@ RSpec.describe 'MoneyColumn' do
       configure(legacy_deprecations: true) do
         expect(Money).to receive(:deprecate).once
         record = MoneyWithReadOnlyCurrency.create
-        record.update_columns(currency: 'invalid', price: 1)
+        record.update_columns(price_currency: 'invalid', price: 1)
         record.reload
         expect(record.price.value).to eq(1)
         expect(record.price.currency.to_s).to eq('')
@@ -278,8 +303,8 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'sets the currency correctly when the currency is changed' do
-      record = MoneyWithReadOnlyCurrency.create(currency: 'CAD', price: 1)
-      record.currency = 'USD'
+      record = MoneyWithReadOnlyCurrency.create(price_currency: 'CAD', price: 1)
+      record.price_currency = 'USD'
       expect(record.price.currency.to_s).to eq('USD')
     end
 
@@ -386,7 +411,7 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'class inheritance' do
     it 'shares money columns declared on the parent class' do
-      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq('currency')
+      expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency_column)).to eq('price_currency')
       expect(MoneyClassInheritance.instance_variable_get(:@money_column_options).dig('price', :currency)).to eq(nil)
       expect(MoneyClassInheritance.new(price: Money.new(1, 'USD')).price).to eq(Money.new(2, 'USD'))
     end
@@ -410,7 +435,7 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'writes currency from input value to the db' do
-      record.update(currency: nil)
+      record.update(price_currency: nil)
       record.update(price: Money.new(7, 'GBP'))
       record.reload
       expect(record.price.value).to eq(7)
@@ -418,13 +443,13 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'raises missing currency error reading a value that was saved using legacy non-money object' do
-      record.update(currency: nil, price: 3)
+      record.update(price_currency: nil, price: 3)
       expect { record.price }.to raise_error(ArgumentError, 'missing currency')
     end
 
     it 'handles legacy support for saving price and currency separately' do
-      record.update(currency: nil)
-      record.update(price: 7, currency: 'GBP')
+      record.update(price_currency: nil)
+      record.update(price: 7, price_currency: 'GBP')
       record.reload
       expect(record.price.value).to eq(7)
       expect(record.price.currency.to_s).to eq('GBP')
@@ -432,17 +457,17 @@ RSpec.describe 'MoneyColumn' do
   end
 
   describe 'updating amount and currency simultaneously' do
-    let(:record) { MoneyWithReadOnlyCurrency.create!(currency: "CAD") }
+    let(:record) { MoneyWithReadOnlyCurrency.create!(price_currency: "CAD") }
 
     it 'allows updating both amount and currency at the same time' do
       record.update!(
         price: Money.new(10, 'USD'),
-        currency: 'USD'
+        price_currency: 'USD'
       )
       record.reload
       expect(record.price.value).to eq(10)
       expect(record.price.currency.to_s).to eq('USD')
-      expect(record.currency).to eq('USD')
+      expect(record.price_currency).to eq('USD')
     end
   end
 
@@ -451,7 +476,7 @@ RSpec.describe 'MoneyColumn' do
       record = MoneyRecord.create!(
         price: Money.new(100, 'USD'),
         prix: Money.new(200, 'EUR'),
-        devise: 'EUR'
+        prix_currency: 'EUR'
       )
       record.reload
       expect(record.price.value).to eq(100)
@@ -506,36 +531,36 @@ RSpec.describe 'MoneyColumn' do
     it 'clears all money column caches when currency changes' do
       record = MoneyRecord.new(
         price: Money.new(100, 'USD'),
-        currency: 'USD'
+        price_currency: 'USD'
       )
 
       expect(record.price).to eq(Money.new(100, 'USD'))
 
       # Change currency should invalidate the cache
-      record.currency = 'EUR'
+      record.price_currency = 'EUR'
       expect(record.price.currency.to_s).to eq('EUR')
     end
 
     it 'only defines currency setter once for shared currency columns' do
       class MoneyWithSharedCurrency < ActiveRecord::Base
         self.table_name = 'money_records'
-        money_column :price, currency_column: 'currency'
-        money_column :prix, currency_column: 'currency'
+        money_column :price, currency_column: 'price_currency'
+        money_column :prix, currency_column: 'price_currency'
       end
 
       record = MoneyWithSharedCurrency.new
-      methods_count = record.methods.count { |m| m.to_s == 'currency=' }
+      methods_count = record.methods.count { |m| m.to_s == 'price_currency=' }
       expect(methods_count).to eq(1)
     end
   end
 
   describe 'no_currency handling' do
     it 'does not write currency when money has no_currency' do
-      record = MoneyRecord.create!(currency: 'USD')
+      record = MoneyRecord.create!(price_currency: 'USD')
       record.price = Money.new(100, Money::NULL_CURRENCY)
       record.save!
       record.reload
-      expect(record.currency).to eq('USD')
+      expect(record.price_currency).to eq('USD')
     end
   end
 
@@ -574,7 +599,7 @@ RSpec.describe 'MoneyColumn' do
   describe 'ActiveRecord callbacks integration' do
     class MoneyWithCallbacks < ActiveRecord::Base
       self.table_name = 'money_records'
-      money_column :price, currency_column: 'currency'
+      money_column :price, currency_column: 'price_currency'
 
       before_save :double_price
 
@@ -595,7 +620,7 @@ RSpec.describe 'MoneyColumn' do
   describe 'validation integration' do
     class MoneyWithCustomValidation < ActiveRecord::Base
       self.table_name = 'money_records'
-      money_column :price, currency_column: 'currency'
+      money_column :price, currency_column: 'price_currency'
 
       validate :price_must_be_positive
 
@@ -621,9 +646,9 @@ RSpec.describe 'MoneyColumn' do
   describe 'ActiveRecord query interface' do
     before do
       MoneyRecord.delete_all
-      MoneyRecord.create!(price: Money.new(100, 'USD'), currency: 'USD')
-      MoneyRecord.create!(price: Money.new(200, 'USD'), currency: 'USD')
-      MoneyRecord.create!(price: Money.new(150, 'EUR'), currency: 'EUR')
+      MoneyRecord.create!(price: Money.new(100, 'USD'), price_currency: 'USD')
+      MoneyRecord.create!(price: Money.new(200, 'USD'), price_currency: 'USD')
+      MoneyRecord.create!(price: Money.new(150, 'EUR'), price_currency: 'EUR')
     end
 
     it 'supports where queries with money values' do
@@ -663,13 +688,13 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'attribute assignment' do
     it 'handles hash assignment with string keys' do
-      record = MoneyRecord.new('price' => 100, 'currency' => 'USD')
+      record = MoneyRecord.new('price' => 100, 'price_currency' => 'USD')
       expect(record.price.value).to eq(100)
       expect(record.price.currency.to_s).to eq('USD')
     end
 
     it 'handles hash assignment with symbol keys' do
-      record = MoneyRecord.new(price: 100, currency: 'USD')
+      record = MoneyRecord.new(price: 100, price_currency: 'USD')
       expect(record.price.value).to eq(100)
       expect(record.price.currency.to_s).to eq('USD')
     end
@@ -698,7 +723,7 @@ RSpec.describe 'MoneyColumn' do
 
   describe 'coerce_null with different scenarios' do
     it 'coerces nil to zero money with proper currency from column' do
-      record = MoneyRecordCoerceNull.new(currency: 'EUR')
+      record = MoneyRecordCoerceNull.new(price_currency: 'EUR')
       expect(record.price.value).to eq(0)
       expect(record.price.currency.to_s).to eq('EUR')
     end
@@ -721,11 +746,11 @@ RSpec.describe 'MoneyColumn' do
       record.price = Money.new(100, 'USD')
       expect(record.price.value).to eq(100)
       # Currency is not written for read_only columns when not saved
-      expect(record.currency).to be_nil
+      expect(record.price_currency).to be_nil
     end
 
     it 'allows setting money with compatible currency using string' do
-      record = MoneyWithReadOnlyCurrency.create!(currency: 'USD')
+      record = MoneyWithReadOnlyCurrency.create!(price_currency: 'USD')
       record.price = Money.new(100, 'USD')
       expect(record.price.value).to eq(100)
     end
@@ -766,26 +791,26 @@ RSpec.describe 'MoneyColumn' do
     end
 
     it 'tracks currency changes' do
-      record = MoneyRecord.create!(currency: 'USD', price: 100)
-      record.currency = 'EUR'
+      record = MoneyRecord.create!(price_currency: 'USD', price: 100)
+      record.price_currency = 'EUR'
 
-      expect(record.currency_changed?).to be true
-      expect(record.currency_was).to eq('USD')
+      expect(record.price_currency_changed?).to be true
+      expect(record.price_currency_was).to eq('USD')
     end
   end
 
   describe 'mass assignment with currency updates' do
     it 'handles simultaneous updates of money and currency in mass assignment' do
-      record = MoneyWithReadOnlyCurrency.create!(currency: 'USD', price: 100)
+      record = MoneyWithReadOnlyCurrency.create!(price_currency: 'USD', price: 100)
 
       record.assign_attributes(
-        currency: 'EUR',
+        price_currency: 'EUR',
         price: Money.new(200, 'EUR')
       )
 
       expect { record.save! }.not_to raise_error
       expect(record.price.value).to eq(200)
-      expect(record.currency).to eq('EUR')
+      expect(record.price_currency).to eq('EUR')
     end
   end
 
@@ -799,7 +824,7 @@ RSpec.describe 'MoneyColumn' do
 
     it 'preserves full precision for currencies with 3 decimal places' do
       # JOD has 3 minor units, so it preserves 3 decimal places
-      record = MoneyRecord.create!(price: Money.new(123.456, 'JOD'), currency: 'JOD')
+      record = MoneyRecord.create!(price: Money.new(123.456, 'JOD'), price_currency: 'JOD')
       record.reload
       expect(record.price.value).to eq(123.456)
     end
@@ -807,7 +832,7 @@ RSpec.describe 'MoneyColumn' do
     it 'rounds database values beyond 3 decimal places' do
       record = MoneyRecord.new
       record['price'] = 123.4567
-      record.currency = 'USD'
+      record.price_currency = 'USD'
       record.save!
       record.reload
       expect(record['price'].to_f.round(3)).to eq(123.457)
@@ -851,7 +876,7 @@ RSpec.describe 'MoneyColumn' do
     it 'allows direct writing of raw decimal value' do
       record = MoneyRecord.new
       record['price'] = 99.99
-      record.currency = 'EUR'
+      record.price_currency = 'EUR'
       expect(record.price.value).to eq(99.99)
       expect(record.price.currency.to_s).to eq('EUR')
     end
@@ -900,7 +925,7 @@ RSpec.describe 'MoneyColumn' do
   describe 'error messages' do
     it 'provides clear error for missing currency when default_currency is nil' do
       configure(default_currency: nil) do
-        record = MoneyRecord.create!(price: 100, currency: nil)
+        record = MoneyRecord.create!(price: 100, price_currency: nil)
         expect { record.reload.price }.to raise_error(ArgumentError, 'missing currency')
       end
     end
@@ -909,16 +934,16 @@ RSpec.describe 'MoneyColumn' do
   describe 'money column with different column names' do
     class MoneyWithCustomColumns < ActiveRecord::Base
       self.table_name = 'money_records'
-      money_column :price, currency_column: :devise
-      money_column :prix, currency_column: 'currency'
+      money_column :price, currency_column: :prix_currency
+      money_column :prix, currency_column: 'price_currency'
     end
 
     it 'supports both string and symbol currency column names' do
       record = MoneyWithCustomColumns.new(
         price: Money.new(100, 'EUR'),
-        devise: 'EUR',
+        prix_currency: 'EUR',
         prix: Money.new(200, 'USD'),
-        currency: 'USD'
+        price_currency: 'USD'
       )
 
       expect(record.price.currency.to_s).to eq('EUR')
@@ -929,14 +954,14 @@ RSpec.describe 'MoneyColumn' do
   describe 'money column array syntax' do
     class MoneyWithArrayColumns < ActiveRecord::Base
       self.table_name = 'money_records'
-      money_column [:price, :prix], currency_column: 'currency'
+      money_column [:price, :prix], currency_column: 'price_currency'
     end
 
     it 'supports defining multiple columns at once' do
       record = MoneyWithArrayColumns.new(
         price: Money.new(100, 'USD'),
         prix: Money.new(200, 'USD'),
-        currency: 'USD'
+        price_currency: 'USD'
       )
 
       expect(record.price).to eq(Money.new(100, 'USD'))
@@ -961,7 +986,7 @@ RSpec.describe 'MoneyColumn' do
       json = record.as_json
       # Money columns are serialized as a hash with symbol keys
       expect(json['price']).to eq({ currency: 'USD', value: '100.00' })
-      expect(json['currency']).to eq('USD')
+      expect(json['price_currency']).to eq('USD')
     end
   end
 
