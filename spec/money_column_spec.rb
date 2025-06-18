@@ -101,6 +101,31 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price_usd).to eq(Money.new(1.44, 'USD'))
   end
 
+  describe 'hard-coded currency (currency: "USD")' do
+    let(:record) { MoneyRecord.new }
+
+    it 'raises CurrencyMismatchError when assigning Money with wrong currency' do
+      expect {
+        record.price_usd = Money.new(5, 'EUR')
+      }.to raise_error(MoneyColumn::CurrencyMismatchError)
+    end
+
+    it 'allows assigning Money with the correct currency' do
+      record.price_usd = Money.new(8, 'USD')
+      expect(record.price_usd.value).to eq(8)
+      expect(record.price_usd.currency.to_s).to eq('USD')
+    end
+
+    it 'deprecates (but does not raise) under legacy_deprecations' do
+      configure(legacy_deprecations: true) do
+        expect(Money).to receive(:deprecate).once
+        record.price_usd = Money.new(9, 'EUR')
+        expect(record.price_usd.value).to eq(9)
+        expect(record.price_usd.currency.to_s).to eq('USD')
+      end
+    end
+  end
+
   it 'returns money with null currency when the currency in the DB is invalid' do
     configure(legacy_deprecations: true) do
       expect(Money).to receive(:deprecate).once

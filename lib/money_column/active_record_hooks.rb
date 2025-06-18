@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module MoneyColumn
-  class CurrencyReadOnlyError < StandardError; end
+  class Error < StandardError; end
+  class CurrencyReadOnlyError < Error; end
+  class CurrencyMismatchError < Error; end
 
   module ActiveRecordHooks
     def self.included(base)
@@ -62,13 +64,17 @@ module MoneyColumn
     def write_currency(column, money, options)
       currency_column = options[:currency_column]
 
-      if options[:currency_read_only]
-        current_currency = options[:currency] || read_currency_column(currency_column)
-        validate_currency_compatibility!(column, money, current_currency)
+      if options[:currency]
+        validate_hardcoded_currency_compatibility!(column, money, options[:currency])
         return
       end
 
-      unless money.no_currency?
+      if options[:currency_read_only]
+        validate_currency_compatibility!(column, money, currency_column)
+        return
+      end
+
+      if currency_column && !money.no_currency?
         self[currency_column] = money.currency.to_s
       end
     end
@@ -82,7 +88,19 @@ module MoneyColumn
       try(currency_column)
     end
 
-    def validate_currency_compatibility!(column, money, current_currency)
+    def validate_hardcoded_currency_compatibility!(column, money, expected_currency)
+      return if money.currency.compatible?(Money::Helpers.value_to_currency(expected_currency))
+
+      msg = "Invalid #{column}: attempting to write a money object with currency '#{money.currency}' to a record with hard-coded currency '#{expected_currency}'."
+      if Money::Config.current.legacy_deprecations
+        Money.deprecate(msg)
+      else
+        raise MoneyColumn::CurrencyMismatchError, msg
+      end
+    end
+
+    def validate_currency_compatibility!(column, money, currency_column)
+      current_currency = read_currency_column(currency_column)
       return if current_currency.nil? || money.currency.compatible?(Money::Helpers.value_to_currency(current_currency))
 
       msg = "Invalid #{column}: attempting to write a money object with currency '#{money.currency}' to a record with currency '#{current_currency}'. " \
