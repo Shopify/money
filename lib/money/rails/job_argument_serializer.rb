@@ -11,8 +11,6 @@ class Money
         Money.new(hash["value"], hash["currency"])
       end
 
-      private
-
       def klass
         Money
       end
