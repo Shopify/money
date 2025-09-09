@@ -11,6 +11,7 @@ class Money
         Money.new(hash["value"], hash["currency"])
       end
 
+      # Rails now expects this method to be public
       def klass
         Money
       end
