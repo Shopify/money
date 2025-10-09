@@ -99,8 +99,8 @@ module MoneyColumn
       current_currency = read_currency_column(currency_column)
       return if current_currency.nil? || money.currency.compatible?(Money::Helpers.value_to_currency(current_currency))
 
-      msg = "Invalid #{column}: attempting to write a money object with currency '#{money.currency}' to a record with currency '#{current_currency}'. " \
-        "If you do want to change the record's currency, either remove `currency_read_only` or update the record's currency manually"
+      msg = "Invalid #{column}: Money '#{money.currency}' != record '#{current_currency}'. " \
+        "Remove column's `currency_read_only` option or update value+currency together (e.g., record.update(value: money, currency: money.currency))."
 
       raise MoneyColumn::CurrencyReadOnlyError, msg
     end
