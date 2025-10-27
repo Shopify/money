@@ -47,7 +47,6 @@ class Money
     def initialize
       @symbol                = '$'
       @disambiguate_symbol   = nil
-      @subunit_symbol        = nil
       @iso_code              = 'XXX'
       @iso_numeric           = '999'
       @name                  = 'No Currency'
