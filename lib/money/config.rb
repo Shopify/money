@@ -41,7 +41,7 @@ class Money
       end
     end
 
-    attr_accessor :legacy_json_format, :legacy_deprecations, :experimental_crypto_currencies, :default_subunit_format
+    attr_accessor :legacy_json_format, :experimental_crypto_currencies, :default_subunit_format
 
     attr_reader :default_currency
     alias_method :currency, :default_currency
@@ -59,14 +59,6 @@ class Money
     end
     alias_method :currency=, :default_currency=
 
-    def legacy_default_currency!
-      @default_currency ||= Money::NULL_CURRENCY
-    end
-
-    def legacy_deprecations!
-      @legacy_deprecations = true
-    end
-
     def legacy_json_format!
       @legacy_json_format = true
     end
@@ -78,7 +70,6 @@ class Money
     def initialize
       @default_currency = nil
       @legacy_json_format = false
-      @legacy_deprecations = false
       @experimental_crypto_currencies = false
       @default_subunit_format = :iso4217
     end

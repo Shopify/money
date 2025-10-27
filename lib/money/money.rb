@@ -41,10 +41,6 @@ class Money
     extend Forwardable
     def_delegators :'Money::Config.global', :default_currency, :default_currency=
 
-    def without_legacy_deprecations(&block)
-      with_config(legacy_deprecations: false, &block)
-    end
-
     def with_config(**configs, &block)
       Money::Config.configure_current(**configs, &block)
     end
@@ -124,12 +120,7 @@ class Money
       msg = "Money.new(Money.new(amount, #{amount.currency}), #{currency}) " \
         "is changing the currency of an existing money object"
 
-      if Money::Config.current.legacy_deprecations
-        Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
-        Money.new(amount.value, currency)
-      else
-        raise Money::IncompatibleCurrencyError, msg
-      end
+      raise Money::IncompatibleCurrencyError, msg
     end
   end
 
@@ -385,11 +376,7 @@ class Money
   def ensure_compatible_currency(other_currency, msg)
     return if currency.compatible?(other_currency)
 
-    if Money::Config.current.legacy_deprecations
-      Money.deprecate("#{msg}. A Money::IncompatibleCurrencyError will raise in the next major release")
-    else
-      raise Money::IncompatibleCurrencyError, msg
-    end
+    raise Money::IncompatibleCurrencyError, msg
   end
 
   def calculated_currency(other)
