@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+class Numeric
+  def to_money: (?(String | Money::Currency | Money::NullCurrency | nil) currency) -> Money
+end
+
+class String
+  def to_money: (?(String | Money::Currency | Money::NullCurrency | nil) currency) -> Money
+end

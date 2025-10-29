@@ -1,0 +1,31 @@
+# frozen_string_literal: true
+
+class Money
+  class Config
+    CONFIG_THREAD: Symbol
+
+    attr_accessor legacy_json_format: bool
+    attr_accessor experimental_crypto_currencies: bool
+    attr_accessor default_subunit_format: Symbol
+
+    attr_reader default_currency: (Currency | NullCurrency | nil)
+    def default_currency=: (String | Currency | NullCurrency | nil value) -> (Currency | NullCurrency | nil)
+    def currency: () -> (Currency | NullCurrency | nil)
+    def currency=: (String | Currency | NullCurrency | nil value) -> (Currency | NullCurrency | nil)
+
+    def self.global: () -> Config
+    def self.current: () -> Config
+    def self.current=: (Config config) -> Config
+    def self.configure_current: [T] (?currency: (String | Currency | NullCurrency | nil), ?legacy_json_format: bool, ?experimental_crypto_currencies: bool, ?default_subunit_format: Symbol) { () -> T } -> T
+    def self.reset_current: () -> nil
+
+    private
+
+    def self.thread_local_config: () -> Hash[Integer, Config]
+
+    def initialize: () -> void
+    def legacy_default_currency!: () -> NullCurrency
+    def legacy_json_format!: () -> bool
+    def experimental_crypto_currencies!: () -> bool
+  end
+end
