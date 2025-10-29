@@ -1,0 +1,103 @@
+# frozen_string_literal: true
+
+class Money
+  include Comparable
+  extend Forwardable
+
+  NULL_CURRENCY: NullCurrency
+
+  attr_reader value: BigDecimal
+  attr_reader currency: (Currency | NullCurrency)
+
+  # Class methods
+  ACTIVE_SUPPORT_DEFINED: untyped
+  DEPRECATION_STACKTRACE_LENGTH: Integer
+
+  def self.default_currency: () -> (Currency | NullCurrency | nil)
+  def self.default_currency=: (String | Currency | NullCurrency | nil) -> (Currency | NullCurrency | nil)
+  def self.current_currency: () -> (Currency | NullCurrency | nil)
+  def self.current_currency=: (String | Currency | NullCurrency | nil) -> (Currency | NullCurrency | nil)
+  def self.config: () -> Config
+  def self.configure: () { (Config) -> void } -> Config
+  def self.with_currency: [T] ((String | Currency | NullCurrency | nil) currency) { () -> T } -> T
+  def self.with_config: [T] (?currency: (String | Currency | NullCurrency | nil), ?legacy_json_format: bool) { () -> T } -> T
+  def self.active_support_deprecator: () -> ActiveSupport::Deprecation
+  def self.deprecate: (String message) -> void
+  def self.caller_stack: () -> Array[Thread::Backtrace::Location]
+  # def_delegators needs this - Forwardable extended in singleton class
+  def self.def_delegators: (untyped accessor, *Symbol methods) -> void
+
+  def self.new: (?Numeric | String | Money value, ?String | Currency | NullCurrency | nil currency) -> Money
+  def self.from_amount: (Numeric | String value, ?String | Currency | NullCurrency | nil currency) -> Money
+  def self.from_subunits: (Integer | Numeric subunits, String | Currency | NullCurrency currency_iso, ?format: Symbol?) -> Money
+  def self.from_json: (String string) -> Money
+  def self.from_hash: (Hash[Symbol | String, untyped] hash) -> Money
+  def self.rational: (Money money1, Money money2) -> Rational
+
+  # Instance methods
+  def initialize: (BigDecimal value, Currency | NullCurrency currency) -> void
+  def init_with: (untyped coder) -> void
+  def encode_with: (untyped coder) -> void
+
+  def subunits: (?format: Symbol?) -> Integer
+  def no_currency?: () -> bool
+
+  def -@: () -> Money
+  def <=>: (untyped other) -> Integer?
+  def +: (Money | Numeric | String other) -> Money
+  def -: (Money | Numeric | String other) -> Money
+  def *: (Numeric other) -> Money
+  def /: (untyped other) -> void
+
+  def ==: (untyped other) -> bool
+  def eql?: (untyped other) -> bool
+  def hash: () -> Integer
+  def coerce: (Numeric other) -> [ReverseOperationProxy, Money]
+
+  def zero?: () -> bool
+  def nonzero?: () -> (BigDecimal | nil)
+  def positive?: () -> bool
+  def negative?: () -> bool
+
+  def to_i: () -> Integer
+  def to_f: () -> Float
+  def to_d: () -> BigDecimal
+  def to_money: (?String | Currency | NullCurrency | nil new_currency) -> Money
+  def to_s: (?Symbol? style) -> String
+  def to_fs: (?Symbol? style) -> String
+  def to_formatted_s: (?Symbol? style) -> String
+  def to_json: (?untyped options) -> String
+  def as_json: (?untyped options) -> (String | Hash[Symbol, String])
+  def to_h: (?untyped options) -> (String | Hash[Symbol, String])
+
+  def inspect: () -> String
+  def abs: () -> Money
+  def floor: () -> Money
+  def round: (?Integer ndigits) -> Money
+  def fraction: (Numeric rate) -> Money
+  def clamp: (Numeric min, Numeric max) -> Money
+
+  def allocate: (Array[Numeric] splits, ?Symbol strategy) -> Array[Money]
+  def allocate_max_amounts: (Array[Money] maximums) -> Array[Money]
+  def split: (Integer num) -> Splitter
+  def calculate_splits: (Integer num) -> Hash[Money, Integer]
+
+  def convert_currency: (Numeric exchange_rate, String | Currency new_currency) -> Money
+
+  private
+
+  def arithmetic: [T] (Money | Numeric | String other) { (Money) -> T } -> T
+  def ensure_compatible_currency: (Currency | NullCurrency other_currency, String msg) -> void
+  def calculated_currency: (Currency | NullCurrency other) -> (Currency | NullCurrency)
+  def self.new_from_money: (Money amount, String | Currency | NullCurrency | nil currency) -> Money
+
+  class ReverseOperationProxy
+    include Comparable
+
+    def initialize: (Numeric value) -> void
+    def <=>: (untyped other) -> Integer
+    def +: (untyped other) -> untyped
+    def -: (untyped other) -> untyped
+    def *: (untyped other) -> untyped
+  end
+end

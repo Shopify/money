@@ -5,7 +5,7 @@ require 'yaml'
 class Money
   class Currency
     module Loader
-      CURRENCY_DATA_PATH = File.expand_path("../../../config", __dir__)
+      CURRENCY_DATA_PATH = File.expand_path("../../../config", __dir__ || raise("__dir__ is nil"))
 
       class << self
         def load_currencies

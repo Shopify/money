@@ -1,0 +1,28 @@
+# frozen_string_literal: true
+
+class Money
+  class Splitter
+    include Enumerable[Money]
+
+    @money: Money
+    @num: Integer
+    @split: Hash[Money, Integer]?
+
+    def initialize: (Money money, Integer num) -> void
+    def split: () -> Hash[Money, Integer]
+    def each: () { (Money) -> void } -> void
+            | () -> Enumerator[Money, void]
+    def reverse_each: () { (Money) -> void } -> void
+                    | () -> Enumerator[Money, void]
+    def reverse: () -> Splitter
+    def size: () -> Integer
+    def to_ary: () -> Array[Money]
+    # These use `count = (count_undefined = true)` pattern with early returns from blocks
+    def first: (?untyped count) -> untyped
+    def last: (?untyped count) -> untyped
+    def []: (Integer index) -> Money?
+
+    # protected in Ruby
+    def split=: (Hash[Money, Integer] value) -> Hash[Money, Integer]
+  end
+end
