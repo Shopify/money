@@ -1,8 +1,0 @@
-module ActiveStorage
-  class Current < ActiveSupport::CurrentAttributes
-    def self.url_options: () -> Hash[Symbol, untyped]
-    def self.url_options=: (Hash[Symbol, untyped]) -> Hash[Symbol, untyped]
-    def url_options: () -> Hash[Symbol, untyped]
-    def url_options=: (Hash[Symbol, untyped]) -> Hash[Symbol, untyped]
-  end
-end
