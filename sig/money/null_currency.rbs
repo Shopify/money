@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+class Money
+  class NullCurrency
+    attr_reader iso_code: String
+    attr_reader iso_numeric: String
+    attr_reader name: String
+    attr_reader smallest_denomination: Integer
+    attr_reader subunit_symbol: String?
+    attr_reader subunit_to_unit: Integer
+    attr_reader minor_units: Integer
+    attr_reader symbol: String
+    attr_reader disambiguate_symbol: String?
+    attr_reader decimal_mark: String
+
+    def initialize: () -> void
+    def compatible?: (untyped other) -> bool
+    def eql?: (untyped other) -> bool
+    def to_s: () -> String
+    def ==: (untyped other) -> bool
+  end
+end

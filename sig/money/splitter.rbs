@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+class Money
+  class Splitter
+    include Enumerable[Money]
+
+    def initialize: (Money money, Integer num) -> void
+    def split: () -> Hash[Money, Integer]
+    def each: () { (Money) -> void } -> void
+            | () -> Enumerator[Money, void]
+    def reverse_each: () { (Money) -> void } -> void
+                    | () -> Enumerator[Money, void]
+    def reverse: () -> Splitter
+    def size: () -> Integer
+    def to_ary: () -> Array[Money]
+    def first: () -> Money?
+             | (Integer count) -> Array[Money]
+    def last: () -> Money?
+            | (Integer count) -> Array[Money]
+    def []: (Integer index) -> Money?
+  end
+end
