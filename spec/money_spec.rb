@@ -458,13 +458,11 @@ RSpec.describe "Money" do
   end
 
   it "raises when constructed with positive infinity" do
-    expect(Money).to receive(:deprecate).once
-    Money.new(Float::INFINITY)
+    expect { Money.new(Float::INFINITY) }.to raise_error(ArgumentError)
   end
 
   it "raises when constructed with negative infinity" do
-    expect(Money).to receive(:deprecate).once
-    Money.new(-Float::INFINITY)
+    expect { Money.new(-Float::INFINITY) }.to raise_error(ArgumentError)
   end
 
   it "is comparable with non-money objects" do
