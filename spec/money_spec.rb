@@ -457,6 +457,16 @@ RSpec.describe "Money" do
     expect { Money.new( 0.0 / 0) }.to raise_error(ArgumentError)
   end
 
+  it "raises when constructed with positive infinity" do
+    expect(Money).to receive(:deprecate).once
+    Money.new(Float::INFINITY)
+  end
+
+  it "raises when constructed with negative infinity" do
+    expect(Money).to receive(:deprecate).once
+    Money.new(-Float::INFINITY)
+  end
+
   it "is comparable with non-money objects" do
     expect(money).not_to eq(nil)
   end
@@ -548,6 +558,7 @@ RSpec.describe "Money" do
     let (:nil_10) { Money.new(10.00, Money::NULL_CURRENCY) }
     let (:nil_20) { Money.new(20.00, Money::NULL_CURRENCY) }
     let (:usd_10) { Money.new(10.00, 'USD') }
+    let (:jpy_10) { Money.new(10, 'JPY') }
 
     it "<=> can compare with and without currency" do
       expect(Money.new(1000, Money::NULL_CURRENCY) <=> Money.new(2000, 'JPY')).to eq(-1)
@@ -679,6 +690,32 @@ RSpec.describe "Money" do
       it { expect(cad_10 == nil).to(eq(false)) }
       it { expect { cad_10 <= nil }.to(raise_error(ArgumentError)) }
       it { expect { cad_10 <  nil }.to(raise_error(ArgumentError)) }
+    end
+
+    describe('infinity comparisons') do
+      it { expect(cad_10 <=> Float::INFINITY).to(eq(-1)) }
+      it { expect(cad_10 <  Float::INFINITY).to(eq(true)) }
+      it { expect(cad_10 <= Float::INFINITY).to(eq(true)) }
+      it { expect(cad_10 >  Float::INFINITY).to(eq(false)) }
+      it { expect(cad_10 >= Float::INFINITY).to(eq(false)) }
+
+      it { expect(cad_10 <=> -Float::INFINITY).to(eq(1)) }
+      it { expect(cad_10 >  -Float::INFINITY).to(eq(true)) }
+      it { expect(cad_10 >= -Float::INFINITY).to(eq(true)) }
+      it { expect(cad_10 <  -Float::INFINITY).to(eq(false)) }
+      it { expect(cad_10 <= -Float::INFINITY).to(eq(false)) }
+
+      it { expect(jpy_10 <=> Float::INFINITY).to(eq(-1)) }
+      it { expect(jpy_10 <  Float::INFINITY).to(eq(true)) }
+      it { expect(jpy_10 <= Float::INFINITY).to(eq(true)) }
+      it { expect(jpy_10 >  Float::INFINITY).to(eq(false)) }
+      it { expect(jpy_10 >= Float::INFINITY).to(eq(false)) }
+
+      it { expect(jpy_10 <=> -Float::INFINITY).to(eq(1)) }
+      it { expect(jpy_10 >  -Float::INFINITY).to(eq(true)) }
+      it { expect(jpy_10 >= -Float::INFINITY).to(eq(true)) }
+      it { expect(jpy_10 <  -Float::INFINITY).to(eq(false)) }
+      it { expect(jpy_10 <= -Float::INFINITY).to(eq(false)) }
     end
   end
 

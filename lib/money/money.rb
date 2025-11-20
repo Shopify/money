@@ -126,6 +126,10 @@ class Money
 
   def initialize(value, currency)
     raise ArgumentError if value.nan?
+    if value.infinite?
+      Money.deprecate("Initializing Money with infinity is deprecated and will raise an ArgumentError in v4")
+    end
+
     @currency = Helpers.value_to_currency(currency)
     @value = BigDecimal(value.round(@currency.minor_units))
     freeze
@@ -153,9 +157,14 @@ class Money
   end
 
   def <=>(other)
-    return unless other.respond_to?(:to_money)
-    arithmetic(other) do |money|
-      value <=> money.value
+    if other.is_a?(Numeric)
+      return value <=> other
+    end
+
+    if other.respond_to?(:to_money)
+      arithmetic(other) do |money|
+        value <=> money.value
+      end
     end
   end
 
