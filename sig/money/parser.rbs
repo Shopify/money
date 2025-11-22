@@ -1,0 +1,49 @@
+# frozen_string_literal: true
+
+class Money
+  module Parser
+    class Fuzzy
+      class MoneyFormatError < ArgumentError
+      end
+
+      MARKS: Array[String]
+      ESCAPED_MARKS: String
+      ESCAPED_NON_SPACE_MARKS: String
+      ESCAPED_NON_DOT_MARKS: String
+      ESCAPED_NON_COMMA_MARKS: String
+      NUMERIC_REGEX: Regexp
+      DOT_DECIMAL_REGEX: Regexp
+      COMMA_DECIMAL_REGEX: Regexp
+      INDIAN_NUMERIC_REGEX: Regexp
+      CHINESE_NUMERIC_REGEX: Regexp
+
+      def self.parse: (String | Numeric input, ?(String | Currency | NullCurrency | nil) currency, ?strict: bool) -> Money
+
+      def parse: (String | Numeric input, ?(String | Currency | NullCurrency | nil) currency, ?strict: bool) -> Money
+
+      private
+
+      def extract_amount_from_string: (String | Numeric input, Currency | NullCurrency currency, bool strict) -> (String | Numeric)
+      def normalize_number: (String number, Array[String] marks, Currency | NullCurrency currency) -> String
+      def last_digits_decimals?: (Array[String] digits, Array[String] marks, Currency | NullCurrency currency) -> bool
+    end
+
+    class Accounting < Fuzzy
+      def parse: (String input, ?(String | Currency | NullCurrency | nil) currency, **untyped options) -> Money
+    end
+
+    class Simple
+      SIGNED_DECIMAL_MATCHER: Regexp
+
+      def self.parse: (String | Numeric input, (String | Currency | NullCurrency | nil) currency, ?strict: bool) -> Money?
+    end
+
+    class LocaleAware
+      @decimal_separator_resolver: Proc?
+
+      def self.decimal_separator_resolver: () -> Proc?
+      def self.decimal_separator_resolver=: (Proc? resolver) -> Proc?
+      def self.parse: (String input, (String | Currency | NullCurrency | nil) currency, ?strict: bool, ?decimal_separator: String?) -> Money?
+    end
+  end
+end

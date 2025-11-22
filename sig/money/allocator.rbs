@@ -1,0 +1,27 @@
+# frozen_string_literal: true
+
+class Money
+  class Allocator < SimpleDelegator
+    ONE: BigDecimal
+
+    def initialize: (Money money) -> void
+    def allocate: (Array[Numeric] splits, ?Symbol strategy) -> Array[Money]
+    def allocate_max_amounts: (Array[Money] maximums) -> Array[Money]
+
+    # Inherited from Money via SimpleDelegator
+    def currency: () -> (Currency | NullCurrency)
+    def value: () -> BigDecimal
+    def subunits: (?format: Symbol?) -> Integer
+
+    # Kernel methods
+    def raise: (Class | String exception, ?String message) -> bot
+    def Rational: (Numeric numerator, ?Numeric denominator) -> Rational
+
+    private
+
+    def extract_currency: (Array[Money] money_array) -> (Currency | NullCurrency)
+    def amounts_from_splits: (Numeric allocations, Array[Numeric] splits, ?Integer subunits_to_split) -> [Array[Hash[Symbol, Numeric]], Integer]
+    def all_rational?: (Array[Numeric] splits) -> bool
+    def rank_by_nearest: (Array[Hash[Symbol, Numeric]] amounts) -> Array[Integer]
+  end
+end

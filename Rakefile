@@ -30,7 +30,24 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
-task default: :spec
+namespace :rbs do
+  desc "Install RBS collection"
+  task :install do
+    sh "rbs collection install > /dev/null"
+  end
+
+  desc "Validate RBS type signatures"
+  task validate: :install do
+    sh "rbs -I sig validate"
+  end
+
+  desc "List RBS files"
+  task :list do
+    sh "find sig -name '*.rbs'"
+  end
+end
+
+task default: [:spec, 'rbs:validate']
 
 require 'rake/task'
 RDoc::Task.new do |rdoc|
