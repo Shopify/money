@@ -1144,6 +1144,18 @@ RSpec.describe "Money" do
     let(:min) { -max }
 
     it 'returns the same value if the value is within the min..max range' do
+      money = Money.new(5000, 'EUR').clamp(min..max)
+      expect(money.value).to eq(5000)
+      expect(money.currency.iso_code).to eq('EUR')
+    end
+
+    it 'returns the same value if the value is larger and the max value is nil' do
+      money = Money.new(min + 1, 'EUR').clamp(min, nil)
+      expect(money.value).to eq(min + 1)
+      expect(money.currency.iso_code).to eq('EUR')
+    end
+
+    it 'returns the same value if the value is between the min and max' do
       money = Money.new(5000, 'EUR').clamp(min, max)
       expect(money.value).to eq(5000)
       expect(money.currency.iso_code).to eq('EUR')
@@ -1159,6 +1171,17 @@ RSpec.describe "Money" do
       money = Money.new(-9001, 'EUR').clamp(min, max)
       expect(money.value).to eq(-9000)
       expect(money.currency.iso_code).to eq('EUR')
+    end
+
+    it 'returns the min value if the original value is smaller and the max value is nil' do
+      money = Money.new(min - 1, 'EUR').clamp(min, nil)
+      expect(money.value).to eq(min)
+      expect(money.currency.iso_code).to eq('EUR')
+    end
+
+    it 'raises an Argument error if the max value is less than the min value' do
+      money = Money.new(-9001, 'EUR').clamp(min, nil)
+      expect { money.clamp(max, min) }.to raise_error(ArgumentError, 'min argument must be less than or equal to max argument')
     end
   end
 
