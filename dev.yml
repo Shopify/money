@@ -2,7 +2,13 @@
 # describe the required dependencies
 ---
 name: money
+
+dev.edition: 2024
+nix: true
+
 up:
+- packages:
+  - libyaml
 - ruby
 - bundler
 commands:
