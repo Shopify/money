@@ -50,7 +50,7 @@ end
 namespace :steep do
   desc "Type check Ruby code against RBS signatures"
   task check: "rbs:install" do
-    sh "steep check"
+    sh "steep check --jobs 2"
   end
 end
 

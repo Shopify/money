@@ -28,4 +28,7 @@ jobs:
           ${{ runner.os }}-rbs-
     - name: Run tests
       run: |
-        bundle exec rake
+        bundle exec rake spec
+    - name: Run typecheck
+      run: |
+        bundle exec rake typecheck
