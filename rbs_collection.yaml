@@ -12,4 +12,3 @@ path: .gem_rbs_collection
 
 gems:
   - name: bigdecimal
-  - name: forwardable
