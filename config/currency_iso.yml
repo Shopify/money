@@ -1339,7 +1339,7 @@ mga:
   symbol: Ar
   alternate_symbols: []
   subunit: Iraimbilanja
-  subunit_to_unit: 5
+  subunit_to_unit: 1
   symbol_first: true
   html_entity: ''
   decimal_mark: "."
