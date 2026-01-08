@@ -1,0 +1,71 @@
+# frozen_string_literal: true
+
+module MoneyColumn
+  class Error < StandardError
+  end
+
+  class CurrencyReadOnlyError < Error
+  end
+
+  class CurrencyMismatchError < Error
+  end
+
+  class ActiveRecordType < ActiveRecord::Type::Decimal
+    def serialize: (Money? money) -> BigDecimal?
+  end
+
+  module ActiveRecordHooks
+    def self.included: (Class base) -> void
+
+    def reload: (*untyped args) -> self
+    def initialize_dup: (*untyped args) -> void
+
+    @money_column_cache: Hash[String, Money?]
+    @money_raw_new_attributes: Hash[Symbol, untyped]?
+
+    # ActiveRecord methods used by this module
+    def persisted?: () -> bool
+    def []: (String | Symbol key) -> untyped
+    def []=: (String | Symbol key, untyped value) -> untyped
+    def try: (String | Symbol method, *untyped args) -> untyped
+
+    private
+
+    def clear_money_column_cache: () -> void
+    def init_internals: () -> void
+    def read_money_attribute: (String | Symbol column) -> Money?
+    def write_money_attribute: (String | Symbol column, Money | Numeric | String | nil money) -> (BigDecimal | nil)
+    def write_currency: (String column, Money money, Hash[Symbol, untyped] options) -> (String | nil)
+    def read_currency_column: (String | Symbol currency_column) -> String?
+    def validate_hardcoded_currency_compatibility!: (String column, Money money, String | Money::Currency expected_currency) -> void
+    def validate_currency_compatibility!: (String column, Money money, String | Symbol currency_column) -> void
+    def _assign_attributes: (Hash[untyped, untyped] new_attributes) -> void
+
+    module ClassMethods
+      @money_column_options: Hash[String, Hash[Symbol, untyped]]
+
+      def money_column_options: () -> Hash[String, Hash[Symbol, untyped]]
+
+      # ActiveRecord class methods used by this module
+      def attribute: (String name, untyped type, **untyped options) -> void
+      def define_method: (String | Symbol name) { (*untyped) -> untyped } -> Symbol
+
+      def money_column: (
+        *(String | Symbol) columns,
+        ?currency_column: (String | Symbol)?,
+        ?currency: (String | Money::Currency)?,
+        ?currency_read_only: bool,
+        ?coerce_null: bool
+      ) -> void
+
+      private
+
+      def normalize_money_column_options: (Hash[Symbol, untyped] options) -> Hash[Symbol, untyped]
+      def clear_cache_on_currency_change: (String currency_column) -> void
+      def inherited: (Class subclass) -> void
+    end
+  end
+
+  class Railtie < Rails::Railtie
+  end
+end

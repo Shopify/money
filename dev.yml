@@ -12,4 +12,4 @@ up:
 - ruby
 - bundler
 commands:
-  test: bundle exec rspec
+  test: bundle exec rake

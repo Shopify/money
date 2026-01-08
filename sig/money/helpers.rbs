@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+class Money
+  module Helpers
+    DECIMAL_ZERO: BigDecimal
+    MAX_DECIMAL: Integer
+
+    def self.value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
+    def self.value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)
+
+    # Instance methods (via extend self)
+    def value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
+    def value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)
+  end
+end
