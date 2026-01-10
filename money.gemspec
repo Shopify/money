@@ -29,6 +29,5 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 3.1'
 
   s.files = %x(git ls-files).split($/)
-  s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.require_paths = ["lib"]
 end
