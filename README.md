@@ -41,7 +41,7 @@ Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 
 m = Money.new(1000, "USD")
 # Splitting money evenly
-m.split(2)              == [Money.new(500, "USD"), Money.new(500, "USD")]
+m.split(2).to_a         == [Money.new(500, "USD"), Money.new(500, "USD")]
 m.split(3).map(&:value) == [333.34, 333.33, 333.33]
 m.calculate_splits(2)   == { Money.new(500, "USD") => 2 }
 m.calculate_splits(3)   == { Money.new(333.34, "USD") => 1, Money.new(333.33, "USD") =>2 }
@@ -183,7 +183,7 @@ Money.new(1.00, 'ISK').subunits                    # => 1
 Money.new(1.00, 'ISK').subunits(format: :stripe)   # => 100
 
 # Convert from subunits
-Money.from_subunits(100, 'ISK', format: :stripe)                    # => Money.new(1.00, 'ISK')
+Money.from_subunits(100, 'ISK', format: :stripe)   # => Money.new(1.00, 'ISK')
 ```
 
 #### Custom Converters
@@ -212,13 +212,12 @@ ActiveRecord:
 
 ```ruby
 create_table :orders do |t|
-  t.decimal :sub_total, precision: 21, scale: 3
-  t.decimal :tax, precision: 21, scale: 3
-  t.string :currency, limit: 3
+  t.decimal :price, precision: 21, scale: 3
+  t.string :price_currency, limit: 3
 end
 
 class Order < ApplicationRecord
-  money_column :sub_total, :tax
+  money_column :price, currency_column: :price_currency
 end
 ```
 
