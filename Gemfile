@@ -8,3 +8,5 @@ gem "rubocop-shopify", ">=2.8.0", require: false
 gem "rubocop-performance", require: false
 
 gemspec
+
+gem "steep", "~> 1.10"

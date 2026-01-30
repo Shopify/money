@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+class Money
+  module Converters
+    def self.subunit_converters: () -> Hash[Symbol, singleton(Converter)]
+    def self.register: (Symbol | String key, singleton(Converter) klass) -> singleton(Converter)
+    def self.for: (Symbol? format) -> Converter
+
+    class Converter
+      def to_subunits: (Money money) -> Integer
+      def from_subunits: (Integer | String | Numeric subunits, String | Currency | NullCurrency currency) -> Money
+
+      private
+
+      def subunit_to_unit: (Currency | NullCurrency currency) -> Numeric
+    end
+
+    class Iso4217Converter < Converter
+      def subunit_to_unit: (Currency | NullCurrency currency) -> Numeric
+    end
+
+    class StripeConverter < Iso4217Converter
+      SUBUNIT_TO_UNIT: Hash[String, Integer]
+
+      def subunit_to_unit: (Currency | NullCurrency currency) -> Numeric
+    end
+
+    class LegacyDollarsConverter < Converter
+      def subunit_to_unit: (Currency | NullCurrency currency) -> Integer
+    end
+  end
+end

@@ -49,3 +49,6 @@ pkg
 
 .rspec_status
 .DS_Store
+
+# RBS collection (installed via rbs collection install)
+.gem_rbs_collection

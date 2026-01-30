@@ -1,0 +1,46 @@
+# frozen_string_literal: true
+
+class Money
+  class Currency
+    module Loader
+      CURRENCY_DATA_PATH: String
+
+      def self.load_currencies: () -> Hash[String, untyped]
+      def self.load_crypto_currencies: () -> Hash[String, untyped]
+
+      private
+
+      def self.deep_deduplicate!: (Hash[untyped, untyped] | Array[untyped] | String | untyped data) -> (Hash[untyped, untyped] | Array[untyped] | String | untyped)
+    end
+
+    attr_reader iso_code: String
+    attr_reader iso_numeric: String
+    attr_reader name: String
+    attr_reader smallest_denomination: Integer
+    attr_reader subunit_symbol: String?
+    attr_reader subunit_to_unit: Integer
+    attr_reader minor_units: Integer
+    attr_reader symbol: String
+    attr_reader disambiguate_symbol: String
+    attr_reader decimal_mark: String
+
+    # self.new overrides Class#new and calls super(iso) which goes to initialize
+    def self.new: (String | Symbol currency_iso) -> Currency
+    def self.allocate: () -> Currency
+    def self.find!: (String | Symbol currency_iso) -> Currency
+    def self.find: (String | Symbol currency_iso) -> Currency?
+    def self.currencies: () -> Hash[String, Hash[String, untyped]]
+    def self.crypto_currencies: () -> Hash[String, Hash[String, untyped]]
+    def self.reset_loaded_currencies: () -> Hash[String, Currency]
+
+    def initialize: (String currency_iso) -> void
+    def eql?: (untyped other) -> bool
+    def hash: () -> Integer
+    def compatible?: (untyped other) -> bool
+    def ==: (untyped other) -> bool
+    def to_s: () -> String
+
+    class UnknownCurrency < ArgumentError
+    end
+  end
+end
