@@ -342,6 +342,33 @@ class Money
     Splitter.new(self, num).split.dup
   end
 
+  # Sum splits allows performing arithmetic operations on the splits
+  # and getting the resulting Money. This method should be used when it's not
+  # a requirement to get the splits as an array. This skips the Array creation
+  # for better performance.
+  #
+  # @param num [Integer] number of parties
+  #
+  # @yieldparam split [Money] each unique split value
+  # @yieldreturn [Money] transformed money value
+  #
+  # @return [Money] sum of transformed splits (or self if no block given)
+  #
+  # @example Without block, returns self
+  #   Money.new(100, "USD").sum_splits(3) #=> Money.new(100, "USD")
+  #
+  # @example With block, transforms each split and sums the results
+  #   Money.new(100, "USD").sum_splits(3) do |split|
+  #     split.allocate([0.9, 0.1]).last
+  #   end #=> Money.new(9.99, "USD")
+  def sum_splits(num)
+    raise ArgumentError, "need at least one party" if num < 1
+
+    return self unless block_given?
+
+    calculate_splits(num).sum(Money.new(0, currency)) { |value, count| yield(value) * count }
+  end
+
   # Clamps the value to be within the specified minimum and maximum. Returns
   # self if the value is within bounds, otherwise a new Money object with the
   # closest min or max value.
