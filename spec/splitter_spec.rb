@@ -120,11 +120,11 @@ RSpec.describe "Money::Splitter" do
     end
 
     specify "#sum_splits with block transforms each split and sums results" do
-      # 100 split 3 ways: 33.34 (1x), 33.33 (2x)
-      # Taking 10% of each (first allocation):
-      # 33.34.allocate([0.1, 0.9]).first => 3.34
-      # 33.33.allocate([0.1, 0.9]).first => 3.34 (roundrobin gives extra penny)
-      # Total: 3.34 + 3.34 + 3.34 = 10.02
+      # calculate_splits(3) => {33.34 => 1, 33.33 => 2}
+      # Taking 10% of each unique split value:
+      #   33.34.allocate([0.1, 0.9]).first => 3.34, * 1 = 3.34
+      #   33.33.allocate([0.1, 0.9]).first => 3.34 (roundrobin), * 2 = 6.68
+      # Total: 3.34 + 6.68 = 10.02
       result = Money.new(100, 'USD').sum_splits(3) do |split|
         split.allocate([0.1, 0.9]).first
       end
