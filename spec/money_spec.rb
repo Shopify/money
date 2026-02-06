@@ -1205,4 +1205,95 @@ RSpec.describe "Money" do
       }.to raise_error(ArgumentError, /unknown format/)
     end
   end
+
+  describe '#proportion_from' do
+    it 'returns the proportional amount based on top/bottom ratio' do
+      money = Money.new(100, 'JPY')
+      top = Money.new(5000, 'JPY')
+      bottom = Money.new(10_000, 'JPY')
+
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(50, 'JPY'))
+    end
+
+    it 'handles fractional results with proper rounding' do
+      money = Money.new(100, 'USD')
+      top = Money.new(1, 'USD')
+      bottom = Money.new(3, 'USD')
+
+      # 100 * (1/3) = 33.33...
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(33.34, 'USD'))
+    end
+
+    it 'returns zero when self is zero' do
+      money = Money.new(0, 'USD')
+      top = Money.new(50, 'USD')
+      bottom = Money.new(100, 'USD')
+
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(0, 'USD'))
+    end
+
+    it 'returns self when proportion is 1' do
+      money = Money.new(100, 'USD')
+      top = Money.new(100, 'USD')
+      bottom = Money.new(100, 'USD')
+
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(100, 'USD'))
+    end
+
+    it 'handles negative amounts when both are negative' do
+      money = Money.new(100, 'USD')
+      top = Money.new(-50, 'USD')
+      bottom = Money.new(-100, 'USD')
+
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(50, 'USD'))
+    end
+
+    it 'handles zero top' do
+      money = Money.new(100, 'USD')
+      top = Money.new(0, 'USD')
+      bottom = Money.new(100, 'USD')
+
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(0, 'USD'))
+    end
+
+    it 'raises ArgumentError when top is not a Money' do
+      money = Money.new(100, 'USD')
+      expect {
+        money.proportion_from(50, Money.new(100, 'USD'))
+      }.to raise_error(ArgumentError, /top must be a Money/)
+    end
+
+    it 'raises ArgumentError when bottom is not a Money' do
+      money = Money.new(100, 'USD')
+      expect {
+        money.proportion_from(Money.new(50, 'USD'), 100)
+      }.to raise_error(ArgumentError, /bottom must be a Money/)
+    end
+
+    it 'raises RangeError when top and bottom have different signs' do
+      money = Money.new(100, 'USD')
+      expect {
+        money.proportion_from(Money.new(50, 'USD'), Money.new(-100, 'USD'))
+      }.to raise_error(RangeError, /top and bottom must both be positive or negative/)
+
+      expect {
+        money.proportion_from(Money.new(-50, 'USD'), Money.new(100, 'USD'))
+      }.to raise_error(RangeError, /top and bottom must both be positive or negative/)
+    end
+
+    it 'raises ArgumentError when top and bottom have incompatible currencies' do
+      money = Money.new(100, 'USD')
+      expect {
+        money.proportion_from(Money.new(50, 'USD'), Money.new(100, 'EUR'))
+      }.to raise_error(ArgumentError, /top and bottom currencies must be compatible/)
+    end
+
+    it 'allows top and bottom with NULL_CURRENCY' do
+      money = Money.new(100, 'USD')
+      top = Money.new(50, Money::NULL_CURRENCY)
+      bottom = Money.new(100, 'USD')
+
+      expect(money.proportion_from(top, bottom)).to eq(Money.new(50, 'USD'))
+    end
+  end
 end
