@@ -107,4 +107,78 @@ RSpec.describe "Money::Splitter" do
       })
     end
   end
+
+  describe "per_unit" do
+    specify "#per_unit returns the higher-valued split by default" do
+      # $1 split 3 ways: 34¢, 33¢, 33¢
+      expect(Money.new(1.00, 'USD').per_unit(3)).to eq(Money.new(0.34, 'USD'))
+    end
+
+    specify "#per_unit with take returns sum of unit prices" do
+      # Take 2 units: 34¢ + 33¢ = 67¢
+      expect(Money.new(1.00, 'USD').per_unit(3, take: 2)).to eq(Money.new(0.67, 'USD'))
+    end
+
+    specify "#per_unit with take: quantity returns original amount" do
+      expect(Money.new(1.00, 'USD').per_unit(3, take: 3)).to eq(Money.new(1.00, 'USD'))
+    end
+
+    specify "#per_unit works with non-decimal currencies" do
+      # 100 JPY split 3 ways: 34, 33, 33
+      expect(Money.new(100, 'JPY').per_unit(3)).to eq(Money.new(34, 'JPY'))
+      expect(Money.new(100, 'JPY').per_unit(3, take: 2)).to eq(Money.new(67, 'JPY'))
+    end
+
+    specify "#per_unit raises for invalid take" do
+      expect { Money.new(1.00, 'USD').per_unit(3, take: -1) }.to raise_error(ArgumentError, "take should be positive")
+    end
+
+    specify "#per_unit raises for invalid quantity" do
+      expect { Money.new(1.00, 'USD').per_unit(0) }.to raise_error(ArgumentError, "quantity should be positive")
+      expect { Money.new(1.00, 'USD').per_unit(-1) }.to raise_error(ArgumentError, "quantity should be positive")
+    end
+
+    specify "#per_unit raises when take exceeds quantity" do
+      expect { Money.new(1.00, 'USD').per_unit(3, take: 4) }.to raise_error(ArgumentError, "take cannot be greater than quantity")
+    end
+
+    specify "#per_unit returns zero when take is 0" do
+      expect(Money.new(1.00, 'USD').per_unit(3, take: 0)).to eq(Money.new(0, 'USD'))
+    end
+  end
+
+  describe "reverse_per_unit" do
+    specify "#reverse_per_unit returns the lower-valued split by default" do
+      # $1 split 3 ways: 34¢, 33¢, 33¢ (reversed: 33¢, 33¢, 34¢)
+      expect(Money.new(1.00, 'USD').reverse_per_unit(3)).to eq(Money.new(0.33, 'USD'))
+    end
+
+    specify "#reverse_per_unit with take returns sum of lower-valued unit prices" do
+      # Take 2 units (from reversed): 33¢ + 33¢ = 66¢
+      expect(Money.new(1.00, 'USD').reverse_per_unit(3, take: 2)).to eq(Money.new(0.66, 'USD'))
+    end
+
+    specify "#reverse_per_unit with take: quantity returns original amount" do
+      expect(Money.new(1.00, 'USD').reverse_per_unit(3, take: 3)).to eq(Money.new(1.00, 'USD'))
+    end
+
+    specify "#reverse_per_unit works with non-decimal currencies" do
+      # 100 JPY split 3 ways: 34, 33, 33 (reversed: 33, 33, 34)
+      expect(Money.new(100, 'JPY').reverse_per_unit(3)).to eq(Money.new(33, 'JPY'))
+      expect(Money.new(100, 'JPY').reverse_per_unit(3, take: 2)).to eq(Money.new(66, 'JPY'))
+    end
+
+    specify "#reverse_per_unit raises for invalid take" do
+      expect { Money.new(1.00, 'USD').reverse_per_unit(3, take: 0) }.to raise_error(ArgumentError, "take should be positive")
+      expect { Money.new(1.00, 'USD').reverse_per_unit(3, take: -1) }.to raise_error(ArgumentError, "take should be positive")
+    end
+
+    specify "#reverse_per_unit raises for invalid quantity" do
+      expect { Money.new(1.00, 'USD').reverse_per_unit(-1) }.to raise_error(ArgumentError, "quantity should be positive")
+    end
+
+    specify "#reverse_per_unit raises when take exceeds quantity" do
+      expect { Money.new(1.00, 'USD').reverse_per_unit(3, take: 4) }.to raise_error(ArgumentError, "take cannot be greater than quantity")
+    end
+  end
 end

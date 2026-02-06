@@ -342,6 +342,66 @@ class Money
     Splitter.new(self, num).split.dup
   end
 
+  # Calculate the unit price based on a total quantity of units.
+  # A number of units to take can be optionally provided to get the sum of
+  # their unit prices with correct rounding.
+  #
+  # The higher-valued splits are used first (i.e., units with the "extra penny").
+  #
+  # @param quantity [Integer] total number of units
+  # @param take [Integer] number of unit prices to sum (default: 1)
+  #
+  # @return [Money]
+  #
+  # @example Get the unit price for 1 unit out of 3
+  #   Money.new(1.00, 'USD').per_unit(3)
+  #   # => Money.new(0.34, 'USD')  # the higher-valued split
+  #
+  # @example Get total for 3 units out of 3 (returns original amount)
+  #   Money.new(1.00, 'USD').per_unit(3, take: 3)
+  #   # => Money.new(1.00, 'USD')
+  def per_unit(quantity, take: 1)
+    raise ArgumentError, "take should be positive" if take < 0
+    raise ArgumentError, "quantity should be positive" if quantity <= 0
+    raise ArgumentError, "take cannot be greater than quantity" if take > quantity
+
+    calculate_splits(quantity).sum(Money.new(0, currency)) do |value, count|
+      count = [take, count].min
+      take -= count
+      value * count
+    end
+  end
+
+  # Calculate the unit price based on a total quantity of units.
+  # Uses the lesser-valued splits first (i.e., units without the "extra penny").
+  #
+  # A number of units to take can be optionally provided to get the sum of
+  # their unit prices with correct rounding.
+  #
+  # @param quantity [Integer] total number of units
+  # @param take [Integer] number of unit prices to sum (default: 1)
+  #
+  # @return [Money]
+  #
+  # @example Get the unit price for 1 unit out of 3 (lower value)
+  #   Money.new(1.00, 'USD').reverse_per_unit(3)
+  #   # => Money.new(0.33, 'USD')  # the lower-valued split
+  #
+  # @example Get total for 3 units out of 3 (returns original amount)
+  #   Money.new(1.00, 'USD').reverse_per_unit(3, take: 3)
+  #   # => Money.new(1.00, 'USD')
+  def reverse_per_unit(quantity, take: 1)
+    raise ArgumentError, "quantity should be positive" if quantity < 0
+    raise ArgumentError, "take should be positive" if take <= 0
+    raise ArgumentError, "take cannot be greater than quantity" if take > quantity
+
+    calculate_splits(quantity).reverse_each.sum(Money.new(0, currency)) do |value, count|
+      count = [take, count].min
+      take -= count
+      value * count
+    end
+  end
+
   # Clamps the value to be within the specified minimum and maximum. Returns
   # self if the value is within bounds, otherwise a new Money object with the
   # closest min or max value.
