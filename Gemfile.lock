@@ -262,7 +262,7 @@ GEM
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.38.0, < 2.0)
-    rubocop-shopify (2.17.0)
+    rubocop-shopify (2.18.0)
       rubocop (~> 1.62)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
@@ -333,7 +333,7 @@ DEPENDENCIES
   rspec (~> 3.2)
   rubocop
   rubocop-performance
-  rubocop-shopify (>= 2.8.0)
+  rubocop-shopify
   shopify-money!
   simplecov
   sqlite3
