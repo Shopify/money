@@ -126,9 +126,7 @@ class Money
 
   def initialize(value, currency)
     raise ArgumentError if value.nan?
-    if value.infinite?
-      Money.deprecate("Initializing Money with infinity is deprecated and will raise an ArgumentError in v4")
-    end
+    raise ArgumentError if value.infinite?
 
     @currency = Helpers.value_to_currency(currency)
     @value = BigDecimal(value.round(@currency.minor_units))
