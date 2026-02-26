@@ -7,6 +7,7 @@ class Money
     attr_accessor legacy_json_format: bool
     attr_accessor experimental_crypto_currencies: bool
     attr_accessor default_subunit_format: Symbol
+    attr_accessor custom_currency_path: String?
 
     attr_reader default_currency: (Currency | NullCurrency | nil)
     def default_currency=: (String | Currency | NullCurrency | nil value) -> (Currency | NullCurrency | nil)
@@ -16,7 +17,7 @@ class Money
     def self.global: () -> Config
     def self.current: () -> Config
     def self.current=: (Config config) -> Config
-    def self.configure_current: [T] (?currency: (String | Currency | NullCurrency | nil), ?legacy_json_format: bool, ?experimental_crypto_currencies: bool, ?default_subunit_format: Symbol) { () -> T } -> T
+    def self.configure_current: [T] (?currency: (String | Currency | NullCurrency | nil), ?legacy_json_format: bool, ?experimental_crypto_currencies: bool, ?default_subunit_format: Symbol, ?custom_currency_path: String?) { () -> T } -> T
     def self.reset_current: () -> nil
 
     private
