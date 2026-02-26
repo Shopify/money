@@ -72,6 +72,18 @@ RSpec.describe "Money::Config" do
     end
   end
 
+  describe 'experimental_custom_currency_path' do
+    it 'defaults to nil' do
+      expect(Money::Config.new.experimental_custom_currency_path).to eq(nil)
+    end
+
+    it 'can be set to a path' do
+      config = Money::Config.new
+      config.experimental_custom_currency_path = '/tmp/custom.yml'
+      expect(config.experimental_custom_currency_path).to eq('/tmp/custom.yml')
+    end
+  end
+
   describe 'legacy_json_format' do
     it 'defaults to false' do
       expect(Money::Config.new.legacy_json_format).to eq(false)
