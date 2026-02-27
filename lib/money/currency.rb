@@ -31,6 +31,15 @@ class Money
         @@crypto_currencies ||= Loader.load_crypto_currencies
       end
 
+      def custom_currencies(path)
+        @@custom_currencies_cache ||= {}
+        @@custom_currencies_cache[path] ||= Loader.load_custom_currencies(path)
+      end
+
+      def reset_custom_currencies
+        @@custom_currencies_cache = nil
+      end
+
       def reset_loaded_currencies
         @@loaded_currencies = {}
       end
@@ -51,6 +60,10 @@ class Money
       data = self.class.currencies[currency_iso]
       if data.nil? && Money::Config.current.experimental_crypto_currencies
         data = self.class.crypto_currencies[currency_iso]
+      end
+      if data.nil?
+        custom_path = Money::Config.current.custom_currency_path
+        data = self.class.custom_currencies(custom_path)[currency_iso] if custom_path
       end
 
       raise UnknownCurrency, "Invalid iso4217 currency '#{currency_iso}'" unless data

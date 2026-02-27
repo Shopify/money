@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'spec_helper'
+require 'tempfile'
 
 RSpec.describe Money::Currency::Loader do
 
@@ -35,6 +36,61 @@ RSpec.describe Money::Currency::Loader do
       expect(currencies).to be_frozen
       expect(currencies['usdc']).to be_frozen
       expect(currencies['usdc']['iso_code']).to be_frozen
+    end
+  end
+
+  describe 'load_custom_currencies' do
+    it 'loads custom currencies from the given path' do
+      file = Tempfile.new(['custom_currencies', '.yml'])
+      file.write({
+        "credits" => {
+          "iso_code" => "CREDITS",
+          "name" => "Loyalty Points",
+          "symbol" => "CR",
+          "disambiguate_symbol" => "CR",
+          "subunit_to_unit" => 1,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        }
+      }.to_yaml)
+      file.close
+
+      currencies = subject.load_custom_currencies(file.path)
+      expect(currencies['credits']['iso_code']).to eq('CREDITS')
+      expect(currencies['credits']['name']).to eq('Loyalty Points')
+      expect(currencies['credits']['symbol']).to eq('CR')
+      expect(currencies['credits']['subunit_to_unit']).to eq(1)
+    ensure
+      file.unlink
+    end
+
+    it 'raises ArgumentError when file does not exist' do
+      expect {
+        subject.load_custom_currencies('/nonexistent/path.yml')
+      }.to raise_error(ArgumentError, /not found/)
+    end
+
+    it 'returns frozen and deduplicated data' do
+      file = Tempfile.new(['custom_currencies', '.yml'])
+      file.write({
+        "credits" => {
+          "iso_code" => "CREDITS",
+          "name" => "Loyalty Points",
+          "symbol" => "CR",
+          "disambiguate_symbol" => "CR",
+          "subunit_to_unit" => 1,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        }
+      }.to_yaml)
+      file.close
+
+      currencies = subject.load_custom_currencies(file.path)
+      expect(currencies).to be_frozen
+      expect(currencies['credits']).to be_frozen
+      expect(currencies['credits']['iso_code']).to be_frozen
+    ensure
+      file.unlink
     end
   end
 end

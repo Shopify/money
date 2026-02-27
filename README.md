@@ -165,6 +165,28 @@ Money.configure do |config|
 end
 ```
 
+### Custom Currencies
+To load custom currencies from a YAML file:
+``` ruby
+Money.configure do |config|
+  config.custom_currency_path = Rails.root.join("config/custom_currencies.yml")
+end
+```
+
+``` yaml
+# config/custom_currencies.yml
+credits:
+  iso_code: "CREDITS"
+  name: "Loyalty Points"
+  symbol: "CR"
+  disambiguate_symbol: "CR"
+  subunit_to_unit: 1
+  smallest_denomination: 1
+  decimal_mark: "."
+```
+
+Custom currencies are looked up after ISO and crypto currencies, so they cannot shadow built-in currencies.
+
 ### Converters
 The Money gem provides a flexible converter system for handling different subunit formats. This is particularly useful when working with payment providers or APIs that have their own conventions for handling currency subunits.
 

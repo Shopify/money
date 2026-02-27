@@ -22,6 +22,13 @@ class Money
           deep_deduplicate!(currencies)
         end
 
+        def load_custom_currencies(path)
+          raise ArgumentError, "Custom currency file not found: #{path}" unless File.exist?(path)
+          data = YAML.safe_load_file(path, permitted_classes: [])
+          raise ArgumentError, "Custom currency file must contain a YAML hash" unless data.is_a?(Hash)
+          deep_deduplicate!(data)
+        end
+
         private
 
         def deep_deduplicate!(data)
