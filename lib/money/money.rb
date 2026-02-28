@@ -340,6 +340,36 @@ class Money
     Splitter.new(self, num).split.dup
   end
 
+  # Provides the proportion (top/bottom) of self.
+  #
+  # @param top [Money] the numerator
+  # @param bottom [Money] the denominator
+  #
+  # @return [Money] self * (top / bottom) with proper rounding
+  #
+  # @example
+  #   money = Money.new(100, 'JPY')
+  #   top = Money.new(5000, 'JPY')
+  #   bottom = Money.new(10_000, 'JPY')
+  #
+  #   money.proportion_from(top, bottom) # => #<Money value:50 currency:JPY>
+  def proportion_from(top, bottom)
+    raise(ArgumentError, "top must be a Money, received #{top.class.name}") unless top.is_a?(Money)
+    raise(ArgumentError, "bottom must be a Money, received #{bottom.class.name}") unless bottom.is_a?(Money)
+    if top.nonzero? && !same_sign?(top, bottom)
+      raise(RangeError, "top and bottom must both be positive or negative")
+    end
+
+    unless top.currency.compatible?(bottom.currency)
+      msg = "top and bottom currencies must be compatible, received " \
+        "#{top.currency.iso_code}:#{bottom.currency.iso_code}"
+      raise(ArgumentError, msg)
+    end
+
+    proportion = Money.rational(top, bottom)
+    allocate([proportion, 1 - proportion]).first
+  end
+
   # Clamps the value to be within the specified minimum and maximum. Returns
   # self if the value is within bounds, otherwise a new Money object with the
   # closest min or max value.
@@ -388,5 +418,9 @@ class Money
 
   def calculated_currency(other)
     no_currency? ? other : currency
+  end
+
+  def same_sign?(*monies)
+    monies.all?(&:positive?) || monies.all?(&:negative?)
   end
 end
