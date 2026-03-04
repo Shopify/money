@@ -44,10 +44,18 @@ class Money
       when 'xxx', 'XXX'
         Money::NULL_CURRENCY
       when String
-        Currency.find!(currency)
+        resolved_currencies[currency] ||= Currency.find!(currency)
       else
         raise ArgumentError, "could not parse as currency #{currency.inspect}"
       end
+    end
+
+    def resolved_currencies
+      @resolved_currencies ||= {}
+    end
+
+    def reset_resolved_currencies
+      @resolved_currencies = {}
     end
   end
 end
