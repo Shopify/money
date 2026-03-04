@@ -42,6 +42,7 @@ class Money
 
       def reset_loaded_currencies
         @@loaded_currencies = {}
+        Helpers.reset_resolved_currencies
       end
     end
 
