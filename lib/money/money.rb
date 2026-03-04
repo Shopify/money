@@ -346,15 +346,14 @@ class Money
   #
   # @example
   #   Money.new(50, "CAD").clamp(1, 100) #=> Money.new(50, "CAD")
+  #   Money.new(50, "CAD").clamp(1..100) #=> Money.new(50, "CAD")
+  #   Money.new(50, "CAD").clamp(1, nil) #=> Money.new(1,  "CAD")
   #
   #   Money.new(120, "CAD").clamp(0, 100) #=> Money.new(100, "CAD")
-  def clamp(min, max)
-    raise ArgumentError, 'min cannot be greater than max' if min > max
+  def clamp(...)
+    clamped_value = value.clamp(...)
 
-    clamped_value = min if value < min
-    clamped_value = max if value > max
-
-    if clamped_value.nil?
+    if clamped_value == value
       self
     else
       Money.new(clamped_value, currency)
