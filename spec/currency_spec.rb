@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'spec_helper'
+require 'tempfile'
 
 RSpec.describe "Currency" do
   CURRENCY_DATA = {
@@ -15,6 +16,20 @@ RSpec.describe "Currency" do
   }
 
   let(:currency) { Money::Currency.new('usd') }
+
+  let(:mock_custom_currency) do
+    {
+      "credits" => {
+        "iso_code" => "CREDITS",
+        "name" => "Loyalty Points",
+        "symbol" => "CR",
+        "disambiguate_symbol" => "CR",
+        "subunit_to_unit" => 1,
+        "smallest_denomination" => 1,
+        "decimal_mark" => "."
+      }
+    }
+  end
 
   let(:mock_crypto_currency) do
     { 
@@ -68,6 +83,80 @@ RSpec.describe "Currency" do
         expect(Money::Currency.find("USDC")).to be_nil
       end
     end
+
+    it "looks up custom currencies when path is set" do
+      file = custom_currency_file(mock_custom_currency)
+
+      configure(experimental_custom_currency_path: file.path) do
+        currency = Money::Currency.new('CREDITS')
+        expect(currency.iso_code).to eq('CREDITS')
+        expect(currency.symbol).to eq('CR')
+      end
+    ensure
+      file.unlink
+    end
+
+    it "doesn't look up custom currencies when path is nil" do
+      expect(Money::Currency.find("CREDITS")).to eq(nil)
+    end
+
+    it "can't override ISO currencies with custom currencies" do
+      file = custom_currency_file(
+        "usd" => {
+          "iso_code" => "USD",
+          "name" => "Fake Dollar",
+          "symbol" => "FAKE",
+          "disambiguate_symbol" => "FAKE",
+          "subunit_to_unit" => 1,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        }
+      )
+
+      configure(experimental_custom_currency_path: file.path) do
+        currency = Money::Currency.new('USD')
+        expect(currency.name).to eq('United States Dollar')
+        expect(currency.symbol).to eq('$')
+      end
+    ensure
+      file.unlink
+    end
+
+    it "can't override crypto currencies with custom currencies" do
+      file = custom_currency_file(
+        "usdc" => {
+          "iso_code" => "USDC",
+          "name" => "Fake USDC",
+          "symbol" => "FAKE",
+          "disambiguate_symbol" => "FAKE",
+          "subunit_to_unit" => 1,
+          "smallest_denomination" => 1,
+          "decimal_mark" => "."
+        }
+      )
+
+      configure(experimental_crypto_currencies: true, experimental_custom_currency_path: file.path) do
+        currency = Money::Currency.new('USDC')
+        expect(currency.name).to eq('USD Coin')
+        expect(currency.symbol).to eq('USDC')
+      end
+    ensure
+      file.unlink
+    end
+
+    it "loads custom currencies end-to-end from a YAML file" do
+      file = custom_currency_file(mock_custom_currency)
+
+      configure(experimental_custom_currency_path: file.path) do
+        money = Money.new(500, "CREDITS")
+        expect(money.currency.iso_code).to eq("CREDITS")
+        expect(money.currency.symbol).to eq("CR")
+        expect(money.currency.name).to eq("Loyalty Points")
+        expect(money.value).to eq(500)
+      end
+    ensure
+      file.unlink
+    end
   end
 
   describe ".find" do
@@ -95,6 +184,21 @@ RSpec.describe "Currency" do
         expect(Money::Currency.find('USDC')).to eq(nil)
       end
     end
+
+    it "returns custom currency when path is set" do
+      file = custom_currency_file(mock_custom_currency)
+
+      configure(experimental_custom_currency_path: file.path) do
+        expect(Money::Currency.find('CREDITS')).not_to eq(nil)
+        expect(Money::Currency.find('CREDITS').iso_code).to eq('CREDITS')
+      end
+    ensure
+      file.unlink
+    end
+
+    it "returns nil for custom currency when path is not set" do
+      expect(Money::Currency.find('CREDITS')).to eq(nil)
+    end
   end
 
   describe ".find!" do
@@ -119,6 +223,20 @@ RSpec.describe "Currency" do
       expect(Money::Currency::Loader).to have_received(:load_crypto_currencies).once
       
       Money::Currency.class_variable_set(:@@crypto_currencies, old_currencies) if old_currencies
+    end
+  end
+
+  describe ".custom_currencies" do
+    after { Money::Currency.reset_custom_currencies }
+
+    it "loads custom currencies from the loader" do
+      allow(Money::Currency::Loader).to receive(:load_custom_currencies)
+        .with('/tmp/custom.yml')
+        .and_return(mock_custom_currency)
+
+      expect(Money::Currency.custom_currencies('/tmp/custom.yml')).to eq(mock_custom_currency)
+      expect(Money::Currency.custom_currencies('/tmp/custom.yml')).to eq(mock_custom_currency) # Second call to verify caching
+      expect(Money::Currency::Loader).to have_received(:load_custom_currencies).with('/tmp/custom.yml').once
     end
   end
 

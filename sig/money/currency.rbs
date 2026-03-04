@@ -7,6 +7,7 @@ class Money
 
       def self.load_currencies: () -> Hash[String, untyped]
       def self.load_crypto_currencies: () -> Hash[String, untyped]
+      def self.load_custom_currencies: (String path) -> Hash[String, untyped]
 
       private
 
@@ -31,6 +32,8 @@ class Money
     def self.find: (String | Symbol currency_iso) -> Currency?
     def self.currencies: () -> Hash[String, Hash[String, untyped]]
     def self.crypto_currencies: () -> Hash[String, Hash[String, untyped]]
+    def self.custom_currencies: (String path) -> Hash[String, Hash[String, untyped]]
+    def self.reset_custom_currencies: () -> nil
     def self.reset_loaded_currencies: () -> Hash[String, Currency]
 
     def initialize: (String currency_iso) -> void
