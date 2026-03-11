@@ -128,13 +128,16 @@ class Money
     raise ArgumentError if value.nan?
     raise ArgumentError if value.infinite?
 
-    @currency = Helpers.value_to_currency(currency)
+    @currency = currency
     @value = BigDecimal(value.round(@currency.minor_units))
     freeze
   end
 
   def init_with(coder)
-    initialize(Helpers.value_to_decimal(coder['value']), coder['currency'])
+    initialize(
+      Helpers.value_to_decimal(coder['value']),
+      Helpers.value_to_currency(coder['currency']),
+    )
   end
 
   def encode_with(coder)
