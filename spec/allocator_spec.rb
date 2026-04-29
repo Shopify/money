@@ -42,7 +42,7 @@ RSpec.describe "Allocator" do
 
     specify "#allocate will use rationals if provided" do
       splits = [128400,20439,14589,14589,25936].map{ |num| Rational(num, 203953) } # sums to > 1 if converted to float
-      expect(new_allocator(2.25).allocate(splits)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])
+      expect(new_allocator(2.25).allocate(splits, :roundrobin)).to eq([Money.new(1.42), Money.new(0.23), Money.new(0.16), Money.new(0.16), Money.new(0.28)])
     end
 
     specify "#allocate will convert rationals with high precision" do
@@ -59,6 +59,23 @@ RSpec.describe "Allocator" do
 
     specify "#allocate raise ArgumentError when invalid strategy is provided" do
       expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse, :nearest")
+    end
+
+    specify "#allocate defaults to :nearest strategy" do
+      # With :nearest, the party closest to the next whole subunit gets the leftover.
+      monies = new_allocator(1).allocate([0.02, 0.98])
+      expect(monies[0]).to eq(Money.new(0.02))
+      expect(monies[1]).to eq(Money.new(0.98))
+    end
+
+    specify "#allocate uses the configured default_allocation_strategy" do
+      Money.with_config(default_allocation_strategy: :roundrobin) do
+        # With :roundrobin, leftover subunits accumulate from the first allocation.
+        monies = new_allocator(0.05).allocate([0.33, 0.34, 0.33])
+        expect(monies[0]).to eq(Money.new(0.02))
+        expect(monies[1]).to eq(Money.new(0.02))
+        expect(monies[2]).to eq(Money.new(0.01))
+      end
     end
 
     specify "#allocate exact splits produce no leftover regardless of strategy" do

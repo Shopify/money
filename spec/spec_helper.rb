@@ -75,12 +75,13 @@ RSpec::Matchers.define :quack_like do
 end
 
 
-def configure(default_currency: nil, legacy_json_format: nil, experimental_crypto_currencies: nil, experimental_custom_currency_path: nil)
+def configure(default_currency: nil, legacy_json_format: nil, experimental_crypto_currencies: nil, experimental_custom_currency_path: nil, default_allocation_strategy: nil)
   Money::Config.current = Money::Config.new.tap do |config|
     config.default_currency = default_currency if default_currency
     config.legacy_json_format! if legacy_json_format
     config.experimental_crypto_currencies = experimental_crypto_currencies unless experimental_crypto_currencies.nil?
     config.experimental_custom_currency_path = experimental_custom_currency_path if experimental_custom_currency_path
+    config.default_allocation_strategy = default_allocation_strategy if default_allocation_strategy
   end
 
   yield

@@ -41,7 +41,7 @@ class Money
       end
     end
 
-    attr_accessor :legacy_json_format, :experimental_crypto_currencies, :default_subunit_format, :experimental_custom_currency_path
+    attr_accessor :legacy_json_format, :experimental_crypto_currencies, :default_subunit_format, :experimental_custom_currency_path, :default_allocation_strategy
 
     attr_reader :default_currency
     alias_method :currency, :default_currency
@@ -73,6 +73,7 @@ class Money
       @experimental_crypto_currencies = false
       @default_subunit_format = :iso4217
       @experimental_custom_currency_path = nil
+      @default_allocation_strategy = :roundrobin
     end
   end
 end

@@ -157,6 +157,23 @@ Money.new(money.value * exchange_rate, "JPY")
 money.convert_currency(exchange_rate, "JPY")
 ```
 
+### Allocation Strategy
+
+By default `allocate` distributes leftover subunits using the `:roundrobin` strategy.
+You can change the default:
+
+``` ruby
+Money.configure do |config|
+  config.default_allocation_strategy = :nearest
+end
+```
+
+Or pass a strategy per call:
+
+``` ruby
+Money.new(10.55, "USD").allocate([0.25, 0.5, 0.25], :nearest)
+```
+
 ### Crypto Currencies
 To enable support for currencies listed in `crypto.yml` use
 ``` ruby
