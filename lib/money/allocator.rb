@@ -33,6 +33,8 @@ class Money
     # - `:roundrobin_reverse`: leftover subunits will be accumulated starting from the last allocation right to left
     # - `:nearest`: leftover subunits will by given first to the party closest to the next whole subunit
     #
+    # The default strategy can be changed via `Money::Config.current.default_allocation_strategy`.
+    #
     # @example
     #   Money.new(5, "USD").allocate([0.50, 0.25, 0.25])
     #     #=> [#<Money value:2.50 currency:USD>, #<Money value:1.25 currency:USD>, #<Money value:1.25 currency:USD>]
@@ -57,12 +59,16 @@ class Money
     #   Money.new(10.55, "USD").allocate([0.25, 0.5, 0.25], :nearest)
     #     #=> [#<Money value:2.64 currency:USD>, #<Money value:5.27 currency:USD>, #<Money value:2.64 currency:USD>]
 
-    def allocate(splits, strategy = :roundrobin)
+    def allocate(splits, strategy = nil)
       if splits.empty?
         raise ArgumentError, 'at least one split must be provided'
       end
 
-      splits.map!(&:to_r)
+      strategy ||= Money::Config.current.default_allocation_strategy
+
+      # Float#to_r preserves float imprecision (0.98.to_r != 98/100).
+      # Rationalize gives the clean fraction (0.98.rationalize == 49/50).
+      splits.map!(&:rationalize)
       allocations = splits.inject(0, :+)
 
       if (allocations - ONE) > Float::EPSILON

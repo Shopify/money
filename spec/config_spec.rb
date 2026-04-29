@@ -84,6 +84,18 @@ RSpec.describe "Money::Config" do
     end
   end
 
+  describe 'default_allocation_strategy' do
+    it 'defaults to :roundrobin' do
+      expect(Money::Config.new.default_allocation_strategy).to eq(:roundrobin)
+    end
+
+    it 'can be set to a different strategy' do
+      config = Money::Config.new
+      config.default_allocation_strategy = :roundrobin
+      expect(config.default_allocation_strategy).to eq(:roundrobin)
+    end
+  end
+
   describe 'legacy_json_format' do
     it 'defaults to false' do
       expect(Money::Config.new.legacy_json_format).to eq(false)
