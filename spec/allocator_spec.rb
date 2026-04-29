@@ -61,6 +61,12 @@ RSpec.describe "Allocator" do
       expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse, :nearest")
     end
 
+    specify "#allocate exact splits produce no leftover regardless of strategy" do
+      monies = new_allocator(1).allocate([0.02, 0.98], :roundrobin)
+      expect(monies[0]).to eq(Money.new(0.02))
+      expect(monies[1]).to eq(Money.new(0.98))
+    end
+
     specify "#allocate raises an error when splits exceed 100%" do
       expect { new_allocator(0.03).allocate([0.5, 0.6]) }.to raise_error(ArgumentError, "allocations add to more than 100%")
     end

@@ -62,7 +62,9 @@ class Money
         raise ArgumentError, 'at least one split must be provided'
       end
 
-      splits.map!(&:to_r)
+      # Float#to_r preserves float imprecision (0.98.to_r != 98/100).
+      # Rationalize gives the clean fraction (0.98.rationalize == 49/50).
+      splits.map!(&:rationalize)
       allocations = splits.inject(0, :+)
 
       if (allocations - ONE) > Float::EPSILON
