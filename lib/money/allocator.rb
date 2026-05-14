@@ -185,12 +185,10 @@ class Money
     end
 
     def rationalize(number)
-      if number.is_a?(Float)
-        # Float#to_r preserves float imprecision (0.98.to_r != 49/50).
-        number.rationalize
-      else
-        number.to_r
-      end
+      return number if number.is_a?(Rational)
+
+      # Float#to_r preserves float imprecision (0.98.to_r != 49/50).
+      number.to_s.to_r
     end
   end
 end
