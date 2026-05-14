@@ -57,6 +57,22 @@ RSpec.describe "Allocator" do
       expect { new_allocator(1).allocate([rate, 1 - rate]) }.not_to raise_error
     end
 
+    specify "#allocate handles BigDecimal splits" do
+      splits = [BigDecimal("0.25"), BigDecimal("0.75")]
+      expect(new_allocator(10).allocate(splits)).to eq([Money.new(2.50), Money.new(7.50)])
+    end
+
+    specify "#allocate handles Float splits" do
+      splits = [0.25, 0.75]
+      expect(new_allocator(10).allocate(splits)).to eq([Money.new(2.50), Money.new(7.50)])
+    end
+
+    specify "#allocate handles Rational splits" do
+      splits = [Rational(1, 4), Rational(3, 4)]
+      expect(new_allocator(10).allocate(splits)).to eq([Money.new(2.50), Money.new(7.50)])
+    end
+
+
     specify "#allocate raise ArgumentError when invalid strategy is provided" do
       expect { new_allocator(0.03).allocate([0.5, 0.5], :bad_strategy_name) }.to raise_error(ArgumentError, "Invalid strategy. Valid options: :roundrobin, :roundrobin_reverse, :nearest")
     end

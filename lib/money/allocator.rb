@@ -66,9 +66,7 @@ class Money
 
       strategy ||= Money::Config.current.default_allocation_strategy
 
-      # Float#to_r preserves float imprecision (0.98.to_r != 98/100).
-      # Rationalize gives the clean fraction (0.98.rationalize == 49/50).
-      splits.map!(&:rationalize)
+      splits.map! { |split| rationalize(split) }
       allocations = splits.inject(0, :+)
 
       if (allocations - ONE) > Float::EPSILON
@@ -184,6 +182,13 @@ class Money
     # is because 3.9 is nearer to 4 than 9.1 is to 10.
     def rank_by_nearest(amounts)
       amounts.each_with_index.sort_by { |amount, _i| 1 - amount[:fractional_subunits] }.map(&:last)
+    end
+
+    def rationalize(number)
+      return number if number.is_a?(Rational)
+
+      # Float#to_r preserves float imprecision (0.98.to_r != 49/50).
+      number.to_s.to_r
     end
   end
 end

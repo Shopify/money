@@ -27,5 +27,6 @@ class Money
     def amounts_from_splits: (Numeric allocations, Array[Numeric] splits, ?Integer subunits_to_split) -> [Array[Hash[Symbol, Numeric]], Integer]
     def all_rational?: (Array[Numeric] splits) -> bool
     def rank_by_nearest: (Array[Hash[Symbol, Numeric]] amounts) -> Array[Integer]
+    def rationalize: (Numeric number) -> Rational
   end
 end

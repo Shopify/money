@@ -301,6 +301,10 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: prism
+  version: 1.9.0
+  source:
+    type: rubygems
 - name: pstore
   version: '0'
   source:
