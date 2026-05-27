@@ -12,6 +12,7 @@ class Money
     attr_reader symbol: String
     attr_reader disambiguate_symbol: String?
     attr_reader decimal_mark: String
+    attr_reader thousands_separator: String
 
     def initialize: () -> void
     def compatible?: (untyped other) -> bool

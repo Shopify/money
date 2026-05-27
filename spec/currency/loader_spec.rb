@@ -49,7 +49,8 @@ RSpec.describe Money::Currency::Loader do
           "disambiguate_symbol" => "CR",
           "subunit_to_unit" => 1,
           "smallest_denomination" => 1,
-          "decimal_mark" => "."
+          "decimal_mark" => ".",
+          "thousands_separator" => ","
         }
       )
 
@@ -58,6 +59,7 @@ RSpec.describe Money::Currency::Loader do
       expect(currencies['credits']['name']).to eq('Loyalty Points')
       expect(currencies['credits']['symbol']).to eq('CR')
       expect(currencies['credits']['subunit_to_unit']).to eq(1)
+      expect(currencies['credits']['thousands_separator']).to eq(',')
     ensure
       file.unlink
     end
@@ -77,7 +79,8 @@ RSpec.describe Money::Currency::Loader do
           "disambiguate_symbol" => "CR",
           "subunit_to_unit" => 1,
           "smallest_denomination" => 1,
-          "decimal_mark" => "."
+          "decimal_mark" => ".",
+          "thousands_separator" => ","
         }
       )
 

@@ -108,6 +108,8 @@ currency.name     #=> "United States Dollar"
 currency.to_s     #=> 'USD'
 currency.symbol   #=> '$'
 currency.disambiguate_symbol #=> 'US$'
+currency.decimal_mark #=> '.'
+currency.thousands_separator #=> ','
 ```
 
 ### Default Currency
@@ -200,6 +202,7 @@ credits:
   subunit_to_unit: 1
   smallest_denomination: 1
   decimal_mark: "."
+  thousands_separator: ","
 ```
 
 Custom currencies are looked up after ISO and crypto currencies, so they cannot shadow built-in currencies.

@@ -54,7 +54,8 @@ class Money
       :minor_units,
       :symbol,
       :disambiguate_symbol,
-      :decimal_mark
+      :decimal_mark,
+      :thousands_separator
 
     def initialize(currency_iso)
       data = self.class.currencies[currency_iso]
@@ -76,6 +77,7 @@ class Money
       @smallest_denomination = data['smallest_denomination']
       @subunit_to_unit       = data['subunit_to_unit']
       @decimal_mark          = data['decimal_mark']
+      @thousands_separator   = data['thousands_separator']
       @minor_units           = subunit_to_unit == 0 ? 0 : Math.log(subunit_to_unit, 10).round.to_i
       freeze
     end

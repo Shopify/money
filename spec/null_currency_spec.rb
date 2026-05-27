@@ -17,6 +17,7 @@ RSpec.describe "NullCurrency" do
       expect(null_currency.symbol).to eq('$')
       expect(null_currency.subunit_to_unit).to eq(100)
       expect(null_currency.smallest_denomination).to eq(1)
+      expect(null_currency.thousands_separator).to eq(',')
     end
 
     it "has the name No Currency" do

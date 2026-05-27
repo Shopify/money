@@ -13,6 +13,7 @@ RSpec.describe "Currency" do
     "symbol": '$',
     "disambiguate_symbol": "US$",
     "decimal_mark": ".",
+    "thousands_separator": ",",
   }
 
   let(:currency) { Money::Currency.new('usd') }
@@ -26,7 +27,8 @@ RSpec.describe "Currency" do
         "disambiguate_symbol" => "CR",
         "subunit_to_unit" => 1,
         "smallest_denomination" => 1,
-        "decimal_mark" => "."
+        "decimal_mark" => ".",
+        "thousands_separator" => ","
       }
     }
   end
@@ -40,7 +42,8 @@ RSpec.describe "Currency" do
         "disambiguate_symbol" => "USDC",
         "subunit_to_unit" => 100,
         "smallest_denomination" => 1,
-        "decimal_mark" => "."
+        "decimal_mark" => ".",
+        "thousands_separator" => ","
       } 
     }
   end
@@ -109,7 +112,8 @@ RSpec.describe "Currency" do
           "disambiguate_symbol" => "FAKE",
           "subunit_to_unit" => 1,
           "smallest_denomination" => 1,
-          "decimal_mark" => "."
+          "decimal_mark" => ".",
+          "thousands_separator" => ","
         }
       )
 
@@ -131,7 +135,8 @@ RSpec.describe "Currency" do
           "disambiguate_symbol" => "FAKE",
           "subunit_to_unit" => 1,
           "smallest_denomination" => 1,
-          "decimal_mark" => "."
+          "decimal_mark" => ".",
+          "thousands_separator" => ","
         }
       )
 
