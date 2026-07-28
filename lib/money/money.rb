@@ -15,8 +15,13 @@ class Money
   # adds ~30ns of indirection per call to these very hot predicates.
   def zero? = @value.zero?
   def nonzero? = @value.nonzero?
-  def positive? = @value.positive?
-  def negative? = @value.negative?
+  # BigDecimal#sign avoids Numeric#positive?/#negative?, which go through
+  # `self > 0` comparison dispatch and Integer coercion. @value is always
+  # finite (enforced in #initialize), so the sign is one of:
+  #   ±SIGN_POSITIVE_ZERO/SIGN_NEGATIVE_ZERO (±1) for zeros,
+  #   ±SIGN_POSITIVE_FINITE/SIGN_NEGATIVE_FINITE (±2) otherwise.
+  def positive? = @value.sign == BigDecimal::SIGN_POSITIVE_FINITE
+  def negative? = @value.sign == BigDecimal::SIGN_NEGATIVE_FINITE
   def to_i = @value.to_i
   def to_f = @value.to_f
   def hash = @value.hash
