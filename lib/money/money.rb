@@ -8,6 +8,8 @@ class Money
   extend Forwardable
 
   NULL_CURRENCY = NullCurrency.new.freeze
+  ZERO_MONEY = {} # cache of zero Money instances, keyed by iso_code
+  private_constant :ZERO_MONEY
 
   attr_reader :value, :currency
 
@@ -75,8 +77,7 @@ class Money
       currency = Helpers.value_to_currency(currency)
 
       if value.zero?
-        @@zero_money ||= {}
-        @@zero_money[currency.iso_code] ||= super(Helpers::DECIMAL_ZERO, currency)
+        ZERO_MONEY[currency.iso_code] ||= super(Helpers::DECIMAL_ZERO, currency)
       else
         super(value, currency)
       end
@@ -107,6 +108,11 @@ class Money
     private
 
     def new_from_money(amount, currency)
+      # Fast path: same ISO code string as the existing money's currency.
+      if currency.is_a?(String) && currency == amount.currency.iso_code && !amount.no_currency?
+        return amount
+      end
+
       currency = Helpers.value_to_currency(currency)
 
       if amount.no_currency?
@@ -125,11 +131,13 @@ class Money
   end
 
   def initialize(value, currency)
-    raise ArgumentError if value.nan?
-    raise ArgumentError if value.infinite?
+    raise ArgumentError unless value.finite?
 
     @currency = currency
-    @value = BigDecimal(value.round(@currency.minor_units))
+    minor_units = currency.minor_units
+    # Avoid allocating via round when the value is already within precision.
+    # BigDecimal#round(0) returns an Integer, hence the BigDecimal() wrap.
+    @value = value.scale <= minor_units ? value : BigDecimal(value.round(minor_units))
     freeze
   end
 
