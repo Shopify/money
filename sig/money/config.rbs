@@ -23,8 +23,6 @@ class Money
 
     private
 
-    def self.thread_local_config: () -> Hash[Integer, Config]
-
     def initialize: () -> void
     def legacy_default_currency!: () -> NullCurrency
     def legacy_json_format!: () -> bool

@@ -9,12 +9,14 @@ class Money
         @config ||= new
       end
 
+      # Thread#[] / Thread#[]= are fiber-local in Ruby, which gives us both
+      # per-thread and per-fiber isolation with a single lookup.
       def current
-        thread_local_config[Fiber.current.object_id] ||= global.dup
+        Thread.current[CONFIG_THREAD] ||= global.dup
       end
 
       def current=(config)
-        thread_local_config[Fiber.current.object_id] = config
+        Thread.current[CONFIG_THREAD] = config
       end
 
       def configure_current(**configs, &block)
@@ -30,14 +32,7 @@ class Money
       end
 
       def reset_current
-        thread_local_config.delete(Fiber.current.object_id)
-        Thread.current[CONFIG_THREAD] = nil if thread_local_config.empty?
-      end
-
-      private
-
-      def thread_local_config
-        Thread.current[CONFIG_THREAD] ||= {}
+        Thread.current[CONFIG_THREAD] = nil
       end
     end
 
