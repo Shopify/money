@@ -11,7 +11,15 @@ class Money
 
   attr_reader :value, :currency
 
-  def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
+  # Plain method definitions instead of Forwardable delegators: def_delegators
+  # adds ~30ns of indirection per call to these very hot predicates.
+  def zero? = @value.zero?
+  def nonzero? = @value.nonzero?
+  def positive? = @value.positive?
+  def negative? = @value.negative?
+  def to_i = @value.to_i
+  def to_f = @value.to_f
+  def hash = @value.hash
 
   class ReverseOperationProxy
     include Comparable
