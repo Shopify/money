@@ -35,9 +35,8 @@ class Money
 
     def value_to_currency(currency)
       if currency.is_a?(String)
-        # Exact-key cache hit for ISO strings (the dominant argument type).
-        # Never contains '', 'xxx', or 'XXX': Currency.new raises before
-        # memoizing, so those still fall through to the cases below.
+        # Safe to check before the special cases below: Currency.new raises
+        # before caching, so '', 'xxx', and 'XXX' are never in the cache.
         cached = Currency::LOADED_CURRENCIES[currency]
         return cached if cached
       end
