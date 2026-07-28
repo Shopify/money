@@ -72,7 +72,11 @@ class Money
       return new_from_money(value, currency) if value.is_a?(Money)
 
       value = Helpers.value_to_decimal(value)
-      currency = Helpers.value_to_currency(currency)
+      # Inline fast path for cached ISO-code strings (the dominant case).
+      # The cache never contains '' or 'XXX' (Currency.new raises before
+      # memoizing), so all special string handling stays in the helper.
+      currency = (Currency::LOADED_CURRENCIES[currency] if currency.is_a?(String)) ||
+        Helpers.value_to_currency(currency)
 
       if value.zero?
         @@zero_money ||= {}
