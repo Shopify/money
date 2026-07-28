@@ -5,13 +5,18 @@ require 'json'
 
 class Money
   include Comparable
-  extend Forwardable
 
   NULL_CURRENCY = NullCurrency.new.freeze
 
   attr_reader :value, :currency
 
-  def_delegators :@value, :zero?, :nonzero?, :positive?, :negative?, :to_i, :to_f, :hash
+  def zero? = @value.zero?
+  def nonzero? = @value.nonzero?
+  def positive? = @value.positive?
+  def negative? = @value.negative?
+  def to_i = @value.to_i
+  def to_f = @value.to_f
+  def hash = @value.hash
 
   class ReverseOperationProxy
     include Comparable
