@@ -6,23 +6,19 @@ class Money
   class Currency
     class UnknownCurrency < ArgumentError; end
 
-    # Cache of Currency instances, keyed by ISO code spelling (String/Symbol).
-    # Mutated in place (never reassigned) so hot paths can reference it directly.
     LOADED_CURRENCIES = {}
 
     @mutex = Mutex.new
 
     class << self
       def new(currency_iso)
-        # Fast path: exact-key cache hit (e.g. "USD") avoids to_s/downcase allocations.
         cached = LOADED_CURRENCIES[currency_iso]
         return cached if cached
 
         raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
         iso = currency_iso.to_s.downcase
         currency = LOADED_CURRENCIES[iso] || @mutex.synchronize { LOADED_CURRENCIES[iso] = super(iso) }
-        # Memoize the original spelling (Hash dups+freezes string keys) so the
-        # next lookup with the same spelling takes the fast path.
+        # Memoize the original spelling so the next lookup takes the fast path.
         if currency_iso.is_a?(String) || currency_iso.is_a?(Symbol)
           @mutex.synchronize { LOADED_CURRENCIES[currency_iso] = currency }
         end
