@@ -76,7 +76,7 @@ RSpec.describe "Currency" do
       Money::Currency.new('UsD')
 
       cached_keys = Money::Currency::LOADED_CURRENCIES.keys
-      expect(cached_keys).to contain_exactly('usd', 'USD', :usd)
+      expect(cached_keys).to contain_exactly('usd', 'USD')
     end
 
     it "raises when the currency is invalid" do

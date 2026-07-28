@@ -18,9 +18,10 @@ class Money
         raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
         iso = currency_iso.to_s.downcase
         currency = LOADED_CURRENCIES[iso] || @mutex.synchronize { LOADED_CURRENCIES[iso] = super(iso) }
-        # Only canonical spellings (:usd, "USD") are memoized, so arbitrary-case
-        # strings can't grow the cache without bound.
-        if currency_iso.is_a?(Symbol) || currency_iso == currency.iso_code
+        # Memoize the canonical spelling ("USD") under its exact key so future
+        # lookups hit the early return above without allocating. Symbols and
+        # mixed-case strings ("UsD") are excluded to keep the cache bounded.
+        if currency_iso == currency.iso_code
           @mutex.synchronize { LOADED_CURRENCIES[currency_iso] = currency }
         end
         currency

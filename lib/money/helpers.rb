@@ -34,13 +34,6 @@ class Money
     end
 
     def value_to_currency(currency)
-      if currency.is_a?(String)
-        # Safe to check before the special cases below: Currency.new raises
-        # before caching, so '', 'xxx', and 'XXX' are never in the cache.
-        cached = Currency::LOADED_CURRENCIES[currency]
-        return cached if cached
-      end
-
       case currency
       when Money::Currency, Money::NullCurrency
         currency
