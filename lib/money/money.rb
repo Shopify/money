@@ -72,8 +72,7 @@ class Money
       return new_from_money(value, currency) if value.is_a?(Money)
 
       value = Helpers.value_to_decimal(value)
-      currency = (Currency::LOADED_CURRENCIES[currency] if currency.is_a?(String)) ||
-        Helpers.value_to_currency(currency)
+      currency = Helpers.value_to_currency(currency)
 
       if value.zero?
         @@zero_money ||= {}
