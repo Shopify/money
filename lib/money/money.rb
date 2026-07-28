@@ -10,14 +10,6 @@ class Money
 
   attr_reader :value, :currency
 
-  def zero? = @value.zero?
-  def nonzero? = @value.nonzero?
-  def positive? = @value.positive?
-  def negative? = @value.negative?
-  def to_i = @value.to_i
-  def to_f = @value.to_f
-  def hash = @value.hash
-
   class ReverseOperationProxy
     include Comparable
 
@@ -213,6 +205,14 @@ class Money
     return false unless currency.compatible?(other.currency)
     value == other.value
   end
+
+  def zero? = @value.zero?
+  def nonzero? = @value.nonzero?
+  def positive? = @value.positive?
+  def negative? = @value.negative?
+  def to_i = @value.to_i
+  def to_f = @value.to_f
+  def hash = @value.hash
 
   def coerce(other)
     raise TypeError, "Money can't be coerced into #{other.class}" unless other.is_a?(Numeric)
