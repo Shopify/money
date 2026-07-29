@@ -65,6 +65,7 @@ RSpec.describe "Currency" do
     it "returns the same cached instance regardless of spelling" do
       expect(Money::Currency.new('USD')).to be(Money::Currency.new('usd'))
       expect(Money::Currency.new(:usd)).to be(Money::Currency.new('usd'))
+      expect(Money::Currency.new(:USD)).to be(Money::Currency.new('usd'))
       expect(Money::Currency.new('UsD')).to be(Money::Currency.new('usd'))
     end
 
@@ -75,8 +76,8 @@ RSpec.describe "Currency" do
       Money::Currency.new(:usd)
       Money::Currency.new('UsD')
 
-      cached_keys = Money::Currency::LOADED_CURRENCIES.keys
-      expect(cached_keys).to contain_exactly('usd', 'USD')
+      cached_keys = Money::Currency.class_variable_get(:@@loaded_currencies).keys
+      expect(cached_keys).to contain_exactly('usd', 'USD', :usd, :USD)
     end
 
     it "raises when the currency is invalid" do

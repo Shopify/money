@@ -4,27 +4,28 @@ require "money/currency/loader"
 
 class Money
   class Currency
+    @@mutex = Mutex.new
+    @@loaded_currencies = {}
+
     class UnknownCurrency < ArgumentError; end
-
-    LOADED_CURRENCIES = {}
-
-    @mutex = Mutex.new
 
     class << self
       def new(currency_iso)
-        cached = LOADED_CURRENCIES[currency_iso]
-        return cached if cached
+        currency = @@loaded_currencies[currency_iso]
+        return currency if currency
 
-        raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
-        iso = currency_iso.to_s.downcase
-        currency = LOADED_CURRENCIES[iso] || @mutex.synchronize { LOADED_CURRENCIES[iso] = super(iso) }
-        # Memoize the canonical spelling ("USD") under its exact key so future
-        # lookups hit the early return above without allocating. Symbols and
-        # mixed-case strings ("UsD") are excluded to keep the cache bounded.
-        if currency_iso == currency.iso_code
-          @mutex.synchronize { LOADED_CURRENCIES[currency_iso] = currency }
+        downcase_iso = currency_iso.to_s.downcase
+        raise UnknownCurrency, "Currency can't be blank" if downcase_iso.empty?
+
+        @@loaded_currencies[downcase_iso] || @@mutex.synchronize do
+          currency = super(downcase_iso)
+          # NOTE: camelcase currency spelling (ex "uSd") is never memoized and will pay the downcase tax on every call.
+          # This is intentional, as it is not a valid currency spelling. User input should be normalized in production code.
+          [downcase_iso.upcase, downcase_iso, downcase_iso.upcase.to_sym, downcase_iso.to_sym].each do |spelling|
+            @@loaded_currencies[spelling] = currency
+          end
+          currency
         end
-        currency
       end
       alias_method :find!, :new
 
@@ -52,7 +53,7 @@ class Money
       end
 
       def reset_loaded_currencies
-        LOADED_CURRENCIES.clear
+        @@loaded_currencies = {}
       end
     end
 
