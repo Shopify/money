@@ -11,9 +11,21 @@ class Money
 
     class << self
       def new(currency_iso)
-        raise UnknownCurrency, "Currency can't be blank" if currency_iso.nil? || currency_iso.to_s.empty?
-        iso = currency_iso.to_s.downcase
-        @@loaded_currencies[iso] || @@mutex.synchronize { @@loaded_currencies[iso] = super(iso) }
+        currency = @@loaded_currencies[currency_iso]
+        return currency if currency
+
+        downcase_iso = currency_iso.to_s.downcase
+        raise UnknownCurrency, "Currency can't be blank" if downcase_iso.empty?
+
+        @@loaded_currencies[downcase_iso] || @@mutex.synchronize do
+          currency = super(downcase_iso)
+          # NOTE: camelcase currency spelling (ex "uSd") is never memoized and will pay the downcase tax on every call.
+          # This is intentional, as it is not a valid currency spelling. User input should be normalized in production code.
+          [downcase_iso.upcase, downcase_iso, downcase_iso.upcase.to_sym, downcase_iso.to_sym].each do |spelling|
+            @@loaded_currencies[spelling] = currency
+          end
+          currency
+        end
       end
       alias_method :find!, :new
 
