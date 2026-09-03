@@ -8,7 +8,8 @@ class Money
 
   attr_reader value: BigDecimal
   attr_reader currency: (Currency | NullCurrency)
-  attr_reader decimal_precision: Integer
+  def decimal_precision: () -> Integer
+  def explicit_decimal_precision?: () -> bool
 
   # Class methods
   ACTIVE_SUPPORT_DEFINED: untyped
@@ -36,7 +37,7 @@ class Money
   def self.rational: (Money money1, Money money2) -> Rational
 
   # Instance methods
-  def initialize: (BigDecimal value, Currency | NullCurrency currency, Integer decimal_precision) -> void
+  def initialize: (BigDecimal value, Currency | NullCurrency currency, Integer? decimal_precision) -> void
   def init_with: (untyped coder) -> void
   def encode_with: (untyped coder) -> void
 
@@ -89,7 +90,8 @@ class Money
 
   def arithmetic: [T] (Money | Numeric | String other) { (Money) -> T } -> T
   def ensure_compatible_currency: (Currency | NullCurrency other_currency, String msg) -> void
-  def calculated_decimal_precision: (Money other) -> Integer
+  def calculated_decimal_precision: (Money other) -> Integer?
+  def precision_argument: () -> Integer?
   def calculated_currency: (Currency | NullCurrency other) -> (Currency | NullCurrency)
   def self.new_from_money: (Money amount, String | Currency | NullCurrency | nil currency, Integer? decimal_precision) -> Money
 

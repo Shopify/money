@@ -138,6 +138,13 @@ RSpec.describe "Money" do
     expect(money.decimal_precision).to eq(2)
   end
 
+  it "records explicitly selecting the currency's default decimal precision" do
+    money = Money.new(Money.new("1.23", "USD"), "USD", decimal_precision: 2)
+
+    expect(money).to be_explicit_decimal_precision
+    expect(money.as_json).to include(decimal_precision: 2)
+  end
+
   it "can be constructed with a money object with a null currency" do
     money = Money.new(Money.new(1, Money::NULL_CURRENCY), 'USD')
     expect(money.value).to eq(1)
