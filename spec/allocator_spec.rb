@@ -358,6 +358,18 @@ RSpec.describe "Allocator" do
       expect(allocations.map(&:decimal_precision)).to eq([3, 3])
       expect(allocations).to all(be_explicit_decimal_precision)
     end
+
+    specify "#allocate_max_amounts applies explicit decimal precision to numeric and string maxima" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      numeric_allocations = money.allocate_max_amounts([0.029, 0.028])
+      string_allocations = money.allocate_max_amounts(["0.029", "0.028"])
+
+      expect(numeric_allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(numeric_allocations).to all(be_explicit_decimal_precision)
+      expect(string_allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(string_allocations).to all(be_explicit_decimal_precision)
+    end
   end
 
   def new_allocator(amount, currency = nil)

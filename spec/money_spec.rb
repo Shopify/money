@@ -591,6 +591,20 @@ RSpec.describe "Money" do
     expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'USD'))).to eq(Rational(2,3))
   end
 
+  it "generates a true rational below the currency subunit with explicit decimal precision" do
+    half_yen = Money.new("0.5", "JPY", decimal_precision: 1)
+    one_yen = Money.new("1.0", "JPY", decimal_precision: 1)
+
+    expect(Money.rational(half_yen, one_yen)).to eq(Rational(1, 2))
+  end
+
+  it "raises when attempting to make a rational from different decimal precisions" do
+    one_decimal = Money.new("0.5", "JPY", decimal_precision: 1)
+    two_decimals = Money.new("1.00", "JPY", decimal_precision: 2)
+
+    expect { Money.rational(one_decimal, two_decimals) }.to raise_error(Money::IncompatiblePrecisionError)
+  end
+
   it "raises when attempting to make a rational from different currencies" do
     expect { Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'JPY')) }.to raise_error(Money::IncompatibleCurrencyError)
   end
