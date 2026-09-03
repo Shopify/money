@@ -41,6 +41,13 @@ RSpec.describe "Money" do
     expect(Money.new(10, "USD").convert_currency(150, "JPY")).to eq(Money.new(1500, "JPY"))
   end
 
+  it "uses the target currency precision when converting a value with implicit precision" do
+    money = Money.new(100, "JPY").convert_currency(BigDecimal("0.0075"), "USD")
+
+    expect(money.value).to eq(BigDecimal("0.75"))
+    expect(money.decimal_precision).to eq(2)
+  end
+
   it "returns itself with to_money" do
     expect(money.to_money).to eq(money)
     expect(amount_money.to_money).to eq(amount_money)
@@ -48,6 +55,13 @@ RSpec.describe "Money" do
 
   it "#to_money uses the provided currency when it doesn't already have one" do
     expect(Money.new(1).to_money('CAD')).to eq(Money.new(1, 'CAD'))
+  end
+
+  it "#to_money uses the target currency precision for a value with implicit precision" do
+    money = Money.new("1.23", Money::NULL_CURRENCY).to_money("JPY")
+
+    expect(money.value).to eq(BigDecimal("1"))
+    expect(money.decimal_precision).to eq(0)
   end
 
   it "#to_money works with money objects of the same currency" do
@@ -132,6 +146,20 @@ RSpec.describe "Money" do
     money = Money.new(Money.new(1, 'USD'), Money::NULL_CURRENCY)
     expect(money.value).to eq(1)
     expect(money.currency.to_s).to eq('USD')
+  end
+
+  it "uses the target currency precision when adding a currency to a value with implicit precision" do
+    money = Money.new(Money.new("1.23", Money::NULL_CURRENCY), "JPY")
+
+    expect(money.value).to eq(BigDecimal("1"))
+    expect(money.decimal_precision).to eq(0)
+  end
+
+  it "preserves an existing currency when explicitly changing precision" do
+    money = Money.new(Money.new(1, "USD"), Money::NULL_CURRENCY, decimal_precision: 3)
+
+    expect(money.currency).to eq(Money::Currency.find!("USD"))
+    expect(money.decimal_precision).to eq(3)
   end
 
   it "constructor raises when changing currency" do
@@ -1151,6 +1179,20 @@ RSpec.describe "Money" do
       EOS
       expect(money).to be == Money.new(750)
       expect(money.value).to be_a BigDecimal
+    end
+  end
+
+  describe "Marshal deserialization" do
+    it "uses the currency precision for objects serialized before decimal precision was added" do
+      legacy_money = Money.allocate
+      legacy_money.instance_variable_set(:@value, BigDecimal("1.23"))
+      legacy_money.instance_variable_set(:@currency, Money::Currency.find!("USD"))
+      legacy_money.freeze
+
+      money = Marshal.load(Marshal.dump(legacy_money))
+
+      expect(money.decimal_precision).to eq(2)
+      expect(money.to_s).to eq("1.23")
     end
   end
 
