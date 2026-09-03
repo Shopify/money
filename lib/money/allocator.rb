@@ -120,7 +120,7 @@ class Money
     #     #=> [Money.new(5), Money.new(2)]
     def allocate_max_amounts(maximums)
       allocation_currency = extract_currency(maximums + [__getobj__])
-      maximums = maximums.map { |max| max.to_money(allocation_currency) }
+      maximums = maximums.map { |max| coerce_maximum(max, allocation_currency) }
       maximums_total = maximums.reduce(
         Money.new(0, allocation_currency, decimal_precision: allocation_decimal_precision),
         :+,
@@ -167,6 +167,13 @@ class Money
           "operation not permitted for Money objects with different currencies #{currencies.join(", ")}"
       end
       currencies.first || NULL_CURRENCY
+    end
+
+    def coerce_maximum(maximum, allocation_currency)
+      money = maximum.to_money(allocation_currency)
+      return money if maximum.is_a?(Money) || allocation_decimal_precision.nil?
+
+      Money.new(money, allocation_currency, decimal_precision: allocation_decimal_precision)
     end
 
     def amounts_from_splits(allocations, splits, subunits_to_split = allocation_units)

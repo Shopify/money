@@ -95,9 +95,9 @@ class Money
     end
 
     def rational(money1, money2)
-      money1.send(:arithmetic, money2) do
-        factor = money1.currency.subunit_to_unit * money2.currency.subunit_to_unit
-        Rational((money1.value * factor).to_i, (money2.value * factor).to_i)
+      money1.send(:arithmetic, money2) do |money|
+        money1.send(:calculated_decimal_precision, money)
+        money1.value.to_r / money.value.to_r
       end
     end
 
