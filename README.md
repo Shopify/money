@@ -39,6 +39,13 @@ Money.new(1000, "USD") + Money.new(500, "USD") == Money.new(1500, "USD")
 Money.new(1000, "USD") - Money.new(200, "USD") == Money.new(800, "USD")
 Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 
+# Explicit precision for values smaller than a currency subunit
+unit_price = Money.new("0.057", "USD", decimal_precision: 3)
+(unit_price * 100).to_s #=> "5.700"
+
+# Money arithmetic requires matching precision
+Money.new(1, "USD", decimal_precision: 3) + Money.new("0.057", "USD", decimal_precision: 3)
+
 m = Money.new(1000, "USD")
 # Splitting money evenly
 m.split(2)              == [Money.new(500, "USD"), Money.new(500, "USD")]
