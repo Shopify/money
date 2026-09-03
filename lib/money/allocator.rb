@@ -90,7 +90,13 @@ class Money
         amounts[order[i]][:whole_subunits] += 1
       end
 
-      amounts.map { |amount| Money.from_subunits(amount[:whole_subunits], currency) }
+      amounts.map do |amount|
+        AllocationUnits.from_units(
+          amount[:whole_subunits],
+          currency,
+          decimal_precision: allocation_decimal_precision,
+        )
+      end
     end
 
     # Allocates money between different parties up to the maximum amounts specified.
@@ -115,14 +121,18 @@ class Money
     def allocate_max_amounts(maximums)
       allocation_currency = extract_currency(maximums + [__getobj__])
       maximums = maximums.map { |max| max.to_money(allocation_currency) }
-      maximums_total = maximums.reduce(Money.new(0, allocation_currency), :+)
+      maximums_total = maximums.reduce(
+        Money.new(0, allocation_currency, decimal_precision: allocation_decimal_precision),
+        :+,
+      )
+      maximums_total_units = AllocationUnits.to_units(maximums_total)
 
       splits = maximums.map do |max_amount|
-        next(Rational(0)) if maximums_total.zero?
-        Money.rational(max_amount, maximums_total)
+        next(Rational(0)) if maximums_total_units.zero?
+        Rational(AllocationUnits.to_units(max_amount), maximums_total_units)
       end
 
-      total_allocatable = [maximums_total.subunits, subunits].min
+      total_allocatable = [maximums_total_units, allocation_units].min
 
       subunits_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
       subunits_amounts.map! { |amount| amount[:whole_subunits] }
@@ -130,14 +140,20 @@ class Money
       subunits_amounts.each_with_index do |amount, index|
         break if left_over <= 0
 
-        max_amount = maximums[index].value * allocation_currency.subunit_to_unit
+        max_amount = AllocationUnits.to_units(maximums[index])
         next if amount >= max_amount
 
         left_over -= 1
         subunits_amounts[index] += 1
       end
 
-      subunits_amounts.map { |cents| Money.from_subunits(cents, allocation_currency) }
+      subunits_amounts.map do |amount|
+        AllocationUnits.from_units(
+          amount,
+          allocation_currency,
+          decimal_precision: allocation_decimal_precision,
+        )
+      end
     end
 
     private
@@ -153,7 +169,7 @@ class Money
       currencies.first || NULL_CURRENCY
     end
 
-    def amounts_from_splits(allocations, splits, subunits_to_split = subunits)
+    def amounts_from_splits(allocations, splits, subunits_to_split = allocation_units)
       raise ArgumentError, "All splits values must be of type Rational." unless all_rational?(splits)
 
       left_over = subunits_to_split
@@ -173,6 +189,14 @@ class Money
 
     def all_rational?(splits)
       splits.all? { |split| split.is_a?(Rational) }
+    end
+
+    def allocation_decimal_precision
+      decimal_precision if explicit_decimal_precision?
+    end
+
+    def allocation_units
+      AllocationUnits.to_units(__getobj__)
     end
 
     # Given a list of decimal numbers, return a list ordered by which is nearest to the next whole number.

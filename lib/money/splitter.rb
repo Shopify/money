@@ -15,11 +15,13 @@ class Money
 
     def split
       @split ||= begin
-        subunits = @money.subunits
-        low = Money.from_subunits(subunits / @num, @money.currency)
-        high = Money.from_subunits(low.subunits + 1, @money.currency)
+        units = AllocationUnits.to_units(@money)
+        low_units = units / @num
+        decimal_precision = @money.decimal_precision if @money.explicit_decimal_precision?
+        low = AllocationUnits.from_units(low_units, @money.currency, decimal_precision: decimal_precision)
+        high = AllocationUnits.from_units(low_units + 1, @money.currency, decimal_precision: decimal_precision)
 
-        num_high = subunits % @num
+        num_high = units % @num
 
         split = {}
         split[high] = num_high if num_high > 0

@@ -352,7 +352,11 @@ RSpec.describe "Allocator" do
         Money.new("0.028", "USD", decimal_precision: 3),
       ]
 
-      expect(money.allocate_max_amounts(maximums)).to eq(maximums)
+      allocations = money.allocate_max_amounts(maximums)
+
+      expect(allocations).to eq(maximums)
+      expect(allocations.map(&:decimal_precision)).to eq([3, 3])
+      expect(allocations).to all(be_explicit_decimal_precision)
     end
   end
 
