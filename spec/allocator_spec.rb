@@ -25,6 +25,21 @@ RSpec.describe "Allocator" do
       expect(monies[1]).to eq(Money.new(0.003, 'JOD'))
     end
 
+    specify "#allocate preserves explicit decimal precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      expect(money.allocate([1])).to contain_exactly(money)
+    end
+
+    specify "#allocate distributes explicit precision subunits" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+      allocations = money.allocate([0.5, 0.5], :roundrobin)
+
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(allocations.map(&:decimal_precision)).to eq([3, 3])
+      expect(allocations).to all(be_explicit_decimal_precision)
+    end
+
     specify "#allocate does not lose pennies even when given a lossy split" do
       monies = new_allocator(1).allocate([0.333,0.333, 0.333])
       expect(monies[0].subunits).to eq(34)
@@ -328,6 +343,16 @@ RSpec.describe "Allocator" do
       expect(
         new_allocator(24.2).allocate_max_amounts([Money.new(46), Money.new(46), Money.new(50), Money.new(50),Money.new(50)]),
         ).to eq([Money.new(4.6), Money.new(4.6), Money.new(5), Money.new(5), Money.new(5)])
+    end
+
+    specify "#allocate_max_amounts supports matching explicit decimal precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+      maximums = [
+        Money.new("0.029", "USD", decimal_precision: 3),
+        Money.new("0.028", "USD", decimal_precision: 3),
+      ]
+
+      expect(money.allocate_max_amounts(maximums)).to eq(maximums)
     end
   end
 
