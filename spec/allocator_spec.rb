@@ -380,6 +380,17 @@ RSpec.describe "Allocator" do
         expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.001")])
       end
     end
+
+    specify "#allocate_max_amounts normalizes maximums to the receiver allocation units" do
+      Money.with_config(default_subunit_format: :stripe) do
+        money = Money.new(1, "ISK", decimal_precision: 0)
+
+        allocations = money.allocate_max_amounts([Money.new(1, "ISK")])
+
+        expect(allocations.map(&:value)).to eq([BigDecimal(1)])
+        expect(allocations).to all(be_explicit_decimal_precision)
+      end
+    end
   end
 
   def new_allocator(amount, currency = nil)
