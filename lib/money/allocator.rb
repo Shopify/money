@@ -170,10 +170,11 @@ class Money
     end
 
     def coerce_maximum(maximum, allocation_currency)
-      money = maximum.to_money(allocation_currency)
-      return money if maximum.is_a?(Money) || allocation_decimal_precision.nil?
+      if allocation_decimal_precision && !maximum.is_a?(Money)
+        return Money.new(maximum, allocation_currency, decimal_precision: allocation_decimal_precision)
+      end
 
-      Money.new(money, allocation_currency, decimal_precision: allocation_decimal_precision)
+      maximum.to_money(allocation_currency)
     end
 
     def amounts_from_splits(allocations, splits, subunits_to_split = allocation_units)

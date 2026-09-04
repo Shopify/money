@@ -189,7 +189,7 @@ class Money
   def +(other)
     arithmetic(other) do |money|
       result_decimal_precision = calculated_decimal_precision(money)
-      return self if money.value.zero? && !no_currency?
+      return self if money.value.zero? && !no_currency? && result_decimal_precision == precision_argument
       Money.new(value + money.value, calculated_currency(money.currency), decimal_precision: result_decimal_precision)
     end
   end
@@ -197,7 +197,7 @@ class Money
   def -(other)
     arithmetic(other) do |money|
       result_decimal_precision = calculated_decimal_precision(money)
-      return self if money.value.zero? && !no_currency?
+      return self if money.value.zero? && !no_currency? && result_decimal_precision == precision_argument
       Money.new(value - money.value, calculated_currency(money.currency), decimal_precision: result_decimal_precision)
     end
   end
