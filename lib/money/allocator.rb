@@ -125,11 +125,11 @@ class Money
         Money.new(0, allocation_currency, decimal_precision: allocation_decimal_precision),
         :+,
       )
-      maximums_total_units = AllocationUnits.to_units(maximums_total)
+      maximums_total_units = allocation_units(maximums_total)
 
       splits = maximums.map do |max_amount|
         next(Rational(0)) if maximums_total_units.zero?
-        Rational(AllocationUnits.to_units(max_amount), maximums_total_units)
+        Rational(allocation_units(max_amount), maximums_total_units)
       end
 
       total_allocatable = [maximums_total_units, allocation_units].min
@@ -140,7 +140,7 @@ class Money
       subunits_amounts.each_with_index do |amount, index|
         break if left_over <= 0
 
-        max_amount = AllocationUnits.to_units(maximums[index])
+        max_amount = allocation_units(maximums[index])
         next if amount >= max_amount
 
         left_over -= 1
@@ -203,8 +203,8 @@ class Money
       decimal_precision if explicit_decimal_precision?
     end
 
-    def allocation_units
-      AllocationUnits.to_units(__getobj__)
+    def allocation_units(money = __getobj__)
+      AllocationUnits.to_units(money, decimal_precision: allocation_decimal_precision)
     end
 
     # Given a list of decimal numbers, return a list ordered by which is nearest to the next whole number.

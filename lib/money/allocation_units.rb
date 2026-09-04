@@ -4,10 +4,10 @@ class Money
   module AllocationUnits
     extend self
 
-    def to_units(money)
-      return money.subunits unless money.explicit_decimal_precision?
+    def to_units(money, decimal_precision: money.explicit_decimal_precision? ? money.decimal_precision : nil)
+      return money.subunits if decimal_precision.nil?
 
-      (money.value * scale(money.decimal_precision)).to_i
+      (money.value * scale(decimal_precision)).to_i
     end
 
     def from_units(units, currency, decimal_precision: nil)
