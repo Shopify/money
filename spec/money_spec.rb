@@ -294,6 +294,16 @@ RSpec.describe "Money" do
     expect((unit_price * 100).to_s).to eq("5.700")
   end
 
+  it "applies explicit decimal precision from zero across arithmetic" do
+    implicit_money = Money.new("1.00", "USD")
+    explicit_zero = Money.new("0.00", "USD", decimal_precision: 2)
+
+    results = [implicit_money + explicit_zero, implicit_money - explicit_zero]
+
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:as_json)).to all(eq(value: "1.00", currency: "USD", decimal_precision: 2))
+  end
+
   it "rejects arithmetic between different decimal precisions" do
     precise_money = Money.new("0.057", "USD", decimal_precision: 3)
     currency_precision_money = Money.new("1.00", "USD")

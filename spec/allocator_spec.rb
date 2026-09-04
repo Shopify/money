@@ -370,6 +370,16 @@ RSpec.describe "Allocator" do
       expect(string_allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
       expect(string_allocations).to all(be_explicit_decimal_precision)
     end
+
+    specify "#allocate_max_amounts does not round numeric or string maxima before applying explicit precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      [[0.029, 0.001], ["0.029", "0.001"]].each do |maximums|
+        allocations = money.allocate_max_amounts(maximums)
+
+        expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.001")])
+      end
+    end
   end
 
   def new_allocator(amount, currency = nil)
