@@ -7,9 +7,13 @@ class Money
 
     def self.value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
     def self.value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)
+    def self.money_to_units: (Money money, ?decimal_precision: Integer?) -> Integer
+    def self.money_from_units: (Numeric units, String | Currency | NullCurrency currency, ?decimal_precision: Integer?) -> Money
 
     # Instance methods (via extend self)
     def value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
     def value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)
+    def money_to_units: (Money money, ?decimal_precision: Integer?) -> Integer
+    def money_from_units: (Numeric units, String | Currency | NullCurrency currency, ?decimal_precision: Integer?) -> Money
   end
 end

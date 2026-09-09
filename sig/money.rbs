@@ -8,6 +8,8 @@ class Money
 
   attr_reader value: BigDecimal
   attr_reader currency: (Currency | NullCurrency)
+  def decimal_precision: () -> Integer
+  def explicit_decimal_precision?: () -> bool
 
   # Class methods
   ACTIVE_SUPPORT_DEFINED: untyped
@@ -27,15 +29,15 @@ class Money
   # def_delegators needs this - Forwardable extended in singleton class
   def self.def_delegators: (untyped accessor, *Symbol methods) -> void
 
-  def self.new: (?Numeric | String | Money value, ?String | Currency | NullCurrency | nil currency) -> Money
-  def self.from_amount: (Numeric | String value, ?String | Currency | NullCurrency | nil currency) -> Money
+  def self.new: (?Numeric | String | Money value, ?String | Currency | NullCurrency | nil currency, ?decimal_precision: Integer?) -> Money
+  def self.from_amount: (Numeric | String value, ?String | Currency | NullCurrency | nil currency, ?decimal_precision: Integer?) -> Money
   def self.from_subunits: (Integer | Numeric subunits, String | Currency | NullCurrency currency_iso, ?format: Symbol?) -> Money
   def self.from_json: (String string) -> Money
   def self.from_hash: (Hash[Symbol | String, untyped] hash) -> Money
   def self.rational: (Money money1, Money money2) -> Rational
 
   # Instance methods
-  def initialize: (BigDecimal value, Currency | NullCurrency currency) -> void
+  def initialize: (BigDecimal value, Currency | NullCurrency currency, Integer? decimal_precision) -> void
   def init_with: (untyped coder) -> void
   def encode_with: (untyped coder) -> void
 
@@ -88,8 +90,10 @@ class Money
 
   def arithmetic: [T] (Money | Numeric | String other) { (Money) -> T } -> T
   def ensure_compatible_currency: (Currency | NullCurrency other_currency, String msg) -> void
+  def calculated_decimal_precision: (Money other) -> Integer?
+  def precision_argument: () -> Integer?
   def calculated_currency: (Currency | NullCurrency other) -> (Currency | NullCurrency)
-  def self.new_from_money: (Money amount, String | Currency | NullCurrency | nil currency) -> Money
+  def self.new_from_money: (Money amount, String | Currency | NullCurrency | nil currency, Integer? decimal_precision) -> Money
 
   class ReverseOperationProxy
     include Comparable

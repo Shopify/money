@@ -6,4 +6,7 @@ class Money
 
   class IncompatibleCurrencyError < Error
   end
+
+  class IncompatiblePrecisionError < Error
+  end
 end
