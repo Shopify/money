@@ -3,7 +3,6 @@
 require_relative 'money/version'
 require_relative 'money/currency'
 require_relative 'money/null_currency'
-require_relative 'money/allocation_units'
 require_relative 'money/allocator'
 require_relative 'money/splitter'
 require_relative 'money/config'

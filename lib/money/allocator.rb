@@ -91,7 +91,7 @@ class Money
       end
 
       amounts.map do |amount|
-        AllocationUnits.from_units(
+        Helpers.money_from_units(
           amount[:whole_subunits],
           currency,
           decimal_precision: allocation_decimal_precision,
@@ -148,7 +148,7 @@ class Money
       end
 
       subunits_amounts.map do |amount|
-        AllocationUnits.from_units(
+        Helpers.money_from_units(
           amount,
           allocation_currency,
           decimal_precision: allocation_decimal_precision,
@@ -204,7 +204,7 @@ class Money
     end
 
     def allocation_units(money = __getobj__)
-      AllocationUnits.to_units(money, decimal_precision: allocation_decimal_precision)
+      Helpers.money_to_units(money, decimal_precision: allocation_decimal_precision)
     end
 
     # Given a list of decimal numbers, return a list ordered by which is nearest to the next whole number.
