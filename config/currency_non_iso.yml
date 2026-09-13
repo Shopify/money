@@ -71,7 +71,7 @@ xfu:
   symbol: ''
   disambiguate_symbol: XFU
   alternate_symbols: []
-  subunit: ''
+  subunit:
   subunit_to_unit: 100
   symbol_first: true
   html_entity: ''
@@ -86,7 +86,7 @@ gbx:
   symbol: ''
   disambiguate_symbol: GBX
   alternate_symbols: []
-  subunit: ''
+  subunit:
   subunit_to_unit: 1
   symbol_first: true
   html_entity: ''
