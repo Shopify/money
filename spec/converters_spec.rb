@@ -54,6 +54,11 @@ RSpec.describe Money::Converters do
       expect(converter.to_subunits(Money.new(1, usd))).to eq(100)
       expect(converter.from_subunits(100, usd)).to eq(Money.new(1, usd))
     end
+
+    it 'rounds retained calculation precision when converting to subunits' do
+      expect(converter.to_subunits(Money.new("0.0099", usd, decimal_precision: 2))).to eq(1)
+      expect(converter.to_subunits(Money.new("0.0057", "JOD", decimal_precision: 3))).to eq(6)
+    end
   end
 
   describe Money::Converters::StripeConverter do

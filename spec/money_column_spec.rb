@@ -92,7 +92,7 @@ RSpec.describe 'MoneyColumn' do
   end
 
   it 'preserves a configured fixed decimal precision after reload' do
-    money = Money.new("0.057", "USD", decimal_precision: 3)
+    money = Money.new("0.0574", "USD", decimal_precision: 3)
 
     record = MoneyRecordWithDecimalPrecision.create!(price: money)
     record.reload

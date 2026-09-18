@@ -36,7 +36,7 @@ class Money
     def money_to_units(money, decimal_precision: money.explicit_decimal_precision? ? money.decimal_precision : nil)
       return money.subunits if decimal_precision.nil?
 
-      (money.value * 10**decimal_precision).to_i
+      (money.value.round(decimal_precision) * 10**decimal_precision).to_i
     end
 
     def money_from_units(units, currency, decimal_precision: nil)

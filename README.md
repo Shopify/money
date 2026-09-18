@@ -43,6 +43,11 @@ Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 unit_price = Money.new("0.057", "USD", decimal_precision: 3)
 (unit_price * 100).to_s #=> "5.700"
 
+# Explicit-precision values retain additional digits during calculations and
+# round when rendered
+fractional_unit_price = Money.new("0.0057", "USD", decimal_precision: 3)
+(fractional_unit_price * 100).to_s #=> "0.570"
+
 # Money arithmetic requires matching precision
 Money.new(1, "USD", decimal_precision: 3) + Money.new("0.057", "USD", decimal_precision: 3)
 

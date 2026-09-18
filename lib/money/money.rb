@@ -136,7 +136,11 @@ class Money
 
     @currency = currency
     @decimal_precision = decimal_precision
-    @value = BigDecimal(value.round(self.decimal_precision))
+    @value = if explicit_decimal_precision?
+      BigDecimal(value)
+    else
+      BigDecimal(value.round(self.decimal_precision))
+    end
     freeze
   end
 

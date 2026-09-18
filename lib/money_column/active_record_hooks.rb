@@ -62,6 +62,7 @@ module MoneyColumn
       if money.is_a?(Money)
         validate_decimal_precision_compatibility!(column, money, options[:decimal_precision])
         write_currency(column, money, options)
+        money = money.to_s(:amount)
       end
 
       self[column] = Money::Helpers.value_to_decimal(money)

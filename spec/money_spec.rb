@@ -106,14 +106,15 @@ RSpec.describe "Money" do
   it "uses an explicit decimal precision when constructing a value" do
     money = Money.new("1.2345", "USD", decimal_precision: 3)
 
-    expect(money.value).to eq(BigDecimal("1.235"))
+    expect(money.value).to eq(BigDecimal("1.2345"))
     expect(money.decimal_precision).to eq(3)
+    expect(money.to_s).to eq("1.235")
   end
 
   it "supports an explicit decimal precision of zero" do
     money = Money.new("1.6", "USD", decimal_precision: 0)
 
-    expect(money.value).to eq(BigDecimal("2"))
+    expect(money.value).to eq(BigDecimal("1.6"))
     expect(money.to_s).to eq("2")
     expect(money).to be_explicit_decimal_precision
   end
@@ -142,8 +143,9 @@ RSpec.describe "Money" do
 
     money = Money.new(precise_money, "USD", decimal_precision: 2)
 
-    expect(money.value).to eq(BigDecimal("1.23"))
+    expect(money.value).to eq(BigDecimal("1.2345"))
     expect(money.decimal_precision).to eq(2)
+    expect(money.to_s).to eq("1.23")
   end
 
   it "records explicitly selecting the currency's default decimal precision" do
@@ -300,6 +302,16 @@ RSpec.describe "Money" do
     expect((unit_price + Money.new("0.001", "USD", decimal_precision: 3)).to_s).to eq("0.058")
     expect((unit_price - Money.new("0.007", "USD", decimal_precision: 3)).to_s).to eq("0.050")
     expect((unit_price * 100).to_s).to eq("5.700")
+  end
+
+  it "defers explicit precision rounding until rendering" do
+    unit_price = Money.new("0.0057", "USD", decimal_precision: 3)
+
+    expect(unit_price.value).to eq(BigDecimal("0.0057"))
+    expect(unit_price.to_s).to eq("0.006")
+    expect(unit_price.as_json).to eq(value: "0.006", currency: "USD", decimal_precision: 3)
+    expect((unit_price * 100).value).to eq(BigDecimal("0.57"))
+    expect((unit_price * 100).to_s).to eq("0.570")
   end
 
   it "applies explicit decimal precision from zero across arithmetic" do

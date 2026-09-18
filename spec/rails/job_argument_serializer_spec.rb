@@ -19,10 +19,11 @@ RSpec.describe Money::Rails::JobArgumentSerializer do
   end
 
   it "roundtrips non-default decimal precision" do
-    money = Money.new("0.057", "USD", decimal_precision: 3)
+    money = Money.new("0.0574", "USD", decimal_precision: 3)
     serialized_job = MoneyTestJob.new(value: money).serialize
 
     serialized_value = serialized_job["arguments"][0]["value"]
+    expect(serialized_value["value"]).to eq("0.0574")
     expect(serialized_value["decimal_precision"]).to eq(3)
 
     deserialized_job = MoneyTestJob.deserialize(serialized_job)
@@ -30,6 +31,7 @@ RSpec.describe Money::Rails::JobArgumentSerializer do
     deserialized_money = deserialized_job.arguments.first[:value]
 
     expect(deserialized_money).to eq(money)
+    expect(deserialized_money.value).to eq(BigDecimal("0.0574"))
     expect(deserialized_money.decimal_precision).to eq(3)
   end
 end

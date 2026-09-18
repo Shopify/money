@@ -5,7 +5,8 @@ class Money
     class Converter
       def to_subunits(money)
         raise ArgumentError, "money cannot be nil" if money.nil?
-        (money.value * subunit_to_unit(money.currency)).to_i
+        value = money.value.round(money.decimal_precision)
+        (value * subunit_to_unit(money.currency)).round.to_i
       end
 
       def from_subunits(subunits, currency)

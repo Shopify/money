@@ -171,7 +171,8 @@ class Money
 
     def coerce_maximum(maximum, allocation_currency)
       return maximum.to_money(allocation_currency) unless allocation_decimal_precision
-      return Money.new(maximum, allocation_currency, decimal_precision: allocation_decimal_precision) unless maximum.is_a?(Money)
+
+      maximum = Money.new(maximum, allocation_currency, decimal_precision: allocation_decimal_precision) unless maximum.is_a?(Money)
 
       if maximum.explicit_decimal_precision? && maximum.decimal_precision != allocation_decimal_precision
         raise Money::IncompatiblePrecisionError,
@@ -179,7 +180,7 @@ class Money
       end
 
       normalized_maximum = Money.new(
-        maximum.value,
+        maximum.value.round(allocation_decimal_precision),
         allocation_currency,
         decimal_precision: allocation_decimal_precision,
       )
