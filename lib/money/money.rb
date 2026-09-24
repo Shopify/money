@@ -96,7 +96,6 @@ class Money
 
     def rational(money1, money2)
       money1.send(:arithmetic, money2) do |money|
-        money1.send(:calculated_decimal_precision, money)
         money1.value.to_r / money.value.to_r
       end
     end
@@ -167,7 +166,7 @@ class Money
   end
 
   def decimal_precision
-    @decimal_precision || currency.minor_units
+    [@decimal_precision || currency.minor_units, currency.minor_units].max
   end
 
   def explicit_decimal_precision?
@@ -275,7 +274,7 @@ class Money
     when :legacy_dollars
       2
     when :amount, nil
-      decimal_precision
+      currency.minor_units
     else
       raise ArgumentError, "Unexpected format: #{style}"
     end
@@ -307,7 +306,8 @@ class Money
     if (options.is_a?(Hash) && options[:legacy_format]) || Money::Config.current.legacy_json_format
       to_s
     else
-      hash = { value: to_s(:amount), currency: currency.to_s }
+      serialized_value = explicit_decimal_precision? ? value.to_s("F") : to_s(:amount)
+      hash = { value: serialized_value, currency: currency.to_s }
       hash[:decimal_precision] = decimal_precision if explicit_decimal_precision?
       hash
     end
@@ -423,17 +423,9 @@ class Money
   end
 
   def calculated_decimal_precision(other)
-    return other.decimal_precision if no_currency? && !explicit_decimal_precision? && other.explicit_decimal_precision?
-    return if no_currency? && !explicit_decimal_precision?
-    return precision_argument if other.no_currency? && !other.explicit_decimal_precision?
-    if decimal_precision == other.decimal_precision
-      return precision_argument || other.decimal_precision if other.explicit_decimal_precision?
-      return precision_argument
-    end
+    return unless explicit_decimal_precision? || other.explicit_decimal_precision?
 
-    raise Money::IncompatiblePrecisionError,
-      "mathematical operation not permitted for Money objects with different decimal precisions " \
-        "#{decimal_precision} and #{other.decimal_precision}."
+    [decimal_precision, other.decimal_precision].max
   end
 
   def precision_argument

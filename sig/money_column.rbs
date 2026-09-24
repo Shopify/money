@@ -10,9 +10,6 @@ module MoneyColumn
   class CurrencyMismatchError < Error
   end
 
-  class PrecisionMismatchError < Error
-  end
-
   class ActiveRecordType < ActiveRecord::Type::Decimal
     def serialize: (Money? money) -> BigDecimal?
   end
@@ -42,7 +39,6 @@ module MoneyColumn
     def read_currency_column: (String | Symbol currency_column) -> String?
     def validate_hardcoded_currency_compatibility!: (String column, Money money, String | Money::Currency expected_currency) -> void
     def validate_currency_compatibility!: (String column, Money money, String | Symbol currency_column) -> void
-    def validate_decimal_precision_compatibility!: (String column, Money money, Integer? decimal_precision) -> void
     def _assign_attributes: (Hash[untyped, untyped] new_attributes) -> void
 
     module ClassMethods

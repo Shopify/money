@@ -85,10 +85,10 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price).to eq(Money.new(1.23, 'EUR'))
   end
 
-  it 'rejects explicit precision without a fixed decimal precision' do
-    expect {
-      MoneyRecord.new(price: Money.new("0.057", "USD", decimal_precision: 3))
-    }.to raise_error(MoneyColumn::PrecisionMismatchError)
+  it 'writes raw values without requiring a decimal precision database column' do
+    record = MoneyRecord.new(price: Money.new("0.057", "USD", decimal_precision: 3))
+    expect(record[:price]).to eq(BigDecimal("0.057"))
+    expect(record.attributes.keys).not_to include("decimal_precision")
   end
 
   it 'preserves a configured fixed decimal precision after reload' do
@@ -97,13 +97,15 @@ RSpec.describe 'MoneyColumn' do
     record = MoneyRecordWithDecimalPrecision.create!(price: money)
     record.reload
 
-    expect(record.price.as_json).to eq(value: "0.057", currency: "USD", decimal_precision: 3)
+    expect(record.price.as_json).to eq(value: "0.0574", currency: "USD", decimal_precision: 3)
+    expect(record.price.to_s).to eq("0.06")
   end
 
-  it 'rejects explicit precision that differs from the fixed decimal precision' do
-    expect {
-      MoneyRecordWithDecimalPrecision.new(price: Money.new("1.23", "USD", decimal_precision: 2))
-    }.to raise_error(MoneyColumn::PrecisionMismatchError)
+  it 'accepts differing precision and reconstructs using model configuration' do
+    record = MoneyRecordWithDecimalPrecision.create!(price: Money.new("1.2345", "USD", decimal_precision: 4))
+    record.reload
+    expect(record.price.value).to eq(BigDecimal("1.2345"))
+    expect(record.price.decimal_precision).to eq(3)
   end
 
   it 'validates a configured fixed decimal precision' do

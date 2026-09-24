@@ -41,15 +41,18 @@ Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 
 # Explicit precision for values smaller than a currency subunit
 unit_price = Money.new("0.057", "USD", decimal_precision: 3)
-(unit_price * 100).to_s #=> "5.700"
+(unit_price * 100).to_s #=> "5.70"
 
 # Explicit-precision values retain additional digits during calculations and
-# round when rendered
+# round to currency precision when rendered
 fractional_unit_price = Money.new("0.0057", "USD", decimal_precision: 3)
-(fractional_unit_price * 100).to_s #=> "0.570"
+(fractional_unit_price * 100).to_s #=> "0.57"
 
-# Money arithmetic requires matching precision
-Money.new(1, "USD", decimal_precision: 3) + Money.new("0.057", "USD", decimal_precision: 3)
+# Money arithmetic uses the highest operand and currency precision
+total = Money.new(1, "USD") + Money.new("0.057", "USD", decimal_precision: 3)
+total.value.to_s("F") #=> "1.057"
+total.to_s           #=> "1.06"
+total.decimal_precision #=> 3
 
 m = Money.new(1000, "USD")
 # Splitting money evenly
@@ -281,7 +284,7 @@ end
 | currency | string | hardcoded currency value  |
 | currency_read_only | boolean |  when true, `currency_column` won't write the currency back into the db. Must be set to true if `currency_column` is an attr_reader or delegate. Default: false |
 | coerce_null | boolean | when true, a nil value will be returned as Money.zero. Default: false |
-| decimal_precision | integer | fixed decimal precision used when reconstructing values. Explicit-precision assignments must match. Default: the currency's minor units |
+| decimal_precision | integer | model-level computation precision used when reconstructing raw stored values, with currency precision as a minimum. No precision database column is needed. Default: the currency's minor units |
 
 You can use multiple `money_column` calls to achieve the desired effects with
 currency on the model or attribute level.

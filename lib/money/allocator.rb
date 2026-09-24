@@ -120,19 +120,26 @@ class Money
     #     #=> [Money.new(5), Money.new(2)]
     def allocate_max_amounts(maximums)
       allocation_currency = extract_currency(maximums + [__getobj__])
-      maximums = maximums.map { |max| coerce_maximum(max, allocation_currency) }
-      maximums_total = maximums.reduce(
-        Money.new(0, allocation_currency, decimal_precision: allocation_decimal_precision),
-        :+,
-      )
-      maximums_total_units = allocation_units(maximums_total)
+      money_values = maximums.grep(Money) + [__getobj__]
+      precision = if money_values.any?(&:explicit_decimal_precision?)
+        (money_values.map(&:decimal_precision) + [allocation_currency.minor_units]).max
+      end
+      maximums = maximums.map { |max| coerce_maximum(max, allocation_currency, precision) }
+      maximums_units = maximums.map do |maximum|
+        if precision
+          (maximum.value * 10**precision).floor
+        else
+          maximum.subunits
+        end
+      end
+      maximums_total_units = maximums_units.sum
 
-      splits = maximums.map do |max_amount|
+      splits = maximums_units.map do |max_units|
         next(Rational(0)) if maximums_total_units.zero?
-        Rational(allocation_units(max_amount), maximums_total_units)
+        Rational(max_units, maximums_total_units)
       end
 
-      total_allocatable = [maximums_total_units, allocation_units].min
+      total_allocatable = [maximums_total_units, Helpers.money_to_units(__getobj__, decimal_precision: precision)].min
 
       subunits_amounts, left_over = amounts_from_splits(1, splits, total_allocatable)
       subunits_amounts.map! { |amount| amount[:whole_subunits] }
@@ -140,7 +147,7 @@ class Money
       subunits_amounts.each_with_index do |amount, index|
         break if left_over <= 0
 
-        max_amount = allocation_units(maximums[index])
+        max_amount = maximums_units[index]
         next if amount >= max_amount
 
         left_over -= 1
@@ -151,7 +158,7 @@ class Money
         Helpers.money_from_units(
           amount,
           allocation_currency,
-          decimal_precision: allocation_decimal_precision,
+          decimal_precision: precision,
         )
       end
     end
@@ -169,25 +176,10 @@ class Money
       currencies.first || NULL_CURRENCY
     end
 
-    def coerce_maximum(maximum, allocation_currency)
-      return maximum.to_money(allocation_currency) unless allocation_decimal_precision
+    def coerce_maximum(maximum, allocation_currency, precision)
+      return maximum.to_money(allocation_currency) if maximum.is_a?(Money)
 
-      maximum = Money.new(maximum, allocation_currency, decimal_precision: allocation_decimal_precision) unless maximum.is_a?(Money)
-
-      if maximum.explicit_decimal_precision? && maximum.decimal_precision != allocation_decimal_precision
-        raise Money::IncompatiblePrecisionError,
-          "maximum decimal precision #{maximum.decimal_precision} does not match allocation decimal precision #{allocation_decimal_precision}."
-      end
-
-      normalized_maximum = Money.new(
-        maximum.value.round(allocation_decimal_precision),
-        allocation_currency,
-        decimal_precision: allocation_decimal_precision,
-      )
-      return normalized_maximum if normalized_maximum.value == maximum.value
-
-      raise Money::IncompatiblePrecisionError,
-        "maximum #{maximum} cannot be represented exactly with decimal precision #{allocation_decimal_precision}."
+      Money.new(maximum, allocation_currency, decimal_precision: precision)
     end
 
     def amounts_from_splits(allocations, splits, subunits_to_split = allocation_units)

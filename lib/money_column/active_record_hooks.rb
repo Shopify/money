@@ -4,7 +4,6 @@ module MoneyColumn
   class Error < StandardError; end
   class CurrencyReadOnlyError < Error; end
   class CurrencyMismatchError < Error; end
-  class PrecisionMismatchError < Error; end
 
   module ActiveRecordHooks
     def self.included(base)
@@ -60,9 +59,7 @@ module MoneyColumn
       end
 
       if money.is_a?(Money)
-        validate_decimal_precision_compatibility!(column, money, options[:decimal_precision])
         write_currency(column, money, options)
-        money = money.to_s(:amount)
       end
 
       self[column] = Money::Helpers.value_to_decimal(money)
@@ -110,14 +107,6 @@ module MoneyColumn
         "Remove column's `currency_read_only` option or update value+currency together (e.g., record.update(value: money, currency: money.currency))."
 
       raise MoneyColumn::CurrencyReadOnlyError, msg
-    end
-
-    def validate_decimal_precision_compatibility!(column, money, decimal_precision)
-      return unless money.explicit_decimal_precision?
-      return if money.decimal_precision == decimal_precision
-
-      raise MoneyColumn::PrecisionMismatchError,
-        "Invalid #{column}: Money decimal precision #{money.decimal_precision} does not match money column decimal precision #{decimal_precision.inspect}."
     end
 
     def _assign_attributes(new_attributes)
