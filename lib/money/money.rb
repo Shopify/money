@@ -424,6 +424,8 @@ class Money
 
   def calculated_decimal_precision(other)
     return unless explicit_decimal_precision? || other.explicit_decimal_precision?
+    return other.decimal_precision if no_currency? && !explicit_decimal_precision?
+    return decimal_precision if other.no_currency? && !other.explicit_decimal_precision?
 
     [decimal_precision, other.decimal_precision].max
   end

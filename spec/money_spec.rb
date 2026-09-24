@@ -381,6 +381,24 @@ RSpec.describe "Money" do
     expect(result.decimal_precision).to eq(3)
   end
 
+  it "ignores implicit null-currency precision in either arithmetic operand" do
+    yen = Money.new(1, "JPY", decimal_precision: 0)
+    placeholder = Money.new(0, Money::NULL_CURRENCY)
+    results = [yen + placeholder, placeholder + yen, yen - placeholder, placeholder - yen]
+
+    expect(results.map(&:decimal_precision)).to all(eq(0))
+    expect(results.map(&:value)).to eq([1, 1, 1, -1])
+    expect((yen + placeholder).split(2).map(&:value)).to eq([1, 0])
+  end
+
+  it "includes explicitly declared null-currency precision in arithmetic" do
+    yen = Money.new(1, "JPY", decimal_precision: 0)
+    placeholder = Money.new(0, Money::NULL_CURRENCY, decimal_precision: 3)
+
+    expect((yen + placeholder).decimal_precision).to eq(3)
+    expect((placeholder + yen).decimal_precision).to eq(3)
+  end
+
   it "preserves explicit precision through numeric, string, and reverse arithmetic" do
     money = Money.new("0.057", "USD", decimal_precision: 3)
 

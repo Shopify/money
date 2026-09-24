@@ -121,6 +121,7 @@ class Money
     def allocate_max_amounts(maximums)
       allocation_currency = extract_currency(maximums + [__getobj__])
       money_values = maximums.grep(Money) + [__getobj__]
+      money_values = money_values.reject { |money| money.no_currency? && !money.explicit_decimal_precision? }
       precision = if money_values.any?(&:explicit_decimal_precision?)
         (money_values.map(&:decimal_precision) + [allocation_currency.minor_units]).max
       end

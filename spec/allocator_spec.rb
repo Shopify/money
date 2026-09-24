@@ -421,6 +421,25 @@ RSpec.describe "Allocator" do
       expect(allocations.map(&:decimal_precision)).to eq([4, 4])
     end
 
+    specify "#allocate_max_amounts ignores implicit null-currency precision" do
+      cap = Money.new("0.5", "JPY", decimal_precision: 0)
+      [Money.new(1, "JPY"), Money.new(1, Money::NULL_CURRENCY)].each do |money|
+        allocations = money.allocate_max_amounts([cap, Money.new(0, Money::NULL_CURRENCY)])
+
+        expect(allocations.map(&:decimal_precision)).to eq([0, 0])
+        expect(allocations.map(&:value)).to eq([0, 0])
+        expect(allocations.map { |amount| amount.currency.iso_code }).to eq(["JPY", "JPY"])
+      end
+    end
+
+    specify "#allocate_max_amounts includes explicit null-currency precision" do
+      cap = Money.new("0.005", Money::NULL_CURRENCY, decimal_precision: 3)
+      allocations = Money.new(1, "JPY").allocate_max_amounts([cap])
+
+      expect(allocations.map(&:decimal_precision)).to eq([3])
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.005")])
+    end
+
     specify "#allocate_max_amounts promotes precision before coercing numeric and string maxima" do
       money = Money.new("0.06", "USD")
       [0.029, "0.029"].each do |maximum|
