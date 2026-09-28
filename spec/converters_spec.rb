@@ -66,6 +66,22 @@ RSpec.describe Money::Converters do
       expect(converter.to_subunits(Money.new("1.6", "JPY", decimal_precision: 4))).to eq(2)
       expect(Money.new("0.057", "USD", decimal_precision: 4).subunits).to eq(6)
     end
+
+    it 'returns integer ISO subunits across declared precisions without changing the raw value' do
+      { "JPY" => 1, "USD" => 123, "BHD" => 1235 }.each do |currency, units|
+        [0, 2, 5].each do |precision|
+          [1, -1].each do |sign|
+            raw_value = BigDecimal("1.2349") * sign
+            money = Money.new(raw_value, currency, decimal_precision: precision)
+            subunits = money.subunits(format: :iso4217)
+
+            expect(subunits).to be_a(Integer)
+            expect(subunits).to eq(units * sign)
+            expect(money.value).to eq(raw_value)
+          end
+        end
+      end
+    end
   end
 
   describe Money::Converters::StripeConverter do
@@ -84,6 +100,15 @@ RSpec.describe Money::Converters do
         expect(converter.from_subunits(1_000_000, "usdc")).to eq(Money.new(1, "usdc"))
       end
     end
+
+    it 'uses Stripe currency units independently of explicit computation precision' do
+      money = Money.new("1.0149", ugx, decimal_precision: 3)
+
+      expect(money.subunits(format: :stripe)).to eq(101)
+      expect(money.subunits(format: :stripe)).to be_a(Integer)
+      expect(money.subunits(format: :iso4217)).to eq(1)
+      expect(money.value).to eq(BigDecimal("1.0149"))
+    end
   end
 
   describe Money::Converters::LegacyDollarsConverter do
@@ -91,6 +116,15 @@ RSpec.describe Money::Converters do
     it 'always uses 100 as subunit_to_unit' do
       expect(converter.to_subunits(Money.new(1, usd))).to eq(100)
       expect(converter.from_subunits(100, usd)).to eq(Money.new(1, usd))
+    end
+
+    it 'keeps legacy dollar units for explicit precision without double rounding' do
+      money = Money.new("-1.0149", "JPY", decimal_precision: 3)
+
+      expect(money.subunits(format: :legacy_dollar)).to eq(-101)
+      expect(money.subunits(format: :legacy_dollar)).to be_a(Integer)
+      expect(money.subunits(format: :iso4217)).to eq(-1)
+      expect(money.value).to eq(BigDecimal("-1.0149"))
     end
   end
 end

@@ -205,6 +205,22 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_fs(:legacy_dollars)).to eq("1.00")
   end
 
+  { "JPY" => "-1", "USD" => "-1.23", "BHD" => "-1.235" }.each do |currency, formatted|
+    it "uses #{currency} presentment in formatting aliases without changing calculation digits" do
+      money = Money.new("-1.2349", currency, decimal_precision: 4)
+
+      [:to_s, :to_fs, :to_formatted_s].each do |method|
+        expect(money.public_send(method)).to eq(formatted)
+        expect(money.public_send(method, :amount)).to eq(formatted)
+        expect(money.public_send(method, :legacy_dollars)).to eq("-1.23")
+      end
+
+      expect(money.value).to eq(BigDecimal("-1.2349"))
+      expect(money.decimal_precision).to eq(4)
+      expect((money * 10000).value).to eq(BigDecimal("-12349"))
+    end
+  end
+
   it "to_fs with a amount style" do
     expect(amount_money.to_fs(:amount)).to eq("1.23")
     expect(non_fractional_money.to_fs(:amount)).to eq("1")
@@ -369,6 +385,25 @@ RSpec.describe "Money" do
     expect(restored.map { |value| (value * 100).to_s }).to all(eq("0.57"))
     expect(money.as_json(legacy_format: true)).to eq("0.01")
     expect(money.to_json(legacy_format: true)).to eq("0.01")
+  end
+
+  it "uses currency precision when both Money operands declare a lower precision" do
+    first = Money.new("1.2345", "BHD", decimal_precision: 0)
+    second = Money.new("0.0001", "BHD", decimal_precision: 1)
+    results = [first + second, second + first, first - second, second - first]
+
+    expect(results.map(&:decimal_precision)).to all(eq(3))
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:value)).to eq(%w[1.2346 1.2346 1.2344 -1.2344].map { |value| BigDecimal(value) })
+  end
+
+  it "still rejects incompatible currencies when operands have different precisions" do
+    usd = Money.new("0.0057", "USD", decimal_precision: 3)
+    cad = Money.new("0.0001", "CAD", decimal_precision: 4)
+
+    expect { usd + cad }.to raise_error(Money::IncompatibleCurrencyError)
+    expect { usd - cad }.to raise_error(Money::IncompatibleCurrencyError)
+    expect { Money.rational(usd, cad) }.to raise_error(Money::IncompatibleCurrencyError)
   end
 
   it "uses the currency-bearing value's precision when adding a default null-currency value" do
