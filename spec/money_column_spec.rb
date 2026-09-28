@@ -101,6 +101,17 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price.to_s).to eq("0.06")
   end
 
+  it 'stores raw values but reconstructs unconfigured columns at currency precision' do
+    record = MoneyRecord.create!(price: Money.new("0.0574", "USD", decimal_precision: 3))
+    record.reload
+
+    expect(record[:price]).to eq(BigDecimal("0.0574"))
+    expect(record.price.value).to eq(BigDecimal("0.06"))
+    expect(record.price.decimal_precision).to eq(2)
+    expect(record.price).not_to be_explicit_decimal_precision
+    expect(record.attributes.keys).not_to include("decimal_precision", "price_decimal_precision")
+  end
+
   it 'accepts differing precision and reconstructs using model configuration' do
     record = MoneyRecordWithDecimalPrecision.create!(price: Money.new("1.2345", "USD", decimal_precision: 4))
     record.reload
