@@ -1137,49 +1137,57 @@ RSpec.describe "Money" do
     end
   end
 
-  describe '.clamp' do
+  describe '#clamp' do
     let(:max) { 9000 }
     let(:min) { -max }
+    let(:money) { Money.new(5000, 'EUR') }
 
-    it 'returns the same value if the value is within the min..max range' do
-      money = Money.new(5000, 'EUR').clamp(min..max)
-      expect(money.value).to eq(5000)
-      expect(money.currency.iso_code).to eq('EUR')
+    it 'returns itself if its value is between the minimum and maximum' do
+      expect(money.clamp(min, max)).to equal(money)
     end
 
-    it 'returns the same value if the value is larger and the max value is nil' do
-      money = Money.new(min + 1, 'EUR').clamp(min, nil)
-      expect(money.value).to eq(min + 1)
-      expect(money.currency.iso_code).to eq('EUR')
+    it 'returns the maximum if its value is larger' do
+      expect(Money.new(max + 1, 'EUR').clamp(min, max)).to eq(Money.new(max, 'EUR'))
     end
 
-    it 'returns the same value if the value is between the min and max' do
-      money = Money.new(5000, 'EUR').clamp(min, max)
-      expect(money.value).to eq(5000)
-      expect(money.currency.iso_code).to eq('EUR')
+    it 'returns the minimum if its value is smaller' do
+      expect(Money.new(min - 1, 'EUR').clamp(min, max)).to eq(Money.new(min, 'EUR'))
     end
 
-    it 'returns the max value if the original value is larger' do
-      money = Money.new(9001, 'EUR').clamp(min, max)
-      expect(money.clamp(min, max).value).to eq(9000)
-      expect(money.clamp(min, max).currency.iso_code).to eq('EUR')
+    it 'accepts a bounded inclusive range' do
+      expect(money.clamp(min..max)).to equal(money)
+      expect(Money.new(min - 1, 'EUR').clamp(min..max)).to eq(Money.new(min, 'EUR'))
+      expect(Money.new(max + 1, 'EUR').clamp(min..max)).to eq(Money.new(max, 'EUR'))
     end
 
-    it 'returns the min value if the original value is smaller' do
-      money = Money.new(-9001, 'EUR').clamp(min, max)
-      expect(money.value).to eq(-9000)
-      expect(money.currency.iso_code).to eq('EUR')
+    it 'accepts an endless range' do
+      expect(Money.new(min - 1, 'EUR').clamp(min..)).to eq(Money.new(min, 'EUR'))
     end
 
-    it 'returns the min value if the original value is smaller and the max value is nil' do
-      money = Money.new(min - 1, 'EUR').clamp(min, nil)
-      expect(money.value).to eq(min)
-      expect(money.currency.iso_code).to eq('EUR')
+    it 'accepts a beginless range' do
+      expect(Money.new(max + 1, 'EUR').clamp(..max)).to eq(Money.new(max, 'EUR'))
     end
 
-    it 'raises an Argument error if the max value is less than the min value' do
-      money = Money.new(-9001, 'EUR').clamp(min, nil)
-      expect { money.clamp(max, min) }.to raise_error(ArgumentError, 'min argument must be less than or equal to max argument')
+    it 'accepts a nil maximum' do
+      expect(money.clamp(min, nil)).to equal(money)
+      expect(Money.new(min - 1, 'EUR').clamp(min, nil)).to eq(Money.new(min, 'EUR'))
+    end
+
+    it 'accepts a nil minimum' do
+      expect(money.clamp(nil, max)).to equal(money)
+      expect(Money.new(max + 1, 'EUR').clamp(nil, max)).to eq(Money.new(max, 'EUR'))
+    end
+
+    it 'accepts two nil bounds' do
+      expect(money.clamp(nil, nil)).to equal(money)
+    end
+
+    it 'rejects an exclusive range' do
+      expect { money.clamp(min...max) }.to raise_error(ArgumentError)
+    end
+
+    it 'raises an ArgumentError if the minimum is greater than the maximum' do
+      expect { money.clamp(max, min) }.to raise_error(ArgumentError)
     end
   end
 

@@ -75,7 +75,8 @@ class Money
   def floor: () -> Money
   def round: (?Integer ndigits) -> Money
   def fraction: (Numeric rate) -> Money
-  def clamp: (Numeric min, Numeric max) -> Money
+  def clamp: (Numeric? min, Numeric? max) -> Money
+           | (Range[Numeric] range) -> Money
 
   def allocate: (Array[Numeric] splits, ?Symbol strategy) -> Array[Money]
   def allocate_max_amounts: (Array[Money] maximums) -> Array[Money]

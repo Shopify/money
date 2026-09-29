@@ -348,15 +348,16 @@ class Money
     Splitter.new(self, num).split.dup
   end
 
-  # Clamps the value to be within the specified minimum and maximum. Returns
-  # self if the value is within bounds, otherwise a new Money object with the
-  # closest min or max value.
+  # Clamps the value to be within the specified minimum and maximum, or within
+  # an inclusive range. A nil minimum or maximum leaves that bound open.
+  # Returns self if the value is within bounds, otherwise a new Money object
+  # with the closest minimum or maximum value.
   #
   # @example
   #   Money.new(50, "CAD").clamp(1, 100) #=> Money.new(50, "CAD")
   #   Money.new(50, "CAD").clamp(1..100) #=> Money.new(50, "CAD")
-  #   Money.new(50, "CAD").clamp(1, nil) #=> Money.new(1,  "CAD")
-  #
+  #   Money.new(50, "CAD").clamp(1, nil) #=> Money.new(50, "CAD")
+  #   Money.new(50, "CAD").clamp(nil, 40) #=> Money.new(40, "CAD")
   #   Money.new(120, "CAD").clamp(0, 100) #=> Money.new(100, "CAD")
   def clamp(...)
     clamped_value = value.clamp(...)
