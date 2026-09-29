@@ -8,6 +8,10 @@ class Money
 
     DECIMAL_ZERO = BigDecimal(0).freeze
     MAX_DECIMAL = 21
+    # Largest supported BigDecimal#exponent (number of integer digits). Rejects
+    # values like "1e1000000000" that are cheap to store but expand into huge
+    # Integers or Strings in #subunits or #to_s.
+    MAX_INTEGER_DIGITS = 1000
 
     def value_to_decimal(num)
       value =
