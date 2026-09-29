@@ -4,6 +4,7 @@ class Money
   module Helpers
     DECIMAL_ZERO: BigDecimal
     MAX_DECIMAL: Integer
+    MAX_INTEGER_DIGITS: Integer
 
     def self.value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
     def self.value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)

@@ -465,6 +465,47 @@ RSpec.describe "Money" do
     expect { Money.new(-Float::INFINITY) }.to raise_error(ArgumentError)
   end
 
+  describe "magnitude bound" do
+    it "raises when constructed with an exponent-form string beyond the supported range" do
+      expect { Money.new("1e1000000000", "USD") }.to raise_error(ArgumentError, /supported range/)
+      expect { Money.new("-1e1000000000", "USD") }.to raise_error(ArgumentError, /supported range/)
+    end
+
+    it "raises when constructed with an out-of-range BigDecimal" do
+      expect { Money.new(BigDecimal("1e1000"), "USD") }.to raise_error(ArgumentError, /supported range/)
+    end
+
+    it "raises when converting out-of-range subunits back to money" do
+      expect { Money.from_subunits("1e1000000000", "USD") }.to raise_error(ArgumentError, /supported range/)
+    end
+
+    it "raises when arithmetic leaves the supported range" do
+      expect { Money.new("1e999", "USD") * 10 }.to raise_error(ArgumentError, /supported range/)
+    end
+
+    it "raises when loaded from YAML with an out-of-range value" do
+      yaml = "--- !ruby/object:Money\nvalue: '1e1000000000'\ncurrency: USD\n"
+      expect { yaml_load(yaml) }.to raise_error(ArgumentError, /supported range/)
+    end
+
+    it "accepts the largest in-range value and converts it to subunits unchanged" do
+      max = "9" * Money::Helpers::MAX_INTEGER_DIGITS
+      expect(Money.new(max, "USD").value).to eq(BigDecimal(max))
+      expect(Money.new(max, "USD").subunits).to eq(Integer(max) * 100)
+      expect(Money.new("-#{max}", "USD").subunits).to eq(-Integer(max) * 100)
+    end
+
+    it "accepts values larger than a DECIMAL(21,3) column" do
+      expect(Money.new("1e25", "USD") * 10**25).to eq(Money.new("1e50", "USD"))
+      expect(Money.new("1e25", "USD").subunits).to eq(10**27)
+    end
+
+    it "still accepts ordinary exponent-form strings" do
+      expect(Money.new("1.5e3", "USD")).to eq(Money.new(1500, "USD"))
+      expect(Money.new("1e-10", "USD")).to eq(Money.new(0, "USD"))
+    end
+  end
+
   it "is comparable with non-money objects" do
     expect(money).not_to eq(nil)
   end
