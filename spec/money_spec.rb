@@ -41,6 +41,13 @@ RSpec.describe "Money" do
     expect(Money.new(10, "USD").convert_currency(150, "JPY")).to eq(Money.new(1500, "JPY"))
   end
 
+  it "uses the target currency precision when converting a value with implicit precision" do
+    money = Money.new(100, "JPY").convert_currency(BigDecimal("0.0075"), "USD")
+
+    expect(money.value).to eq(BigDecimal("0.75"))
+    expect(money.decimal_precision).to eq(2)
+  end
+
   it "returns itself with to_money" do
     expect(money.to_money).to eq(money)
     expect(amount_money.to_money).to eq(amount_money)
@@ -48,6 +55,13 @@ RSpec.describe "Money" do
 
   it "#to_money uses the provided currency when it doesn't already have one" do
     expect(Money.new(1).to_money('CAD')).to eq(Money.new(1, 'CAD'))
+  end
+
+  it "#to_money uses the target currency precision for a value with implicit precision" do
+    money = Money.new("1.23", Money::NULL_CURRENCY).to_money("JPY")
+
+    expect(money.value).to eq(BigDecimal("1"))
+    expect(money.decimal_precision).to eq(0)
   end
 
   it "#to_money works with money objects of the same currency" do
@@ -84,9 +98,62 @@ RSpec.describe "Money" do
     expect(Money.new(1.00)).to eq(Money.new(1))
   end
 
+  it "uses the currency minor units as the default decimal precision" do
+    expect(Money.new("1.2345", "USD").decimal_precision).to eq(2)
+    expect(Money.new("1.2345", "BHD").decimal_precision).to eq(3)
+  end
+
+  it "uses an explicit decimal precision when constructing a value" do
+    money = Money.new("1.2345", "USD", decimal_precision: 3)
+
+    expect(money.value).to eq(BigDecimal("1.2345"))
+    expect(money.decimal_precision).to eq(3)
+    expect(money.to_s).to eq("1.23")
+  end
+
+  it "supports an explicit decimal precision of zero" do
+    money = Money.new("1.6", "USD", decimal_precision: 0)
+
+    expect(money.value).to eq(BigDecimal("1.6"))
+    expect(money.to_s).to eq("1.60")
+    expect(money.decimal_precision).to eq(2)
+    expect(money).to be_explicit_decimal_precision
+  end
+
+  it "requires decimal precision to be a non-negative integer" do
+    expect { Money.new(1, "USD", decimal_precision: -1) }.to raise_error(ArgumentError, "decimal_precision must be a non-negative Integer")
+    expect { Money.new(1, "USD", decimal_precision: 1.5) }.to raise_error(ArgumentError, "decimal_precision must be a non-negative Integer")
+  end
+
+  it "caches zero values separately by decimal precision" do
+    currency_precision_money = Money.new(0, "USD")
+    precise_money = Money.new(0, "USD", decimal_precision: 4)
+
+    expect(currency_precision_money.decimal_precision).to eq(2)
+    expect(precise_money.decimal_precision).to eq(4)
+    expect(currency_precision_money).not_to equal(precise_money)
+  end
+
   it "can be constructed with a money object" do
     expect(Money.new(Money.new(1))).to eq(Money.new(1))
     expect(Money.new(Money.new(1, "USD"), "USD")).to eq(Money.new(1, "USD"))
+  end
+
+  it "can explicitly change the decimal precision of a money object" do
+    precise_money = Money.new("1.2345", "USD", decimal_precision: 4)
+
+    money = Money.new(precise_money, "USD", decimal_precision: 2)
+
+    expect(money.value).to eq(BigDecimal("1.2345"))
+    expect(money.decimal_precision).to eq(2)
+    expect(money.to_s).to eq("1.23")
+  end
+
+  it "records explicitly selecting the currency's default decimal precision" do
+    money = Money.new(Money.new("1.23", "USD"), "USD", decimal_precision: 2)
+
+    expect(money).to be_explicit_decimal_precision
+    expect(money.as_json).to include(decimal_precision: 2)
   end
 
   it "can be constructed with a money object with a null currency" do
@@ -97,6 +164,20 @@ RSpec.describe "Money" do
     money = Money.new(Money.new(1, 'USD'), Money::NULL_CURRENCY)
     expect(money.value).to eq(1)
     expect(money.currency.to_s).to eq('USD')
+  end
+
+  it "uses the target currency precision when adding a currency to a value with implicit precision" do
+    money = Money.new(Money.new("1.23", Money::NULL_CURRENCY), "JPY")
+
+    expect(money.value).to eq(BigDecimal("1"))
+    expect(money.decimal_precision).to eq(0)
+  end
+
+  it "preserves an existing currency when explicitly changing precision" do
+    money = Money.new(Money.new(1, "USD"), Money::NULL_CURRENCY, decimal_precision: 3)
+
+    expect(money.currency).to eq(Money::Currency.find!("USD"))
+    expect(money.decimal_precision).to eq(3)
   end
 
   it "constructor raises when changing currency" do
@@ -112,9 +193,32 @@ RSpec.describe "Money" do
     expect(non_fractional_money.to_s).to eq("1")
   end
 
+  it "to_s uses currency precision for presentment" do
+    expect(Money.new("0.057", "USD", decimal_precision: 3).to_s).to eq("0.06")
+    expect(Money.new("1", "USD", decimal_precision: 4).to_s).to eq("1.00")
+    expect(Money.new("1.57", "JPY", decimal_precision: 3).to_s).to eq("2")
+    expect(Money.new("1.2345", "BHD", decimal_precision: 4).to_s).to eq("1.235")
+  end
+
   it "to_fs with a legacy_dollars style" do
     expect(amount_money.to_fs(:legacy_dollars)).to eq("1.23")
     expect(non_fractional_money.to_fs(:legacy_dollars)).to eq("1.00")
+  end
+
+  { "JPY" => "-1", "USD" => "-1.23", "BHD" => "-1.235" }.each do |currency, formatted|
+    it "uses #{currency} presentment in formatting aliases without changing calculation digits" do
+      money = Money.new("-1.2349", currency, decimal_precision: 4)
+
+      [:to_s, :to_fs, :to_formatted_s].each do |method|
+        expect(money.public_send(method)).to eq(formatted)
+        expect(money.public_send(method, :amount)).to eq(formatted)
+        expect(money.public_send(method, :legacy_dollars)).to eq("-1.23")
+      end
+
+      expect(money.value).to eq(BigDecimal("-1.2349"))
+      expect(money.decimal_precision).to eq(4)
+      expect((money * 10000).value).to eq(BigDecimal("-12349"))
+    end
   end
 
   it "to_fs with a amount style" do
@@ -179,6 +283,14 @@ RSpec.describe "Money" do
     expect(money.as_json).to eq(value: "1.00", currency: "CAD")
   end
 
+  it "serializes non-default decimal precision" do
+    money = Money.new("0.057", "USD", decimal_precision: 3)
+
+    expect(money.as_json).to eq(value: "0.057", currency: "USD", decimal_precision: 3)
+    expect(Money.from_json(money.to_json)).to eq(money)
+    expect(Money.from_json(money.to_json).decimal_precision).to eq(3)
+  end
+
   it "is constructable with a BigDecimal" do
     expect(Money.new(BigDecimal("1.23"))).to eq(Money.new(1.23))
   end
@@ -201,6 +313,178 @@ RSpec.describe "Money" do
 
   it "is addable" do
     expect((Money.new(1.51) + Money.new(3.49))).to eq(Money.new(5.00))
+  end
+
+  it "preserves explicit decimal precision across arithmetic" do
+    unit_price = Money.new("0.057", "USD", decimal_precision: 3)
+
+    expect((unit_price + Money.new("0.001", "USD", decimal_precision: 3)).value).to eq(BigDecimal("0.058"))
+    expect((unit_price - Money.new("0.007", "USD", decimal_precision: 3)).value).to eq(BigDecimal("0.050"))
+    expect((unit_price * 100).to_s).to eq("5.70")
+  end
+
+  it "defers explicit precision rounding until rendering" do
+    unit_price = Money.new("0.0057", "USD", decimal_precision: 3)
+
+    expect(unit_price.value).to eq(BigDecimal("0.0057"))
+    expect(unit_price.to_s).to eq("0.01")
+    expect(unit_price.as_json).to eq(value: "0.0057", currency: "USD", decimal_precision: 3)
+    expect((unit_price * 100).value).to eq(BigDecimal("0.57"))
+    expect((unit_price * 100).to_s).to eq("0.57")
+  end
+
+  it "applies explicit decimal precision from zero across arithmetic" do
+    implicit_money = Money.new("1.00", "USD")
+    explicit_zero = Money.new("0.00", "USD", decimal_precision: 2)
+
+    results = [implicit_money + explicit_zero, implicit_money - explicit_zero]
+
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:as_json)).to all(eq(value: "1.0", currency: "USD", decimal_precision: 2))
+  end
+
+  it "uses the highest precision for arithmetic in either operand order" do
+    precise_money = Money.new("0.057", "USD", decimal_precision: 3)
+    currency_precision_money = Money.new("1.00", "USD")
+
+    sums = [precise_money + currency_precision_money, currency_precision_money + precise_money]
+    expect(sums.map(&:value)).to all(eq(BigDecimal("1.057")))
+    expect(sums.map(&:decimal_precision)).to eq([3, 3])
+    expect((currency_precision_money - precise_money).value).to eq(BigDecimal("0.943"))
+    expect((precise_money - currency_precision_money).value).to eq(BigDecimal("-0.943"))
+  end
+
+  it "promotes mixed explicit precisions without rounding raw operands" do
+    low = Money.new("0.0057", "USD", decimal_precision: 2)
+    high = Money.new("0.00003", "USD", decimal_precision: 4)
+
+    results = [low + high, high + low, low - high, high - low]
+    expect(results.map(&:decimal_precision)).to all(eq(4))
+    expect(results.map(&:value)).to eq(%w[0.00573 0.00573 0.00567 -0.00567].map { |value| BigDecimal(value) })
+    expect((low + Money.new(0, "USD", decimal_precision: 5)).decimal_precision).to eq(5)
+  end
+
+  it "uses currency precision as the minimum across arithmetic and currency conversion" do
+    money = Money.new("1.2345", "USD", decimal_precision: 0)
+    results = [money + "0.0001", money - "0.0001", money * 2, -money, money.fraction(1)]
+
+    expect(results.map(&:decimal_precision)).to all(eq(2))
+    expect(results.map(&:value)).to eq(%w[1.2346 1.2344 2.469 -1.2345 0.61725].map { |value| BigDecimal(value) })
+    converted = money.convert_currency(1, "BHD")
+    expect(converted.decimal_precision).to eq(3)
+    expect(converted.value).to eq(money.value)
+    expect(converted.to_s).to eq("1.235")
+  end
+
+  it "preserves raw value and precision through JSON, hashes, and YAML" do
+    money = Money.new("0.0057", "USD", decimal_precision: 3)
+    restored = [Money.from_json(money.to_json), Money.from_hash(money.to_h), yaml_load(money.to_yaml)]
+
+    expect(restored.map(&:value)).to all(eq(BigDecimal("0.0057")))
+    expect(restored.map(&:decimal_precision)).to all(eq(3))
+    expect(restored.map { |value| (value * 100).to_s }).to all(eq("0.57"))
+    expect(money.as_json(legacy_format: true)).to eq("0.01")
+    expect(money.to_json(legacy_format: true)).to eq("0.01")
+  end
+
+  it "uses currency precision when both Money operands declare a lower precision" do
+    first = Money.new("1.2345", "BHD", decimal_precision: 0)
+    second = Money.new("0.0001", "BHD", decimal_precision: 1)
+    results = [first + second, second + first, first - second, second - first]
+
+    expect(results.map(&:decimal_precision)).to all(eq(3))
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:value)).to eq(%w[1.2346 1.2346 1.2344 -1.2344].map { |value| BigDecimal(value) })
+  end
+
+  it "still rejects incompatible currencies when operands have different precisions" do
+    usd = Money.new("0.0057", "USD", decimal_precision: 3)
+    cad = Money.new("0.0001", "CAD", decimal_precision: 4)
+
+    expect { usd + cad }.to raise_error(Money::IncompatibleCurrencyError)
+    expect { usd - cad }.to raise_error(Money::IncompatibleCurrencyError)
+    expect { Money.rational(usd, cad) }.to raise_error(Money::IncompatibleCurrencyError)
+  end
+
+  it "uses the currency-bearing value's precision when adding a default null-currency value" do
+    precise_money = Money.new("0.057", "USD", decimal_precision: 3)
+    null_currency_money = Money.new(1, Money::NULL_CURRENCY)
+
+    result = null_currency_money + precise_money
+
+    expect(result.value).to eq(BigDecimal("1.057"))
+    expect(result.decimal_precision).to eq(3)
+  end
+
+  it "ignores implicit null-currency precision in either arithmetic operand" do
+    yen = Money.new(1, "JPY", decimal_precision: 0)
+    placeholder = Money.new(0, Money::NULL_CURRENCY)
+    results = [yen + placeholder, placeholder + yen, yen - placeholder, placeholder - yen]
+
+    expect(results.map(&:decimal_precision)).to all(eq(0))
+    expect(results.map(&:value)).to eq([1, 1, 1, -1])
+    expect((yen + placeholder).split(2).map(&:value)).to eq([1, 0])
+  end
+
+  it "includes explicitly declared null-currency precision in arithmetic" do
+    yen = Money.new(1, "JPY", decimal_precision: 0)
+    placeholder = Money.new(0, Money::NULL_CURRENCY, decimal_precision: 3)
+
+    expect((yen + placeholder).decimal_precision).to eq(3)
+    expect((placeholder + yen).decimal_precision).to eq(3)
+  end
+
+  it "preserves explicit precision through numeric, string, and reverse arithmetic" do
+    money = Money.new("0.057", "USD", decimal_precision: 3)
+
+    results = [money + 0.001, money - "0.007", 1 + money, 1 - money, 2 * money]
+
+    expect(results.map(&:value)).to eq([
+      BigDecimal("0.058"),
+      BigDecimal("0.050"),
+      BigDecimal("1.057"),
+      BigDecimal("0.943"),
+      BigDecimal("0.114"),
+    ])
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:decimal_precision)).to all(eq(3))
+  end
+
+  it "preserves explicit precision in both null-currency operand directions" do
+    money = Money.new("0.057", "USD", decimal_precision: 3)
+    implicit_null_money = Money.new(1, Money::NULL_CURRENCY)
+    explicit_null_money = Money.new("1.000", Money::NULL_CURRENCY, decimal_precision: 3)
+
+    results = [
+      money + implicit_null_money,
+      implicit_null_money + money,
+      money - implicit_null_money,
+      implicit_null_money - money,
+      money + explicit_null_money,
+      explicit_null_money + money,
+    ]
+
+    expect(results.map(&:currency)).to all(eq(Money::Currency.find!("USD")))
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:decimal_precision)).to all(eq(3))
+  end
+
+  it "preserves explicit precision through value transformations" do
+    money = Money.new("1.235", "USD", decimal_precision: 3)
+    negative_money = Money.new("-1.235", "USD", decimal_precision: 3)
+
+    results = [
+      -money,
+      negative_money.abs,
+      money.floor,
+      money.round(1),
+      money.fraction(0.1),
+      money.clamp(0, 1),
+      money.convert_currency(2, "CAD"),
+    ]
+
+    expect(results).to all(be_explicit_decimal_precision)
+    expect(results.map(&:decimal_precision)).to all(eq(3))
   end
 
   it "keeps currency across calculations" do
@@ -383,6 +667,12 @@ RSpec.describe "Money" do
       expect(Money.from_hash({ value: 1.01, currency: "CAD" })).to eq(Money.new(1.01, "CAD"))
     end
 
+    it "restores explicit decimal precision" do
+      money = Money.from_hash({ "value" => "0.057", "currency" => "USD", "decimal_precision" => 3 })
+
+      expect(money.as_json).to eq(value: "0.057", currency: "USD", decimal_precision: 3)
+    end
+
     it "raises if Hash does not have the expected keys" do
       expect { Money.from_hash({ "val": 1.0 }) }.to raise_error(KeyError)
     end
@@ -469,6 +759,18 @@ RSpec.describe "Money" do
     expect(money).not_to eq(nil)
   end
 
+  it "compares equal values independently of decimal precision" do
+    implicit_money = Money.new("1.00", "USD")
+    explicit_currency_precision = Money.new("1.00", "USD", decimal_precision: 2)
+    explicit_additional_precision = Money.new("1.000", "USD", decimal_precision: 3)
+
+    expect(explicit_currency_precision).to eq(implicit_money)
+    expect(explicit_additional_precision).to eq(implicit_money)
+    expect(explicit_currency_precision.hash).to eq(implicit_money.hash)
+    expect(explicit_additional_precision.hash).to eq(implicit_money.hash)
+    expect(explicit_additional_precision <=> implicit_money).to eq(0)
+  end
+
   it "supports floor" do
     expect(Money.new(15.52).floor).to eq(Money.new(15.00))
     expect(Money.new(18.99).floor).to eq(Money.new(18.00))
@@ -477,6 +779,20 @@ RSpec.describe "Money" do
 
   it "generates a true rational" do
     expect(Money.rational(Money.new(10.0, 'USD'), Money.new(15.0, 'USD'))).to eq(Rational(2,3))
+  end
+
+  it "generates a true rational below the currency subunit with explicit decimal precision" do
+    half_yen = Money.new("0.5", "JPY", decimal_precision: 1)
+    one_yen = Money.new("1.0", "JPY", decimal_precision: 1)
+
+    expect(Money.rational(half_yen, one_yen)).to eq(Rational(1, 2))
+  end
+
+  it "makes a rational from different decimal precisions" do
+    one_decimal = Money.new("0.5", "JPY", decimal_precision: 1)
+    two_decimals = Money.new("1.00", "JPY", decimal_precision: 2)
+
+    expect(Money.rational(one_decimal, two_decimals)).to eq(Rational(1, 2))
   end
 
   it "raises when attempting to make a rational from different currencies" do
@@ -985,6 +1301,12 @@ RSpec.describe "Money" do
       expect { Money.from_amount(1, "CAD") }.to_not raise_error
     end
 
+    it "accepts explicit decimal precision" do
+      money = Money.from_amount("0.057", "USD", decimal_precision: 3)
+
+      expect(money.as_json).to eq(value: "0.057", currency: "USD", decimal_precision: 3)
+    end
+
     it "accepts Rational number" do
       expect(Money.from_amount(Rational("999999999999999999.999")).value).to eql(BigDecimal("1000000000000000000", Money::Helpers::MAX_DECIMAL))
       expect(Money.from_amount(Rational("999999999999999999.99")).value).to eql(BigDecimal("999999999999999999.99", Money::Helpers::MAX_DECIMAL))
@@ -1005,6 +1327,12 @@ RSpec.describe "Money" do
       money = Money.new(100, 'JPY').to_yaml
       expect(money).to eq("--- !ruby/object:Money\nvalue: '100.0'\ncurrency: JPY\n")
     end
+
+    it "includes non-default decimal precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3).to_yaml
+
+      expect(money).to eq("--- !ruby/object:Money\nvalue: '0.057'\ncurrency: USD\ndecimal_precision: 3\n")
+    end
   end
 
   describe "YAML deserialization" do
@@ -1016,6 +1344,13 @@ RSpec.describe "Money" do
     it "accepts values with null currencies" do
       money = yaml_load("--- !ruby/object:Money\nvalue: '750.0'\ncurrency: XXX\n")
       expect(money).to eq(Money.new(750))
+    end
+
+    it "restores non-default decimal precision" do
+      money = yaml_load("--- !ruby/object:Money\nvalue: '0.057'\ncurrency: USD\ndecimal_precision: 3\n")
+
+      expect(money.value).to eq(BigDecimal("0.057"))
+      expect(money.decimal_precision).to eq(3)
     end
 
     it "accepts serialized NullCurrency objects" do
@@ -1061,6 +1396,20 @@ RSpec.describe "Money" do
       EOS
       expect(money).to be == Money.new(750)
       expect(money.value).to be_a BigDecimal
+    end
+  end
+
+  describe "Marshal deserialization" do
+    it "uses the currency precision for objects serialized before decimal precision was added" do
+      legacy_money = Money.allocate
+      legacy_money.instance_variable_set(:@value, BigDecimal("1.23"))
+      legacy_money.instance_variable_set(:@currency, Money::Currency.find!("USD"))
+      legacy_money.freeze
+
+      money = Marshal.load(Marshal.dump(legacy_money))
+
+      expect(money.decimal_precision).to eq(2)
+      expect(money.to_s).to eq("1.23")
     end
   end
 

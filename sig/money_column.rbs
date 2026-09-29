@@ -55,7 +55,8 @@ module MoneyColumn
         ?currency_column: (String | Symbol)?,
         ?currency: (String | Money::Currency)?,
         ?currency_read_only: bool,
-        ?coerce_null: bool
+        ?coerce_null: bool,
+        ?decimal_precision: Integer?
       ) -> void
 
       private

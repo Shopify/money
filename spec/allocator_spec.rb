@@ -25,6 +25,30 @@ RSpec.describe "Allocator" do
       expect(monies[1]).to eq(Money.new(0.003, 'JOD'))
     end
 
+    specify "#allocate preserves explicit decimal precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      expect(money.allocate([1])).to contain_exactly(money)
+    end
+
+    specify "#allocate distributes explicit precision subunits" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+      allocations = money.allocate([0.5, 0.5], :roundrobin)
+
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(allocations.map(&:decimal_precision)).to eq([3, 3])
+      expect(allocations).to all(be_explicit_decimal_precision)
+    end
+
+    specify "#allocate applies reverse round-robin at explicit precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      allocations = money.allocate([0.5, 0.5], :roundrobin_reverse)
+
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.028"), BigDecimal("0.029")])
+      expect(allocations).to all(be_explicit_decimal_precision)
+    end
+
     specify "#allocate does not lose pennies even when given a lossy split" do
       monies = new_allocator(1).allocate([0.333,0.333, 0.333])
       expect(monies[0].subunits).to eq(34)
@@ -328,6 +352,143 @@ RSpec.describe "Allocator" do
       expect(
         new_allocator(24.2).allocate_max_amounts([Money.new(46), Money.new(46), Money.new(50), Money.new(50),Money.new(50)]),
         ).to eq([Money.new(4.6), Money.new(4.6), Money.new(5), Money.new(5), Money.new(5)])
+    end
+
+    specify "#allocate_max_amounts supports matching explicit decimal precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+      maximums = [
+        Money.new("0.029", "USD", decimal_precision: 3),
+        Money.new("0.028", "USD", decimal_precision: 3),
+      ]
+
+      allocations = money.allocate_max_amounts(maximums)
+
+      expect(allocations).to eq(maximums)
+      expect(allocations.map(&:decimal_precision)).to eq([3, 3])
+      expect(allocations).to all(be_explicit_decimal_precision)
+    end
+
+    specify "#allocate_max_amounts normalizes exactly representable implicit Money maxima" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+      maximums = [Money.new("0.03", "USD"), Money.new("0.03", "USD")]
+
+      allocations = money.allocate_max_amounts(maximums)
+
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(allocations).to all(be_explicit_decimal_precision)
+    end
+
+    specify "#allocate_max_amounts normalizes an implicit zero Money maximum" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      allocations = money.allocate_max_amounts([Money.new(0, "USD")])
+
+      expect(allocations).to eq([Money.new(0, "USD", decimal_precision: 3)])
+      expect(allocations).to all(be_explicit_decimal_precision)
+    end
+
+    specify "#allocate_max_amounts uses currency precision for implicit maxima" do
+      money = Money.new("0.1", "USD", decimal_precision: 1)
+
+      allocations = money.allocate_max_amounts([Money.new("0.05", "USD")])
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.05")])
+      expect(allocations.map(&:decimal_precision)).to eq([2])
+    end
+
+    specify "#allocate_max_amounts uses currency precision for numeric and string maxima" do
+      money = Money.new("0.1", "USD", decimal_precision: 1)
+
+      [0.05, "0.05"].each do |maximum|
+        allocations = money.allocate_max_amounts([maximum, maximum])
+        expect(allocations.map(&:value)).to eq([BigDecimal("0.05"), BigDecimal("0.05")])
+      end
+    end
+
+    specify "#allocate_max_amounts accepts explicitly mismatched Money maxima" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      allocations = money.allocate_max_amounts([Money.new("0.03", "USD", decimal_precision: 2)])
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.03")])
+      expect(allocations.map(&:decimal_precision)).to eq([3])
+    end
+
+    specify "#allocate_max_amounts promotes an implicit receiver to the maxima precision" do
+      money = Money.new("0.06", "USD")
+      maxima = [Money.new("0.029", "USD", decimal_precision: 3), Money.new("0.028", "USD", decimal_precision: 4)]
+      allocations = money.allocate_max_amounts(maxima)
+
+      expect(allocations.map(&:value)).to eq(maxima.map(&:value))
+      expect(allocations.map(&:decimal_precision)).to eq([4, 4])
+    end
+
+    specify "#allocate_max_amounts ignores implicit null-currency precision" do
+      cap = Money.new("0.5", "JPY", decimal_precision: 0)
+      [Money.new(1, "JPY"), Money.new(1, Money::NULL_CURRENCY)].each do |money|
+        allocations = money.allocate_max_amounts([cap, Money.new(0, Money::NULL_CURRENCY)])
+
+        expect(allocations.map(&:decimal_precision)).to eq([0, 0])
+        expect(allocations.map(&:value)).to eq([0, 0])
+        expect(allocations.map { |amount| amount.currency.iso_code }).to eq(["JPY", "JPY"])
+      end
+    end
+
+    specify "#allocate_max_amounts includes explicit null-currency precision" do
+      cap = Money.new("0.005", Money::NULL_CURRENCY, decimal_precision: 3)
+      allocations = Money.new(1, "JPY").allocate_max_amounts([cap])
+
+      expect(allocations.map(&:decimal_precision)).to eq([3])
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.005")])
+    end
+
+    specify "#allocate_max_amounts promotes precision before coercing numeric and string maxima" do
+      money = Money.new("0.06", "USD")
+      [0.029, "0.029"].each do |maximum|
+        allocations = money.allocate_max_amounts([maximum, Money.new("0.028", "USD", decimal_precision: 3)])
+        expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+        expect(allocations.map(&:decimal_precision)).to eq([3, 3])
+      end
+    end
+
+    specify "#allocate_max_amounts does not round caps up or overallocate retained digits" do
+      money = Money.new("0.1", "USD", decimal_precision: 2)
+      allocations = money.allocate_max_amounts(["0.055", Money.new("0.045", "USD", decimal_precision: 2)])
+
+      expect(allocations.map(&:value)).to eq([BigDecimal("0.05"), BigDecimal("0.04")])
+      expect(allocations.sum(&:value)).to be <= money.value
+      expect(money.allocate_max_amounts(["0.001"]).map(&:value)).to eq([BigDecimal(0)])
+    end
+
+    specify "#allocate_max_amounts applies explicit decimal precision to numeric and string maxima" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      numeric_allocations = money.allocate_max_amounts([0.029, 0.028])
+      string_allocations = money.allocate_max_amounts(["0.029", "0.028"])
+
+      expect(numeric_allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(numeric_allocations).to all(be_explicit_decimal_precision)
+      expect(string_allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.028")])
+      expect(string_allocations).to all(be_explicit_decimal_precision)
+    end
+
+    specify "#allocate_max_amounts does not round numeric or string maxima before applying explicit precision" do
+      money = Money.new("0.057", "USD", decimal_precision: 3)
+
+      [[0.029, 0.001], ["0.029", "0.001"]].each do |maximums|
+        allocations = money.allocate_max_amounts(maximums)
+
+        expect(allocations.map(&:value)).to eq([BigDecimal("0.029"), BigDecimal("0.001")])
+      end
+    end
+
+    specify "#allocate_max_amounts normalizes maximums to the receiver allocation units" do
+      Money.with_config(default_subunit_format: :stripe) do
+        money = Money.new(1, "ISK", decimal_precision: 0)
+
+        allocations = money.allocate_max_amounts([Money.new(1, "ISK")])
+
+        expect(allocations.map(&:value)).to eq([BigDecimal(1)])
+        expect(allocations).to all(be_explicit_decimal_precision)
+      end
     end
   end
 

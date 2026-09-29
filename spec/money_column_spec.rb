@@ -28,6 +28,11 @@ class MoneyRecordCoerceNull < ActiveRecord::Base
   money_column :price_usd, currency: 'USD', coerce_null: true
 end
 
+class MoneyRecordWithDecimalPrecision < ActiveRecord::Base
+  self.table_name = 'money_records'
+  money_column :price, currency_column: 'price_currency', decimal_precision: 3
+end
+
 class MoneyWithDelegatedCurrency < ActiveRecord::Base
   self.table_name = 'money_records'
   delegate :price_currency, to: :delegated_record
@@ -78,6 +83,49 @@ RSpec.describe 'MoneyColumn' do
 
   it 'returns money with currency from the default column' do
     expect(record.price).to eq(Money.new(1.23, 'EUR'))
+  end
+
+  it 'writes raw values without requiring a decimal precision database column' do
+    record = MoneyRecord.new(price: Money.new("0.057", "USD", decimal_precision: 3))
+    expect(record[:price]).to eq(BigDecimal("0.057"))
+    expect(record.attributes.keys).not_to include("decimal_precision")
+  end
+
+  it 'preserves a configured fixed decimal precision after reload' do
+    money = Money.new("0.0574", "USD", decimal_precision: 3)
+
+    record = MoneyRecordWithDecimalPrecision.create!(price: money)
+    record.reload
+
+    expect(record.price.as_json).to eq(value: "0.0574", currency: "USD", decimal_precision: 3)
+    expect(record.price.to_s).to eq("0.06")
+  end
+
+  it 'stores raw values but reconstructs unconfigured columns at currency precision' do
+    record = MoneyRecord.create!(price: Money.new("0.0574", "USD", decimal_precision: 3))
+    record.reload
+
+    expect(record[:price]).to eq(BigDecimal("0.0574"))
+    expect(record.price.value).to eq(BigDecimal("0.06"))
+    expect(record.price.decimal_precision).to eq(2)
+    expect(record.price).not_to be_explicit_decimal_precision
+    expect(record.attributes.keys).not_to include("decimal_precision", "price_decimal_precision")
+  end
+
+  it 'accepts differing precision and reconstructs using model configuration' do
+    record = MoneyRecordWithDecimalPrecision.create!(price: Money.new("1.2345", "USD", decimal_precision: 4))
+    record.reload
+    expect(record.price.value).to eq(BigDecimal("1.2345"))
+    expect(record.price.decimal_precision).to eq(3)
+  end
+
+  it 'validates a configured fixed decimal precision' do
+    expect {
+      Class.new(ActiveRecord::Base) do
+        self.table_name = 'money_records'
+        money_column :price, currency_column: 'price_currency', decimal_precision: -1
+      end
+    }.to raise_error(ArgumentError, "decimal_precision must be a non-negative Integer")
   end
 
   it 'writes the currency to the db' do

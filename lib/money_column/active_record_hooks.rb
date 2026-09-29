@@ -41,7 +41,11 @@ module MoneyColumn
 
       return if value.nil? && !options[:coerce_null]
 
-      @money_column_cache[column] = Money.new(value, options[:currency] || send(options[:currency_column]))
+      @money_column_cache[column] = Money.new(
+        value,
+        options[:currency] || send(options[:currency_column]),
+        decimal_precision: options[:decimal_precision],
+      )
     end
 
     def write_money_attribute(column, money)
@@ -115,7 +119,7 @@ module MoneyColumn
     module ClassMethods
       attr_reader :money_column_options
 
-      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false)
+      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false, decimal_precision: nil)
         @money_column_options ||= {}
 
         options = normalize_money_column_options(
@@ -123,6 +127,7 @@ module MoneyColumn
           currency: currency,
           currency_read_only: currency_read_only,
           coerce_null: coerce_null,
+          decimal_precision: decimal_precision,
         )
 
         if options[:currency_column]
@@ -153,6 +158,9 @@ module MoneyColumn
           'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
         raise ArgumentError,
           'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
+        unless options[:decimal_precision].nil? || (options[:decimal_precision].is_a?(Integer) && options[:decimal_precision] >= 0)
+          raise ArgumentError, "decimal_precision must be a non-negative Integer"
+        end
 
         if options[:currency]
           options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze
