@@ -14,6 +14,7 @@ RSpec.describe Money::Currency::Loader do
 
     it 'loads the non iso currency file' do
       expect(subject.load_currencies['jep']['iso_code']).to eq('JEP')
+      expect(subject.load_currencies['xfu']['subunit']).to be_nil
     end
 
     it 'loads the historic iso currency file' do
