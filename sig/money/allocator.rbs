@@ -12,6 +12,7 @@ class Money
     def currency: () -> (Currency | NullCurrency)
     def value: () -> BigDecimal
     def subunits: (?format: Symbol?) -> Integer
+    def explicit_decimal_precision: () -> Integer?
 
     # Get wrapped object
     def __getobj__: () -> Money
@@ -21,6 +22,10 @@ class Money
     def Rational: (Integer | Numeric numerator, ?Integer | Numeric denominator) -> Rational
 
     private
+
+    def allocation_units: () -> Integer
+    def shared_decimal_precision: (Array[Money] money_values, Currency | NullCurrency allocation_currency) -> Integer?
+    def coerce_maximum: (Money | Numeric | String maximum, Currency | NullCurrency allocation_currency, Integer? precision) -> Money
 
     def extract_currency: (Array[Money] money_array) -> (Currency | NullCurrency)
     # splits is Array[Numeric] at call site but Array[Rational] after map!(&:to_r)

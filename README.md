@@ -39,6 +39,21 @@ Money.new(1000, "USD") + Money.new(500, "USD") == Money.new(1500, "USD")
 Money.new(1000, "USD") - Money.new(200, "USD") == Money.new(800, "USD")
 Money.new(1000, "USD") * 5                     == Money.new(5000, "USD")
 
+# Explicit precision for values smaller than a currency subunit
+unit_price = Money.new("0.057", "USD", decimal_precision: 3)
+(unit_price * 100).to_s #=> "5.70"
+
+fractional_unit_price = Money.new("0.0057", "USD", decimal_precision: 4)
+(fractional_unit_price * 100).to_s #=> "0.57"
+
+# Money arithmetic uses the highest operand and currency precision
+total = Money.new(1, "USD") + Money.new("0.057", "USD", decimal_precision: 3)
+total.value.to_s("F") #=> "1.057"
+total.to_s           #=> "1.06"
+total.decimal_precision #=> 3
+
+fractional_unit_price.as_json #=> { value: "0.01", currency: "USD" }
+
 m = Money.new(1000, "USD")
 # Splitting money evenly
 m.split(2)              == [Money.new(500, "USD"), Money.new(500, "USD")]
@@ -86,6 +101,17 @@ Money.from_subunits(500, "USD")  == Money.new(5, "USD")   # 5 USD
 Money.from_subunits(5, "JPY")    == Money.new(5, "JPY")   # 5 JPY
 Money.from_subunits(5000, "TND") == Money.new(5, "TND")   # 5 TND
 ```
+
+Explicit-precision values round at construction and after arithmetic to the greater
+of `decimal_precision` and the currency's minor units. Choose enough decimal places
+for your calculation inputs and results. Strings, JSON, and hashes use currency
+presentment and do not preserve calculation precision when read back. Active Job
+and YAML retain the stored calculation value and its explicit precision.
+
+For money columns, `decimal_precision:` also rounds assignments before saving;
+the effective precision is never below the currency's minor units. The model owns
+this configuration, not a separate database column. The amount column must have
+enough decimal scale to store the configured precision.
 
 ## Currency
 
@@ -269,6 +295,7 @@ end
 | currency | string | hardcoded currency value  |
 | currency_read_only | boolean |  when true, `currency_column` won't write the currency back into the db. Must be set to true if `currency_column` is an attr_reader or delegate. Default: false |
 | coerce_null | boolean | when true, a nil value will be returned as Money.zero. Default: false |
+| decimal_precision | integer | model-level precision used to round assignments and reconstruct stored values, with currency precision as a minimum. No precision database column is needed. Default: the currency's minor units |
 
 You can use multiple `money_column` calls to achieve the desired effects with
 currency on the model or attribute level.

@@ -41,7 +41,11 @@ module MoneyColumn
 
       return if value.nil? && !options[:coerce_null]
 
-      @money_column_cache[column] = Money.new(value, options[:currency] || send(options[:currency_column]))
+      @money_column_cache[column] = Money.new(
+        value,
+        options[:currency] || send(options[:currency_column]),
+        decimal_precision: options[:decimal_precision],
+      )
     end
 
     def write_money_attribute(column, money)
@@ -58,7 +62,12 @@ module MoneyColumn
         write_currency(column, money, options)
       end
 
-      self[column] = Money::Helpers.value_to_decimal(money)
+      value = Money::Helpers.value_to_decimal(money)
+      if options[:decimal_precision]
+        currency = options[:currency] || read_currency_column(options[:currency_column])
+        value = Money.new(value, currency, decimal_precision: options[:decimal_precision]).value
+      end
+      self[column] = value
     end
 
     def write_currency(column, money, options)
@@ -115,7 +124,7 @@ module MoneyColumn
     module ClassMethods
       attr_reader :money_column_options
 
-      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false)
+      def money_column(*columns, currency_column: nil, currency: nil, currency_read_only: false, coerce_null: false, decimal_precision: nil)
         @money_column_options ||= {}
 
         options = normalize_money_column_options(
@@ -123,6 +132,7 @@ module MoneyColumn
           currency: currency,
           currency_read_only: currency_read_only,
           coerce_null: coerce_null,
+          decimal_precision: decimal_precision,
         )
 
         if options[:currency_column]
@@ -153,6 +163,7 @@ module MoneyColumn
           'cannot set both :currency_column and :currency options' if options[:currency] && options[:currency_column]
         raise ArgumentError,
           'must set one of :currency_column or :currency options' unless options[:currency] || options[:currency_column]
+        Money::Helpers.validate_decimal_precision!(options[:decimal_precision])
 
         if options[:currency]
           options[:currency] = Money::Currency.find!(options[:currency]).to_s.freeze
