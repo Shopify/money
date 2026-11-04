@@ -479,6 +479,13 @@ RSpec.describe "Money" do
       expect { Money.from_subunits("1e1000000000", "USD") }.to raise_error(ArgumentError, /supported range/)
     end
 
+    it "raises before dividing when out-of-range subunits have a very large exponent" do
+      # BigDecimal division on this value does not return in reasonable time,
+      # so the bound must apply before Converter#from_subunits divides.
+      expect { Money.from_subunits("1e100000000000", "USD") }.to raise_error(ArgumentError, /supported range/)
+      expect { Money.from_subunits(BigDecimal("1e100000000000"), "USD") }.to raise_error(ArgumentError, /supported range/)
+    end
+
     it "raises when arithmetic leaves the supported range" do
       expect { Money.new("1e999", "USD") * 10 }.to raise_error(ArgumentError, /supported range/)
     end
