@@ -8,9 +8,11 @@ class Money
 
     def self.value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
     def self.value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)
+    def self.check_magnitude!: (BigDecimal value) -> void
 
     # Instance methods (via extend self)
     def value_to_decimal: (Numeric | String | Money | nil num) -> BigDecimal
     def value_to_currency: (String | Currency | NullCurrency | nil currency) -> (Currency | NullCurrency)
+    def check_magnitude!: (BigDecimal value) -> void
   end
 end

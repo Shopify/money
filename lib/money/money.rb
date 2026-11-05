@@ -124,9 +124,7 @@ class Money
   def initialize(value, currency)
     raise ArgumentError if value.nan?
     raise ArgumentError if value.infinite?
-    if value.exponent > Helpers::MAX_INTEGER_DIGITS
-      raise ArgumentError, "value exceeds the supported range of #{Helpers::MAX_INTEGER_DIGITS} integer digits"
-    end
+    Helpers.check_magnitude!(value)
 
     @currency = currency
     @value = BigDecimal(value.round(@currency.minor_units))

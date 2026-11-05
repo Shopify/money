@@ -88,6 +88,10 @@ RSpec.describe 'MoneyColumn' do
     expect(record.price.currency.to_s).to eq('JPY')
   end
 
+  it 'raises when assigned an amount beyond the supported magnitude' do
+    expect { MoneyRecord.new(price: "1e1000000000") }.to raise_error(ArgumentError, /supported range/)
+  end
+
   it 'duplicating the record keeps the money values' do
     expect(MoneyRecord.new(price: money).clone.price).to eq(money)
     expect(MoneyRecord.new(price: money).dup.price).to eq(money)
