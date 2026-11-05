@@ -8,6 +8,10 @@ class Money
 
     DECIMAL_ZERO = BigDecimal(0).freeze
     MAX_DECIMAL = 21
+    # Largest supported BigDecimal#exponent (number of integer digits). Rejects
+    # values like "1e1000000000" that are cheap to store but expand into huge
+    # Integers or Strings in #subunits or #to_s.
+    MAX_INTEGER_DIGITS = 1000
 
     def value_to_decimal(num)
       value =
@@ -30,7 +34,17 @@ class Money
           raise ArgumentError, "could not parse as decimal #{num.inspect}"
         end
       return DECIMAL_ZERO if value.sign == BigDecimal::SIGN_NEGATIVE_ZERO
+      # Check at parse time, before callers such as Converter#from_subunits do
+      # arithmetic on the value: BigDecimal division with a huge exponent can
+      # hang the process before Money#initialize gets to reject the result.
+      check_magnitude!(value)
       value
+    end
+
+    def check_magnitude!(value)
+      return if value.exponent <= MAX_INTEGER_DIGITS
+
+      raise ArgumentError, "value exceeds the supported range of #{MAX_INTEGER_DIGITS} integer digits"
     end
 
     def value_to_currency(currency)

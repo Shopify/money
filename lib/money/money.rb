@@ -124,6 +124,7 @@ class Money
   def initialize(value, currency)
     raise ArgumentError if value.nan?
     raise ArgumentError if value.infinite?
+    Helpers.check_magnitude!(value)
 
     @currency = currency
     @value = BigDecimal(value.round(@currency.minor_units))
